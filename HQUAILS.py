@@ -1,25 +1,30 @@
-import copy
+""" Main Function """
 
 # Temporary packages
 import matplotlib.pyplot as plt
+plt.close('all')
 from importlib import reload
 import numpy as np
 from astropy.modeling import models, fitting, custom_model
 
 # HQUAILS supporting files
-import RegionFinding
-reload(RegionFinding)
+import RegionFinding as RF
+import ModelConstructor as MC
 # emissionLines: Emission Lines Dictionary
 
 
 # Emission line dictionary
 emissionLines = {
-'Narrow':{
+'AGN':{
 	'OIII':([(5006.77,1),(4958.83,0.350)],1,['Broad']),
-	'Hbeta':([(4861.32,1)],1,['Broad']),
-	'NII':([(6583.34,1),(6547.96,0.340)],1,['Broad']),
-	'Halpha':([(6562.80,1)],1,['Broad'])},
-'Broad':{}
+	
+	'NII':([(6583.34,1),(6547.96,0.340)],1,['Broad'])},
+'Galaxy':{
+	'Halpha':([(6562.80,1)],1,['Broad']),
+	'Hbeta':([(4861.32,1)],3,['Broad','Absorption'])
+		},
+ 'Broad':{},
+ 'Absorption':{}
 }
 
 # Fake data
@@ -40,26 +45,32 @@ def background(x,slope=0,intercept=1,rightedge=0,leftedge=0):
 	y[np.logical_and(x > rightedge,x < leftedge)] = slope*(x - center) + intercept
 	
 ## Fake spectrum
-x = np.arange(6000,7000,1) # Angstroms
+z = 0.5
+x = np.arange(6000,10500,1) # Angstroms
 y = 0.5*np.ones(x.shape) # Flux
 # Balmer
-y += models.Gaussian1D(amplitude=1, mean=6562.80, stddev=5)(x)
-y += models.Gaussian1D(amplitude=1/2.86, mean=4861.32, stddev=5)(x)
+# y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6562.80, stddev=20)(x)
+y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6562.80, stddev=5)(x)
+y += models.Gaussian1D(amplitude=1/2.86, mean=(1+z)*4861.32, stddev=5)(x)
+# y += models.Gaussian1D(amplitude=-0.1, mean=(1+z)*4861.32, stddev=10)(x)
 # NII
-y += models.Gaussian1D(amplitude=1, mean=6583.34, stddev=5)(x)
-y += models.Gaussian1D(amplitude=0.34, mean=6547.96, stddev=5)(x)
+y += models.Gaussian1D(amplitude=1, mean=(1+z)*6583.34, stddev=5)(x)
+y += models.Gaussian1D(amplitude=0.34, mean=(1+z)*6547.96, stddev=5)(x)
 # OIII
-y += models.Gaussian1D(amplitude=1, mean=5006.77, stddev=5)(x)
-y += models.Gaussian1D(amplitude=0.35, mean=4958.83, stddev=5)(x)
+# y += models.Gaussian1D(amplitude=0.5, mean=(1+z-0.002)*5006.77, stddev=20)(x)
+# y += models.Gaussian1D(amplitude=0.35, mean=(1+z-0.002)*4958.83, stddev=20)(x)
+y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*5006.77, stddev=5)(x)
+y += models.Gaussian1D(amplitude=0.35, mean=(1+z)*4958.83, stddev=5)(x)
 # Add error
 sigmas = np.random.uniform(0.01,0.05, x.shape)
 weights = 1/np.square(sigmas)
 y += np.random.normal(0., sigmas, x.shape)
+y += (x - 8250.0)*.0001 + -(x-8250.0)*(x-8250.0)*.0000001
 
-
+spectrum = [x,y,weights,z]
 
 # Main Function
-def HQUAILS(emissionLines_master,region_width=50):
+def HQUAILS(emissionLines_master,region_width=50,background_degree=1):
 
 	# Verify Emission Line Dictionary
 	if not verifyDict(emissionLines_master):
@@ -68,53 +79,25 @@ def HQUAILS(emissionLines_master,region_width=50):
 	print('Emission line dictionary verified.')
 
 	## Identify fitting regions
-	regions_master = RegionFinding.identifyComplexes(emissionLines_master,tol=region_width)
+	regions_master = RF.identifyComplexes(emissionLines_master,tol=region_width)
 	print('Identififed emission line complexes.')
 
-# Iterate over spectra (eventually)
-	wav,flux,weight,z = x,y,weights,0
+	''' Iterate over spectra (eventually) '''
+	wav,flux,weight,z = spectrum 
 	
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
-	# Deep copy region list and emission line dictionary for this spectrum
-	regions 		= copy.deepcopy(regions_master)
-	emissionLines 	= copy.deepcopy(emissionLines_master)
-	
-	# Check if there is spectral coverage of the regions
-	for region in regions:
-		# If not...
-		if (wav.min() > region[0]*(1+z)) or (wav.max() < region[1]*(1+z)):
-			# ...remove region
-			regions.remove(region)
-		
-	# Remove emission lines not in regions
-	# For each emission line	
-	for z in emissionLines_master.keys():
-		for species in emissionLines_master[z].keys():
-			for line in emissionLines_master[z][species][0]:
-
-				# Check for removal
-				remove = True # Initialize as removing
-				for region in regions: # Check if it is in any region
-					if (region[0] < line[0]) and (line[0] < region[1]):
-						remove = False # If it is, set as remove 
-				
-				# Remove if necessary
-				if remove:
-					emissionLines[z][species][0].remove(line)
-			
-			# If species is empty, delete it
-			if (len(emissionLines[z][species][0]) == 0):
-				del emissionLines[z][species]		
+	regions,emissionLines =  RF.specRegionAndLines(spectrum,emissionLines_master,regions_master) 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 
 	## Model construction ##
+	model,param_names = MC.ConstructModel(spectrum,emissionLines,regions,background_degree)
 	
+	
+	return model
 	## Model construction ##
 	
-	
-	print(regions,emissionLines)
 			
-	## Model Constructor
+
 # Verify if emission line dictionary is in correct format. 
 def verifyDict(emissionLines):
 
@@ -187,5 +170,12 @@ def verifyDict(emissionLines):
 						
 	return True
 
-HQUAILS(emissionLines)
-	
+wav,flux,weight,z = spectrum 
+
+test = HQUAILS(emissionLines)
+fit_g = fitting.LevMarLSQFitter()
+g = fit_g(test,wav,flux,weights=weight)
+
+plt.plot(wav,flux)
+# plt.plot(wav,g(wav))
+plt.show()

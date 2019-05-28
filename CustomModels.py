@@ -1,113 +1,156 @@
-import numpy as np
-from astropy.modeling import Fittable1DModel,Parameter
+""" Custom Astropy Models """
 
-from astropy.modeling import fitting
-import matplotlib.pyplot as plt
-plt.close('all')
+from astropy.modeling import Fittable1DModel,Parameter
+from astropy.modeling.polynomial import PolynomialModel
+import numpy as np
 
 # Global vars
 FLOAT_EPSILON = float(np.finfo(np.float32).tiny)
-GAUSSIAN_SIGMA_TO_FWHM = 2.0 * np.sqrt(2.0 * np.log(2.0))
+GAUSSIAN_Sigma_TO_FWHM = 2.0 * np.sqrt(2.0 * np.log(2.0))
 SQRT_2_PI = np.sqrt(2*np.pi)
 
 ## Custom Astropy Modeling Models
 # Spectral Feature Class (Gaussian)
 class SpectralFeature(Fittable1DModel):
 
-	# Parameters
-	redshift = Parameter(default=0)
-	height	 = Parameter(default=0)
-	sigma	 = Parameter(default=1,bounds=(FLOAT_EPSILON, None)) # Must be positive
+	r"""
+	Very similar to the 1D Gaussian but parametrized differently. 
+	"""
 
-	def __init__(self, center = 0, redshift = redshift.default, height = height.default,
-				sigma = sigma.default, **kwargs):
+	# Parameters
+	Redshift = Parameter(default=0)
+	Height	 = Parameter(default=0,bounds=(0,None)) # Must be non-negative for emission
+	Sigma	 = Parameter(default=5,bounds=(FLOAT_EPSILON, None)) # Must be positive
+
+	def __init__(self, center = 0, Redshift = Redshift.default, Height = Height.default,
+				Sigma = Sigma.default, **kwargs):
 		self.center = center
 		super().__init__(
-			redshift = redshift, height=height, sigma=sigma, **kwargs)
+			Redshift = Redshift, Height=Height, Sigma=Sigma, **kwargs)
 		
 	@property
 	def fwhm(self):
-		"""Gaussian full sigma at half maximum."""
-		return self.sigma * GAUSSIAN_SIGMA_TO_FWHM
+		"""Gaussian full Sigma at half maximum."""
+		return self.Sigma * GAUSSIAN_Sigma_TO_FWHM
 
 	@property
 	def flux(self):
 		"""Gaussian flux."""
-		return self.height * self.sigma * SQRT_2_PI
+		return self.Height * self.Sigma * SQRT_2_PI
 
-	def evaluate(self, x, redshift, height, sigma):
+	def evaluate(self, x, Redshift, Height, Sigma):
 		"""
 		Gaussian1D model function.
 		"""
-		exponand = (x - self.center*(1 + redshift)) / sigma
-		return height * np.exp(- 0.5 * exponand * exponand)
+		exponand = (x - self.center*(1 + Redshift)) / Sigma
+		return Height * np.exp(- 0.5 * exponand * exponand)
 		
-	def fit_deriv(self, x, redshift, height, sigma):
+	# Derivative with respect to every parameter
+	def fit_deriv(self, x, Redshift, Height, Sigma):
 		
-		exponand = (x - self.center*(1 + redshift)) / sigma
+		exponand = (x - self.center*(1 + Redshift)) / Sigma
 		
-		d_height 	= np.exp(-0.5 * exponand * exponand)
-		d_redshift 	= height * d_height * exponand / sigma
-		d_sigma 	= height * d_height * exponand * exponand / sigma
+		d_Height 	= np.exp(-0.5 * exponand * exponand)
+		d_Redshift 	= Height * d_Height * exponand / Sigma
+		d_Sigma 	= Height * d_Height * exponand * exponand / Sigma
 		
-		return [d_redshift, d_height, d_sigma]
+		return [d_Redshift, d_Height, d_Sigma]
 
 # Spectral Feature Class (Gaussian)
-class ContinuumBackground(Fittable1DModel):
+class ContinuumBackground(PolynomialModel):
 
-	# Default _param_names list; this will be filled in by the __init__
-	_param_names = ()
+	r"""
+	Copy of 1D Polynomial model with modification.
+
+	It is defined as:
+
+	.. math::
+
+		P = \sum_{i=0}^{i=n}C_{i} * x^{i}
+
+	within the give domain, otherwise 0
+	
+	Parameters
+	----------
+	degree : int
+		degree of the series
+	domain : list 
+	**params : dict
+		keyword: value pairs, representing parameter_name: value
+
+	"""
+
+	inputs = ('x',)
+	outputs = ('y',)
+	_separable = True
+
+	def __init__(self, degree, domain, n_models=None,
+				 model_set_axis=None, name=None, meta=None, **params):
+		self.domain = domain
+		self.center = (domain[0] + domain[1])/2
+		super().__init__(
+			degree, n_models=n_models, model_set_axis=model_set_axis,
+			name=name, meta=meta, **params)
+
+	def prepare_inputs(self, x, **kwargs):
+		inputs, format_info = super().prepare_inputs(x, **kwargs)
+
+		x = inputs[0]
+		return (x,), format_info
+
+	def evaluate(self, x, *coeffs):
+		y = self.horner(x - self.center, coeffs)
+		y[np.logical_or(x < self.domain[0],x > self.domain[1])] = 0
+		return y
+
+	def fit_deriv(self, x, *params):
+		"""
+		Computes the Vandermonde matrix.
+
+		Parameters
+		----------
+		x : ndarray
+			input
+		params : throw away parameter
+			parameter list returned by non-linear fitters
+
+		Returns
+		-------
+		result : ndarray
+			The Vandermonde matrix
+		"""
+		# Zero outside domain
+		indomain = np.logical_and(x > self.domain[0],x < self.domain[1])
+		v = np.empty((self.degree + 1,) + x.shape, dtype=float)
+		v[0] = 0
+		v[0][indomain] = 1
+		if self.degree > 0:
+			v[1] = 0
+			v[1][indomain] = x[indomain] - self.center
+			for i in range(2, self.degree + 1):
+				v[i] = v[i - 1] * x
+		return np.rollaxis(v, 0, v.ndim)
+
+	@staticmethod
+	def horner(x, coeffs):
+		if len(coeffs) == 1:
+			c0 = coeffs[-1] * np.ones_like(x, subok=False)
+		else:
+			c0 = coeffs[-1]
+			for i in range(2, len(coeffs) + 1):
+				c0 = coeffs[-i] + c0 * x
+		return c0
 
 	@property
-	def param_names(self):
-		"""Coefficient names generated based on the model's polynomial degree
-		and number of dimensions.
-			
-		Subclasses should implement this to return parameter names in the
-		desired format.
-		
-		On most `Model` classes this is a class attribute, but for polynomial
-		models it is an instance attribute since each polynomial model instance
-		can have different parameters depending on the degree of the polynomial
-		and the number of dimensions, for example.
-		"""
+	def input_units(self):
+		if self.degree == 0 or self.c1.unit is None:
+			return None
+		else:
+			return {'x': self.c0.unit / self.c1.unit}
 
-		return self._param_names
-        
-	def __getattr__(self, attr):
-		if self._param_names and attr in self._param_names:
-			return Parameter(attr, default=0.0, model=self)
-	
-        raise AttributeError(attr)
-        
-    def __setattr__(self, attr, value):
-        # TODO: Support a means of specifying default values for coefficients
-        # Check for self._ndim first--if it hasn't been defined then the
-        # instance hasn't been initialized yet and self.param_names probably
-        # won't work.
-        # This has to vaguely duplicate the functionality of
-        # Parameter.__set__.
-        # TODO: I wonder if there might be a way around that though...
-        if attr[0] != '_' and self._param_names and attr in self._param_names:
-            param = Parameter(attr, default=0.0, model=self)
-            # This is a little hackish, but we can actually reuse the
-            # Parameter.__set__ method here
-            param.__set__(self, value)
-        else:
-            super().__setattr__(attr, value)
-        
-np.random.seed(42)
-x = np.arange(-50,50,0.1)
-g_true = SpectralFeature(center = 1, redshift = 10.1, height = 10, sigma = 5)
-y = g_true(x) + np.random.normal(loc=0,scale=1,size=x.shape)
-
-g_init = SpectralFeature(center = 1, redshift = 10, height = 1, sigma = 10)
-
-fit_g = fitting.LevMarLSQFitter()
-g = fit_g(g_init, x, y)
-
-plt.plot(x,y)
-plt.plot(x,g(x))
-plt.show()
-
-
+	def _parameter_units_for_data_units(self, inputs_unit, outputs_unit):
+		mapping = []
+		for i in range(self.degree + 1):
+			par = getattr(self, 'c{0}'.format(i))
+			mapping.append((par.name, outputs_unit['y'] / inputs_unit['x'] ** i))
+		return OrderedDict(mapping)
