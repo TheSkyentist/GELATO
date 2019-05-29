@@ -16,15 +16,18 @@ import ModelConstructor as MC
 # Emission line dictionary
 emissionLines = {
 'AGN':{
-	'OIII':([(5006.77,1),(4958.83,0.350)],1,['Broad']),
-	
+	'OIII':([(5006.77,1),(4958.83,0.350)],1,['Broad']),	
 	'NII':([(6583.34,1),(6547.96,0.340)],1,['Broad'])},
 'Galaxy':{
 	'Halpha':([(6562.80,1)],1,['Broad']),
-	'Hbeta':([(4861.32,1)],3,['Broad','Absorption'])
+	'Hbeta':([(4861.32,1)],3,['Broad','Absorption']),
+	'Htest':([(6500,1)],0,[])
 		},
- 'Broad':{},
- 'Absorption':{}
+'Broad':{},
+'Absorption':{},
+'Bad':{
+	'Test':([(6000,1)],1,['Broad'])
+	},
 }
 
 # Fake data
@@ -46,31 +49,39 @@ def background(x,slope=0,intercept=1,rightedge=0,leftedge=0):
 	
 ## Fake spectrum
 z = 0.5
-x = np.arange(6000,10500,1) # Angstroms
+true_x = np.arange(7000,10000,1)
+x = np.concatenate([np.arange(7000,8950,1),np.arange(9050,9715,1),np.arange(9780,10000,1)]) # Angstroms
+
+# Continuum
 y = 0.5*np.ones(x.shape) # Flux
+y += (x - 8250.0)*.0001 + -(x-8250.0)*(x-8250.0)*.0000001
 # Balmer
-# y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6562.80, stddev=20)(x)
 y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6562.80, stddev=5)(x)
 y += models.Gaussian1D(amplitude=1/2.86, mean=(1+z)*4861.32, stddev=5)(x)
-# y += models.Gaussian1D(amplitude=-0.1, mean=(1+z)*4861.32, stddev=10)(x)
+y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6562.80, stddev=20)(x)
+y += models.Gaussian1D(amplitude=-0.2, mean=(1+z)*4861.32, stddev=10)(x)
 # NII
 y += models.Gaussian1D(amplitude=1, mean=(1+z)*6583.34, stddev=5)(x)
 y += models.Gaussian1D(amplitude=0.34, mean=(1+z)*6547.96, stddev=5)(x)
 # OIII
-# y += models.Gaussian1D(amplitude=0.5, mean=(1+z-0.002)*5006.77, stddev=20)(x)
-# y += models.Gaussian1D(amplitude=0.35, mean=(1+z-0.002)*4958.83, stddev=20)(x)
 y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*5006.77, stddev=5)(x)
-y += models.Gaussian1D(amplitude=0.35, mean=(1+z)*4958.83, stddev=5)(x)
+y += models.Gaussian1D(amplitude=0.35/2, mean=(1+z)*4958.83, stddev=5)(x)
+y += models.Gaussian1D(amplitude=0.5, mean=(1+z-0.002)*5006.77, stddev=20)(x)
+y += models.Gaussian1D(amplitude=0.35/2, mean=(1+z-0.002)*4958.83, stddev=20)(x)
+
+# Test lines
+y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6500, stddev=5)(x)
+y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6000, stddev=5)(x)
+
 # Add error
 sigmas = np.random.uniform(0.01,0.05, x.shape)
 weights = 1/np.square(sigmas)
 y += np.random.normal(0., sigmas, x.shape)
-y += (x - 8250.0)*.0001 + -(x-8250.0)*(x-8250.0)*.0000001
 
 spectrum = [x,y,weights,z]
 
 # Main Function
-def HQUAILS(emissionLines_master,region_width=50,background_degree=1):
+def HQUAILS(emissionLines_master,region_width=50,background_degree=1,maxiter=500):
 
 	# Verify Emission Line Dictionary
 	if not verifyDict(emissionLines_master):
@@ -90,7 +101,7 @@ def HQUAILS(emissionLines_master,region_width=50,background_degree=1):
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 
 	## Model construction ##
-	model,param_names = MC.ConstructModel(spectrum,emissionLines,regions,background_degree)
+	model,param_names = MC.ConstructModel(spectrum,emissionLines,regions,background_degree,maxiter)
 	
 	
 	return model
@@ -174,8 +185,8 @@ wav,flux,weight,z = spectrum
 
 test = HQUAILS(emissionLines)
 fit_g = fitting.LevMarLSQFitter()
-g = fit_g(test,wav,flux,weights=weight)
+g = fit_g(test,wav,flux,weights=weight,maxiter=200)
 
-plt.plot(wav,flux)
-# plt.plot(wav,g(wav))
+plt.step(wav,flux)
+plt.step(true_x,g(true_x))
 plt.show()

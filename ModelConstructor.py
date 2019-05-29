@@ -2,17 +2,34 @@
 
 import numpy as np
 import CustomModels as CM
+from astropy.modeling import fitting
 
 # Construct Full Model with F-tests for additional parameters
-def ConstructModel(spectrum,emissionLines,regions,background_degree):
+def ConstructModel(spectrum,emissionLines,regions,background_degree,maxiter):
 
 	# Build initial model
 	model,param_names = BuildModel(spectrum,emissionLines,regions,background_degree)
 
 	# Tie params
 	model = TieParams(model,emissionLines,param_names)
+	
+	# Fit initial model to the data
+	model = FitModel(spectrum,model,emissionLines,maxiter)
 
 	return model,param_names
+
+# Fit Model and remove parameters that aren't fittable
+def FitModel(spectrum,init_model,emissionLines,maxiter):
+	
+	# Unpack
+	wav,flux,weight,redshift = spectrum
+	
+	# Fit model
+	fit = fitting.LevMarLSQFitter()
+	fit_model = fit(init_model,wav,flux,weights=weight,maxiter=maxiter)
+	
+	return init_model
+
 
 # Build the model from the emissionLines and spectrum with initial guess
 def BuildModel(spectrum,emissionLines,regions,background_degree):

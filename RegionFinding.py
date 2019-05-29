@@ -1,6 +1,7 @@
 """ Region Finding Code """
 
 import copy
+import numpy as np
 
 # If two regions overlap, return true
 def overlap(a,b):
@@ -70,7 +71,7 @@ def specRegionAndLines(spectrum,emissionLines_master,regions_master):
 	# Check if there is spectral coverage of the regions
 	for region in regions:
 		# If not...
-		if (wav.min() > region[0]) or (wav.max() < region[1]):
+		if np.sum(np.logical_and(wav > region[0],wav < region[1])) == 0:
 			# ...remove region
 			regions.remove(region)
 		
