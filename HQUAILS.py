@@ -3,13 +3,15 @@
 # Temporary packages
 import matplotlib.pyplot as plt
 plt.close('all')
-from importlib import reload
-import numpy as np
 from astropy.modeling import models, fitting, custom_model
+
+import numpy as np
+import pandas as pd
+import multiprocessing as mp
+from astropy.table import Table
 
 # HQUAILS supporting files
 import RegionFinding as RF
-import ModelConstructor as MC
 import FittingModel as FM
 # emissionLines: Emission Lines Dictionary
 
@@ -89,22 +91,47 @@ sigmas = np.random.uniform(0.01,0.05, x.shape)
 weights = 1/np.square(sigmas)
 y += np.random.normal(0., sigmas, x.shape)
 
-spectrum = [x,y,weights,z]
+spectrum1 = ['test1',x,y,weights,z]
+spectrum2 = ['test2',x,y,weights,z]
 
 # Main Function
-def HQUAILS(emissionLines_master,spectrum,region_width=100,background_degree=1,maxiter=100,fthresh=0.95,num_boostrap=1,num_process=None):
+def HQUAILS(outname,spectra,emissionLines,region_width=100,background_degree=1,maxiter=1000,fthresh=0.95,num_process=None):
 
-	# Verify Emission Line Dictionary
-	if not verifyDict(emissionLines_master):
+	## Verify Emission Line Dictionary ##
+	if not verifyDict(emissionLines):
 		print('Unable to verify emission line dictionary, exiting.')
 		return
-	print('Emission line dictionary verified.')
+	## Verify Emission Line Dictionary ##
 
 	## Identify fitting regions
-	regions_master = RF.identifyComplexes(emissionLines_master,tol=region_width)
-	print('Identififed emission line complexes.')
+	regions_master = RF.identifyComplexes(emissionLines,tol=region_width)
+	## Identify fitting regions
 
-	''' Iterate over spectra (eventually) '''
+	## Prepare Inputs ##
+	inputs = []
+	names = []
+	for spectrum in spectra:
+		names.append(spectrum[0])
+		inputs.append((spectrum[1:],emissionLines,regions_master,background_degree,maxiter,fthresh))
+	## Prepare Inputs ##
+	
+	## Multiprocessing ##
+	if num_process == None: num_process = mp.cpu_count() -1
+	pool = mp.Pool(processes=num_process)
+	results = pool.starmap(ProcessSpectrum, inputs)
+	## Multiprocessing ##
+	
+	## Gather Results ##
+	df = pd.concat([result[0] for result in results], axis=0, ignore_index=True)
+	df.insert(0,'Object',names)
+	t = Table.from_pandas(df)
+	t.write(outname,overwrite = True)
+	## Gather Results ##
+
+	return t
+
+def ProcessSpectrum(spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh):
+
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 	regions,emissionLines =  RF.specRegionAndLines(spectrum,emissionLines_master,regions_master) 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
@@ -113,15 +140,11 @@ def HQUAILS(emissionLines_master,spectrum,region_width=100,background_degree=1,m
 	spectrum = LimitSpectrum(spectrum,regions)
 	## Limit spectrum to regions and good values ##
 
-	## Model construction ##
-	model,param_names = MC.ConstructModel(spectrum,emissionLines,regions,background_degree,maxiter,fthresh)
-	## Model construction ##
-	
-	## Bootstrap and Fit Model ##
-	FM.FitResults(spectrum,model,maxiter,param_names,num_boostrap,num_process)
-	## Bootstrap and Fit Model ##
-	
-	return model,param_names 
+	## Model Fitting ##
+	parameters,param_names,cov = FM.FitSpectrum(spectrum,emissionLines,regions,background_degree,maxiter,fthresh)
+	## Model Fitting ##
+
+	return pd.DataFrame([parameters],columns=param_names),cov
 
 # Verify if emission line dictionary is in correct format. 
 def verifyDict(emissionLines):
@@ -213,4 +236,4 @@ def LimitSpectrum(spectrum,regions):
 	
 	return 	wav,flux,weight,z
 
-HQUAILS(emissionLines,spectrum)
+print(HQUAILS('test.fits',[spectrum1,spectrum2], emissionLines))
