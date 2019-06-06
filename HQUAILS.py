@@ -92,7 +92,7 @@ y += np.random.normal(0., sigmas, x.shape)
 spectrum = [x,y,weights,z]
 
 # Main Function
-def HQUAILS(emissionLines_master,region_width=100,background_degree=1,maxiter=2000,fthresh=0.95,num_boostrap=5000,num_process=None):
+def HQUAILS(emissionLines_master,spectrum,region_width=100,background_degree=1,maxiter=100,fthresh=0.95,num_boostrap=1,num_process=None):
 
 	# Verify Emission Line Dictionary
 	if not verifyDict(emissionLines_master):
@@ -105,7 +105,6 @@ def HQUAILS(emissionLines_master,region_width=100,background_degree=1,maxiter=20
 	print('Identififed emission line complexes.')
 
 	''' Iterate over spectra (eventually) '''
-	spectrum = wav,flux,weight,z
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 	regions,emissionLines =  RF.specRegionAndLines(spectrum,emissionLines_master,regions_master) 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
@@ -119,9 +118,8 @@ def HQUAILS(emissionLines_master,region_width=100,background_degree=1,maxiter=20
 	## Model construction ##
 	
 	## Bootstrap and Fit Model ##
-	FM.FitResults(spectrum,model,param_names,num_boostrap,num_process)
+	FM.FitResults(spectrum,model,maxiter,param_names,num_boostrap,num_process)
 	## Bootstrap and Fit Model ##
-	
 	
 	return model,param_names 
 
@@ -215,3 +213,4 @@ def LimitSpectrum(spectrum,regions):
 	
 	return 	wav,flux,weight,z
 
+HQUAILS(emissionLines,spectrum)
