@@ -10,10 +10,12 @@ from astropy.modeling import models, fitting, custom_model
 # HQUAILS supporting files
 import RegionFinding as RF
 import ModelConstructor as MC
+import FittingModel as FM
 # emissionLines: Emission Lines Dictionary
 
 
 # Emission line dictionary
+# Full testing for chip gaps
 emissionLines = {
 'AGN':{
 	'OIII':([(5006.77,1),(4958.83,0.350)],1,['Broad']),	
@@ -30,36 +32,45 @@ emissionLines = {
 	},
 }
 
+emissionLines = {
+'AGN':{
+	'OIII':([(5006.77,1),(4958.83,0.350)],1,['Outflow']),	
+	'NII':([(6583.34,1),(6547.96,0.340)],1,['Broad'])},
+'Galaxy':{
+	'Halpha':([(6562.80,1)],1,['Broad']),
+	'Hbeta':([(4861.32,1)],3,['Broad','Galaxy'])
+		},
+'Bad':{},
+}
+
+emissionLines = {
+'AGN':{
+	'OIII':([(5006.77,1),(4958.83,0.350)],1,['Outflow']),	
+	'NII':([(6583.34,1),(6547.96,0.340)],0,[])},
+'Galaxy':{
+	'Halpha':([(6562.80,1)],1,['Broad']),
+	'Hbeta':([(4861.32,1)],3,['Broad','Galaxy'])
+		},
+'Bad':{},
+}
+
 # Fake data
 # Random seed
-np.random.seed(42)
-	
-# Define emission line custom model
-@custom_model
-def emissionLine(x,redshift=0,height=0,sigma=1,center=0):
-	exponand = (x - center*(1 + redshift)) # What goes in the exponent
-	return height * np.exp( -0.5 * exponand * exponand)
-
-# Define linear background custom model
-@custom_model
-def background(x,slope=0,intercept=1,rightedge=0,leftedge=0):
-	center 	= (rightedge + leftedge)/2
-	y 		= np.zeros(x.shape)
-	y[np.logical_and(x > rightedge,x < leftedge)] = slope*(x - center) + intercept
-	
+np.random.seed(100)
+		
 ## Fake spectrum
 z = 0.5
-true_x = np.arange(7000,10000,1)
-x = np.concatenate([np.arange(7000,8950,1),np.arange(9050,9715,1),np.arange(9780,10000,1)]) # Angstroms
+true_x = np.arange(7000,10100,1)
+x = true_x#np.concatenate([np.arange(7000,8950,1),np.arange(9050,9715,1),np.arange(9790,10000,1)]) # Angstroms
 
 # Continuum
 y = 0.5*np.ones(x.shape) # Flux
 y += (x - 8250.0)*.0001 + -(x-8250.0)*(x-8250.0)*.0000001
 # Balmer
-y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6562.80, stddev=5)(x)
-y += models.Gaussian1D(amplitude=1/2.86, mean=(1+z)*4861.32, stddev=5)(x)
-y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6562.80, stddev=20)(x)
-y += models.Gaussian1D(amplitude=-0.2, mean=(1+z)*4861.32, stddev=10)(x)
+y += models.Gaussian1D(amplitude=1, mean=(1+z)*6562.80, stddev=5)(x)
+y += models.Gaussian1D(amplitude=2/2.86, mean=(1+z)*4861.32, stddev=5)(x)
+y += models.Gaussian1D(amplitude=1, mean=(1+z)*6562.80, stddev=20)(x)
+y += models.Gaussian1D(amplitude=-0.4, mean=(1+z)*4861.32, stddev=10)(x)
 # NII
 y += models.Gaussian1D(amplitude=1, mean=(1+z)*6583.34, stddev=5)(x)
 y += models.Gaussian1D(amplitude=0.34, mean=(1+z)*6547.96, stddev=5)(x)
@@ -70,8 +81,8 @@ y += models.Gaussian1D(amplitude=0.5, mean=(1+z-0.002)*5006.77, stddev=20)(x)
 y += models.Gaussian1D(amplitude=0.35/2, mean=(1+z-0.002)*4958.83, stddev=20)(x)
 
 # Test lines
-y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6500, stddev=5)(x)
-y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6000, stddev=5)(x)
+# y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6500, stddev=5)(x)
+# y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6000, stddev=5)(x)
 
 # Add error
 sigmas = np.random.uniform(0.01,0.05, x.shape)
@@ -81,7 +92,7 @@ y += np.random.normal(0., sigmas, x.shape)
 spectrum = [x,y,weights,z]
 
 # Main Function
-def HQUAILS(emissionLines_master,region_width=50,background_degree=1,maxiter=500):
+def HQUAILS(emissionLines_master,region_width=100,background_degree=1,maxiter=2000,fthresh=0.95,num_boostrap=5000,num_process=None):
 
 	# Verify Emission Line Dictionary
 	if not verifyDict(emissionLines_master):
@@ -94,20 +105,25 @@ def HQUAILS(emissionLines_master,region_width=50,background_degree=1,maxiter=500
 	print('Identififed emission line complexes.')
 
 	''' Iterate over spectra (eventually) '''
-	wav,flux,weight,z = spectrum 
-	
+	spectrum = wav,flux,weight,z
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 	regions,emissionLines =  RF.specRegionAndLines(spectrum,emissionLines_master,regions_master) 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 
+	## Limit spectrum to regions and good values ##
+	spectrum = LimitSpectrum(spectrum,regions)
+	## Limit spectrum to regions and good values ##
+
 	## Model construction ##
-	model,param_names = MC.ConstructModel(spectrum,emissionLines,regions,background_degree,maxiter)
-	
-	
-	return model
+	model,param_names = MC.ConstructModel(spectrum,emissionLines,regions,background_degree,maxiter,fthresh)
 	## Model construction ##
 	
-			
+	## Bootstrap and Fit Model ##
+	FM.FitResults(spectrum,model,param_names,num_boostrap,num_process)
+	## Bootstrap and Fit Model ##
+	
+	
+	return model,param_names 
 
 # Verify if emission line dictionary is in correct format. 
 def verifyDict(emissionLines):
@@ -155,11 +171,7 @@ def verifyDict(emissionLines):
 			if not (type(emissionLines[z][species][2]) == list):
 				print('Line component redshift groups must be a list.')
 				return False
-			for component in emissionLines[z][species][2]:
-				if not component in emissionLines.keys():
-					print('Additional component redshift must be in emission dictionary.')
-					return False
-					
+
 			# Check if each line is an appropriate tuple or list
 			for line in emissionLines[z][species][0]:
 				if not (type(line) == tuple) or (type(line) == list):
@@ -181,12 +193,25 @@ def verifyDict(emissionLines):
 						
 	return True
 
-wav,flux,weight,z = spectrum 
+def LimitSpectrum(spectrum,regions):
 
-test = HQUAILS(emissionLines)
-fit_g = fitting.LevMarLSQFitter()
-g = fit_g(test,wav,flux,weights=weight,maxiter=200)
+	# Unpack
+	wav,flux,weight,z = spectrum 
+	
+	# Only take good values
+	good = weight > 0
+	wav = wav[good]
+	flux = flux[good]
+	weight = weight[good]
+	
+	# Only take data in regions
+	inregion = []
+	for region in regions:
+		inregion.append(np.logical_and(region[0]<wav,wav<region[1]))
+	inregion = np.logical_or.reduce(inregion)
+	wav = wav[inregion]
+	flux = flux[inregion]
+	weight = weight[inregion]
+	
+	return 	wav,flux,weight,z
 
-plt.step(wav,flux)
-plt.step(true_x,g(true_x))
-plt.show()

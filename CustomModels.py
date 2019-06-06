@@ -22,11 +22,23 @@ class SpectralFeature(Fittable1DModel):
 	Height	 = Parameter(default=0,bounds=(0,None)) # Must be non-negative for emission
 	Sigma	 = Parameter(default=5,bounds=(FLOAT_EPSILON, None)) # Must be positive
 
-	def __init__(self, center = 0, Redshift = Redshift.default, Height = Height.default,
-				Sigma = Sigma.default, **kwargs):
+	def __init__(self, center, spectrum, regions, Sigma = Sigma.default, **kwargs):
+	
+		# Unpack
+		wav,flux,_,Redshift = spectrum 
+		
+		# Find starting height
+		# Find corresponding region
+		for region in regions:
+			if (center*(1+Redshift) < region[1]) and (center*(1+Redshift) > region[0]):
+				break
+		inregion = np.logical_and(wav > region[0],wav < region[1])				
+		Height = np.max(flux[inregion]) - np.median(flux[inregion])
+		
+		# Set parameters
 		self.center = center
-		super().__init__(
-			Redshift = Redshift, Height=Height, Sigma=Sigma, **kwargs)
+		self.domain = region
+		super().__init__(Redshift = Redshift, Height=Height, Sigma=Sigma, **kwargs)
 		
 	@property
 	def fwhm(self):
@@ -42,15 +54,26 @@ class SpectralFeature(Fittable1DModel):
 		"""
 		Gaussian1D model function.
 		"""
-		exponand = (x - self.center*(1 + Redshift)) / Sigma
-		return Height * np.exp(- 0.5 * exponand * exponand)
+		# Zero outside region
+		indomain = np.logical_and(x > self.domain[0],x < self.domain[1])		
+		
+		# Assign values
+		y = np.zeros(x.shape)
+		exponand = (x[indomain] - self.center*(1 + Redshift)) / Sigma
+		y[indomain] = Height * np.exp(- 0.5 * exponand * exponand)
+		
+		return y
 		
 	# Derivative with respect to every parameter
 	def fit_deriv(self, x, Redshift, Height, Sigma):
 		
+		# Zero outside region
+		outdomain = np.logical_or(x < self.domain[0],x > self.domain[1])
+		
 		exponand = (x - self.center*(1 + Redshift)) / Sigma
 		
 		d_Height 	= np.exp(-0.5 * exponand * exponand)
+		d_Height[outdomain] = 0
 		d_Redshift 	= Height * d_Height * exponand / Sigma
 		d_Sigma 	= Height * d_Height * exponand * exponand / Sigma
 		
@@ -86,6 +109,8 @@ class ContinuumBackground(PolynomialModel):
 
 	def __init__(self, degree, domain, n_models=None,
 				 model_set_axis=None, name=None, meta=None, **params):
+				
+		# Set parameters
 		self.domain = domain
 		self.center = (domain[0] + domain[1])/2
 		super().__init__(
