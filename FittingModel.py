@@ -95,10 +95,10 @@ def BuildModel(spectrum,emissionLines,regions,background_degree):
 	model_components = []
 	
 	# Add background regions
-	for region in regions:
+	for i,region in enumerate(regions):
 		
 		# Name of region
-		name = 'Background_' + str((region[0] + region[1])/2) +'_'
+		name = 'Background_' + str(i) +'_'
 		
 		# Generate model
 		background = CM.ContinuumBackground(background_degree,region)

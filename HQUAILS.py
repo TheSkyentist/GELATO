@@ -1,14 +1,11 @@
 """ Main Function """
 
 # Temporary packages
-import matplotlib.pyplot as plt
-plt.close('all')
-from astropy.modeling import models, fitting, custom_model
-
 import numpy as np
 import pandas as pd
 import multiprocessing as mp
 from astropy.table import Table
+import astropy.io.fits as pyfits
 
 # HQUAILS supporting files
 import RegionFinding as RF
@@ -56,44 +53,6 @@ emissionLines = {
 'Bad':{},
 }
 
-# Fake data
-# Random seed
-np.random.seed(100)
-		
-## Fake spectrum
-z = 0.5
-true_x = np.arange(7000,10100,1)
-x = true_x#np.concatenate([np.arange(7000,8950,1),np.arange(9050,9715,1),np.arange(9790,10000,1)]) # Angstroms
-
-# Continuum
-y = 0.5*np.ones(x.shape) # Flux
-y += (x - 8250.0)*.0001 + -(x-8250.0)*(x-8250.0)*.0000001
-# Balmer
-y += models.Gaussian1D(amplitude=1, mean=(1+z)*6562.80, stddev=5)(x)
-y += models.Gaussian1D(amplitude=2/2.86, mean=(1+z)*4861.32, stddev=5)(x)
-y += models.Gaussian1D(amplitude=1, mean=(1+z)*6562.80, stddev=20)(x)
-y += models.Gaussian1D(amplitude=-0.4, mean=(1+z)*4861.32, stddev=10)(x)
-# NII
-y += models.Gaussian1D(amplitude=1, mean=(1+z)*6583.34, stddev=5)(x)
-y += models.Gaussian1D(amplitude=0.34, mean=(1+z)*6547.96, stddev=5)(x)
-# OIII
-y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*5006.77, stddev=5)(x)
-y += models.Gaussian1D(amplitude=0.35/2, mean=(1+z)*4958.83, stddev=5)(x)
-y += models.Gaussian1D(amplitude=0.5, mean=(1+z-0.002)*5006.77, stddev=20)(x)
-y += models.Gaussian1D(amplitude=0.35/2, mean=(1+z-0.002)*4958.83, stddev=20)(x)
-
-# Test lines
-# y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6500, stddev=5)(x)
-# y += models.Gaussian1D(amplitude=0.5, mean=(1+z)*6000, stddev=5)(x)
-
-# Add error
-sigmas = np.random.uniform(0.01,0.05, x.shape)
-weights = 1/np.square(sigmas)
-y += np.random.normal(0., sigmas, x.shape)
-
-spectrum1 = ['test1',x,y,weights,z]
-spectrum2 = ['test2',x,y,weights,z]
-
 # Main Function
 def HQUAILS(outname,spectra,emissionLines,region_width=100,background_degree=1,maxiter=1000,fthresh=0.95,num_process=None):
 
@@ -130,6 +89,19 @@ def HQUAILS(outname,spectra,emissionLines,region_width=100,background_degree=1,m
 
 	return t
 
+# Load in spectrum
+def LoadSpectrum(filename,z,name=None):
+
+	# Import spectrum
+	spectrum = pyfits.getdata(filename,1)
+
+	wav = 10**spectrum['loglam']
+	flux = spectrum['flux']
+	weight = spectrum['ivar']
+	
+	return wav,flux,weight,z
+
+# Get fit parameters for galaxy
 def ProcessSpectrum(spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh):
 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
@@ -144,7 +116,37 @@ def ProcessSpectrum(spectrum,emissionLines_master,regions_master,background_degr
 	parameters,param_names,cov = FM.FitSpectrum(spectrum,emissionLines,regions,background_degree,maxiter,fthresh)
 	## Model Fitting ##
 
+	## Add regions to parameters ##
+	for i,region in enumerate(regions):
+		param_names.append('Background_'+str(i)+'_Low')
+		param_names.append('Background_'+str(i)+'_High')
+		parameters = np.concatenate([parameters,region])
+	## Add regions to parameters ##
+	
 	return pd.DataFrame([parameters],columns=param_names),cov
+
+# Pair down spectrum
+def LimitSpectrum(spectrum,regions):
+
+	# Unpack
+	wav,flux,weight,z = spectrum 
+	
+	# Only take good values
+	good = weight > 0
+	wav = wav[good]
+	flux = flux[good]
+	weight = weight[good]
+	
+	# Only take data in regions
+	inregion = []
+	for region in regions:
+		inregion.append(np.logical_and(region[0]<wav,wav<region[1]))
+	inregion = np.logical_or.reduce(inregion)
+	wav = wav[inregion]
+	flux = flux[inregion]
+	weight = weight[inregion]
+	
+	return 	wav,flux,weight,z
 
 # Verify if emission line dictionary is in correct format. 
 def verifyDict(emissionLines):
@@ -214,26 +216,21 @@ def verifyDict(emissionLines):
 						
 	return True
 
-def LimitSpectrum(spectrum,regions):
 
-	# Unpack
-	wav,flux,weight,z = spectrum 
-	
-	# Only take good values
-	good = weight > 0
-	wav = wav[good]
-	flux = flux[good]
-	weight = weight[good]
-	
-	# Only take data in regions
-	inregion = []
-	for region in regions:
-		inregion.append(np.logical_and(region[0]<wav,wav<region[1]))
-	inregion = np.logical_or.reduce(inregion)
-	wav = wav[inregion]
-	flux = flux[inregion]
-	weight = weight[inregion]
-	
-	return 	wav,flux,weight,z
 
-print(HQUAILS('test.fits',[spectrum1,spectrum2], emissionLines))
+
+print(LoadSpectrum('/Users/raphaelhviding/Documents/WISEAGN/Spectra/spec-8503-57519-0435.fits',1))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
