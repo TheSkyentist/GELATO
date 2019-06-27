@@ -71,7 +71,7 @@ def HQUAILS(outname,spectra,emissionLines,region_width=100,background_degree=1,m
 	names = []
 	for spectrum in spectra:
 		names.append(spectrum[0])
-		inputs.append((spectrum[1:],emissionLines,regions_master,background_degree,maxiter,fthresh))
+		inputs.append((spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh))
 	## Prepare Inputs ##
 	
 	## Multiprocessing ##
@@ -81,7 +81,10 @@ def HQUAILS(outname,spectra,emissionLines,region_width=100,background_degree=1,m
 	## Multiprocessing ##
 	
 	## Gather Results ##
-	df = pd.concat([result[0] for result in results], axis=0, ignore_index=True)
+	df = pd.concat([result[0] for result in results], axis=0, ignore_index=True, sort=False)
+
+	return df
+
 	df.insert(0,'Object',names)
 	t = Table.from_pandas(df)
 	t.write(outname,overwrite = True)
@@ -90,7 +93,7 @@ def HQUAILS(outname,spectra,emissionLines,region_width=100,background_degree=1,m
 	return t
 
 # Load in spectrum
-def LoadSpectrum(filename,z,name=None):
+def LoadSpectrum(filename,z):
 
 	# Import spectrum
 	spectrum = pyfits.getdata(filename,1)
@@ -103,6 +106,9 @@ def LoadSpectrum(filename,z,name=None):
 
 # Get fit parameters for galaxy
 def ProcessSpectrum(spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh):
+
+	# Load Spectrum
+	spectrum = LoadSpectrum(spectrum[0],spectrum[1])
 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 	regions,emissionLines =  RF.specRegionAndLines(spectrum,emissionLines_master,regions_master) 
@@ -216,10 +222,12 @@ def verifyDict(emissionLines):
 						
 	return True
 
+# Names
+names = np.genfromtxt('SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])
 
+test = HQUAILS('test.fits',names,emissionLines)
+print(test)
 
-
-print(LoadSpectrum('/Users/raphaelhviding/Documents/WISEAGN/Spectra/spec-8503-57519-0435.fits',1))
 
 
 

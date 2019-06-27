@@ -56,6 +56,8 @@ def FitSpectrum(spectrum,emissionLines_base,regions,background_degree,maxiter,th
 	# Fit model
 	model,cov = FitModel(spectrum,model,maxiter)		
 	
+	print(spectrum[-1])
+	
 	return model.parameters,param_names,cov
 
 # Fit Model
