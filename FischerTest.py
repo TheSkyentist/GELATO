@@ -30,8 +30,9 @@ def FTest(spectrum,regions,model1,model2,threshold):
 	N = 0
 	for region in regions:
 		N += np.sum(np.logical_and(region[0] < wav,wav < region[1]))
-	df_redu = N - model_redu.parameters.size
-	df_full = N - model_full.parameters.size	
+	df_redu = N - np.sum([val == False for val in model_redu.tied.values()])
+	df_full = N - np.sum([val == False for val in model_full.tied.values()])
+
 
 	# Calculate Chi2
 	RSS_redu = Chi2(model_redu,wav,flux,weight)

@@ -69,9 +69,16 @@ def HQUAILS(outname,spectra,emissionLines,region_width=100,background_degree=1,m
 	## Prepare Inputs ##
 	inputs = []
 	names = []
+	results = []
 	for spectrum in spectra:
 		names.append(spectrum[0])
 		inputs.append((spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh))
+	
+		# Not multiprocessing
+		print(spectrum[0])
+		results.append(ProcessSpectrum(spectrum,emissionLines,regions_master,\
+						background_degree,maxiter,fthresh))
+	
 	## Prepare Inputs ##
 	
 	## Multiprocessing ##
