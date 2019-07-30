@@ -1,11 +1,12 @@
 """ Main Function """
 
-# Temporary packages
+# Packages
 import numpy as np
 import pandas as pd
 import multiprocessing as mp
 from astropy.table import Table
 import astropy.io.fits as pyfits
+import matplotlib.pyplot as plt
 
 # HQUAILS supporting files
 import RegionFinding as RF
@@ -75,14 +76,13 @@ def HQUAILS(outname,spectra,emissionLines,region_width=100,background_degree=1,m
 		inputs.append((spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh))
 	
 		# Not multiprocessing
-		print(spectrum[0])
 		results.append(ProcessSpectrum(spectrum,emissionLines,regions_master,\
 						background_degree,maxiter,fthresh))
 	
 	## Prepare Inputs ##
 	
 	## Multiprocessing ##
-	if num_process == None: num_process = mp.cpu_count() -1
+	if num_process == None: num_process = mp.cpu_count() - 1
 	pool = mp.Pool(processes=num_process)
 	results = pool.starmap(ProcessSpectrum, inputs)
 	## Multiprocessing ##
@@ -105,36 +105,48 @@ def LoadSpectrum(filename,z):
 	# Import spectrum
 	spectrum = pyfits.getdata(filename,1)
 
-	wav = 10**spectrum['loglam']
-	flux = spectrum['flux']
+	# Only take good values
 	weight = spectrum['ivar']
+	good = weight > 0
+	wav = 10**spectrum['loglam'][good]
+	flux = spectrum['flux'][good]
 	
-	return wav,flux,weight,z
+	return wav,flux,weight[good],z
 
 # Get fit parameters for galaxy
 def ProcessSpectrum(spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh):
 
 	# Load Spectrum
-	spectrum = LoadSpectrum(spectrum[0],spectrum[1])
+	full_spectrum = LoadSpectrum(spectrum[0],spectrum[1])
 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
-	regions,emissionLines =  RF.specRegionAndLines(spectrum,emissionLines_master,regions_master) 
+	regions,emissionLines =  RF.specRegionAndLines(full_spectrum,emissionLines_master,regions_master) 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 
 	## Limit spectrum to regions and good values ##
-	spectrum = LimitSpectrum(spectrum,regions)
+	limited_spectrum = LimitSpectrum(full_spectrum,regions)
 	## Limit spectrum to regions and good values ##
 
 	## Model Fitting ##
-	parameters,param_names,cov = FM.FitSpectrum(spectrum,emissionLines,regions,background_degree,maxiter,fthresh)
+	model,param_names,cov = FM.FitSpectrum(limited_spectrum,emissionLines,regions,background_degree,maxiter,fthresh)
 	## Model Fitting ##
 
 	## Add regions to parameters ##
 	for i,region in enumerate(regions):
 		param_names.append('Background_'+str(i)+'_Low')
 		param_names.append('Background_'+str(i)+'_High')
-		parameters = np.concatenate([parameters,region])
+		parameters = np.concatenate([model.parameters,region])
 	## Add regions to parameters ##
+	
+	## Plotting ##
+	figname = spectrum[0].split('/')[-1].split('.')[-2] + '.pdf'
+	fig, ax = plt.subplots(figsize = (10,7))
+	ax.step(full_spectrum[0],full_spectrum[1],'k')
+	ax.step(full_spectrum[0],model(full_spectrum[0]),'r')
+	fig.savefig(figname)
+	plt.close(fig)
+	
+	## Plotting ##
 	
 	return pd.DataFrame([parameters],columns=param_names),cov
 
@@ -143,12 +155,6 @@ def LimitSpectrum(spectrum,regions):
 
 	# Unpack
 	wav,flux,weight,z = spectrum 
-	
-	# Only take good values
-	good = weight > 0
-	wav = wav[good]
-	flux = flux[good]
-	weight = weight[good]
 	
 	# Only take data in regions
 	inregion = []
@@ -230,10 +236,10 @@ def verifyDict(emissionLines):
 	return True
 
 # Names
-names = np.genfromtxt('SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])
+names = [np.genfromtxt('SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])[27]]
 
 test = HQUAILS('test.fits',names,emissionLines)
-print(test)
+# print(test.columns)
 
 
 

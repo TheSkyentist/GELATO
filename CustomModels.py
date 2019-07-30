@@ -8,6 +8,7 @@ import numpy as np
 FLOAT_EPSILON = float(np.finfo(np.float32).tiny)
 GAUSSIAN_Sigma_TO_FWHM = 2.0 * np.sqrt(2.0 * np.log(2.0))
 SQRT_2_PI = np.sqrt(2*np.pi)
+C = 299792.458 # km/s
 
 ## Custom Astropy Modeling Models
 # Spectral Feature Class (Gaussian)
@@ -18,11 +19,11 @@ class SpectralFeature(Fittable1DModel):
 	"""
 
 	# Parameters
-	Redshift = Parameter(default=0)
-	Height	 = Parameter(default=0,bounds=(0,None)) # Must be non-negative for emission
-	Sigma	 = Parameter(default=5,bounds=(FLOAT_EPSILON, None)) # Must be positive
+	Redshift 	= Parameter(default=0)
+	Flux	 	= Parameter(default=0,bounds=(0,None)) # Must be non-negative for emission
+	Dispersion	= Parameter(default=300,bounds=(FLOAT_EPSILON, None)) # Must be positive
 
-	def __init__(self, center, spectrum, regions, Sigma = Sigma.default, **kwargs):
+	def __init__(self, center, spectrum, regions, Dispersion = Dispersion.default, **kwargs):
 	
 		# Unpack
 		wav,flux,_,Redshift = spectrum 
@@ -34,50 +35,68 @@ class SpectralFeature(Fittable1DModel):
 				break
 		inregion = np.logical_and(wav > region[0],wav < region[1])				
 		Height = np.max(flux[inregion]) - np.median(flux[inregion])
+		Flux = Height * Dispersion * SQRT_2_PI
 		
 		# Set parameters
 		self.center = center
 		self.domain = region
-		super().__init__(Redshift = Redshift, Height=Height, Sigma=Sigma, **kwargs)
+		super().__init__(Redshift = Redshift, Flux=Flux, Dispersion=Dispersion, **kwargs)
+
+	@property
+	def sigma(self):
+		"""Gaussian full Sigma at half maximum."""
+		return self.Dispersion * self.center / C 
 		
 	@property
 	def fwhm(self):
 		"""Gaussian full Sigma at half maximum."""
-		return self.Sigma * GAUSSIAN_Sigma_TO_FWHM
+		return self.sigma() * GAUSSIAN_Sigma_TO_FWHM
 
-	@property
-	def flux(self):
-		"""Gaussian flux."""
-		return self.Height * self.Sigma * SQRT_2_PI
-
-	def evaluate(self, x, Redshift, Height, Sigma):
+	def evaluate(self, x, Redshift, Flux, Dispersion):
 		"""
 		Gaussian1D model function.
 		"""
+		
+		# (1 + z) * lambda
+		lam_obs = (1 + Redshift) * self.center
+		
 		# Zero outside region
 		indomain = np.logical_and(x > self.domain[0],x < self.domain[1])		
 		
 		# Assign values
 		y = np.zeros(x.shape)
-		exponand = (x[indomain] - self.center*(1 + Redshift)) / Sigma
-		y[indomain] = Height * np.exp(- 0.5 * exponand * exponand)
+		exponand = (C / Dispersion) * (x[indomain] / lam_obs - 1) 
+		y[indomain] = C * Flux * np.exp(-0.5 * exponand * exponand) / (lam_obs * Dispersion * SQRT_2_PI)
 		
 		return y
 		
 	# Derivative with respect to every parameter
-	def fit_deriv(self, x, Redshift, Height, Sigma):
-		
+	def fit_deriv(self, x, Redshift, Flux, Dispersion):
+				
+		# 1 + z
+		oneplusz = (1 + Redshift)
+		# observed center
+		lam_obs = oneplusz * self.center
+
 		# Zero outside region
 		outdomain = np.logical_or(x < self.domain[0],x > self.domain[1])
 		
-		exponand = (x - self.center*(1 + Redshift)) / Sigma
+		exponand = ( C / Dispersion ) * ( x[indomain] / lam_obs - 1) 
+
+		d_Flux = np.exp(-0.5 * exponand * exponand) * C / (SQRT_2_PI * Dispersion * lam_obs)
+		d_Flux[outdomain] = 0
+
+
+		d_Redshift = Flux * d_Flux * \
+					 ( C / (2 * lam_obs * oneplusz * Dispersion * Dispersion) ) * \
+					 ( C * C * x - 2 * lam_obs * Disperion * Disperion)
+
+
+		d_Dispersion = Flux * d_Flux * \
+						( C / (lam_obs * Dispersion * Dispersion * Dispersion) ) * \
+					 	( C * C * ( x - lam_obs ) - lam_obs * Disperion * Disperion )
 		
-		d_Height 	= np.exp(-0.5 * exponand * exponand)
-		d_Height[outdomain] = 0
-		d_Redshift 	= Height * d_Height * exponand / Sigma
-		d_Sigma 	= Height * d_Height * exponand * exponand / Sigma
-		
-		return [d_Redshift, d_Height, d_Sigma]
+		return [d_Redshift, d_Flux, d_Dispersion]
 
 # Spectral Feature Class (Gaussian)
 class ContinuumBackground(PolynomialModel):

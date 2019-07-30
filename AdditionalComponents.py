@@ -3,6 +3,8 @@
 import numpy as np
 import CustomModels as CM
 
+SQRT_2_PI = np.sqrt(2*np.pi)
+
 def ComponentName(index):
 
 	'''
@@ -37,8 +39,8 @@ def AddComponent(flag, line, spectrum, regions):
 	if index == 0: 
 	
 		# Broad line model
-		# Use wider default sigma
-		model = CM.SpectralFeature(center = line,spectrum = spectrum,regions = regions, Sigma = 20)
+		# Use wider default dispersion
+		model = CM.SpectralFeature(center = line,spectrum = spectrum,regions = regions, Dispersion = 1200)
 			
 		return model
 
@@ -46,15 +48,15 @@ def AddComponent(flag, line, spectrum, regions):
 	if index == 1: 
 	
 		# Absorption line model
-		# Use wider default sigma		
-		model = CM.SpectralFeature(center = line,spectrum = spectrum,regions = regions, Sigma = 10)
-		model.Height.bounds = (None,0) # Must be non-positive
+		# Use wider default dispersion		
+		model = CM.SpectralFeature(center = line,spectrum = spectrum,regions = regions, Dispersion = 600)
+		model.Flux.bounds = (None,0) # Must be non-positive
 		
 		# Set default depth
 		for region in regions:
 			if (line*(1+redshift) < region[1]) and (line*(1+redshift) > region[0]):
 				break
 		inregion = np.logical_and(wav > region[0],wav < region[1])				
-		model.Height = np.min(flux[inregion]) - np.median(flux[inregion])
+		model.Flux = ( np.min(flux[inregion]) - np.median(flux[inregion]) ) * model.Dispersion * SQRT_2_PI
 				
 		return model

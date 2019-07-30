@@ -56,7 +56,7 @@ def FitSpectrum(spectrum,emissionLines_base,regions,background_degree,maxiter,th
 	# Fit model
 	model,cov = FitModel(spectrum,model,maxiter)		
 		
-	return model.parameters,param_names,cov
+	return model,param_names,cov
 
 # Fit Model
 def FitModel(spectrum,init_model,maxiter):
@@ -93,7 +93,7 @@ def BuildModel(spectrum,emissionLines,regions,background_degree):
 	
 	# Model
 	model_components = []
-	
+		
 	# Add background regions
 	for i,region in enumerate(regions):
 		
@@ -168,28 +168,28 @@ def	TieParams(model,emissionLines,param_names):
 					redshift_index = param_names.index(name+'Redshift')
 					model.tied[model.param_names[redshift_index]] = TieRedshift
 					
-				## Tie Sigma and Flux/Height
+				## Tie Dispersion and Flux
 				# Check for first line in species and make tie function or initialize scale
 				if reference_line:
-					# Sigma
+					# Dispersion
 					reference_line	= False
-					TieSigma 		= GenTieFunc(param_names.index(name+'Sigma'))
+					TieDispersion 		= GenTieFunc(param_names.index(name+'Dispersion'))
 					
 					# Flux
 					reference_flux 	= line[1]
-					index_flux		= param_names.index(name+'Height')
+					index_flux		= param_names.index(name+'Flux')
 
 				# Otherwise tie param
 				else:
-					# Sigma
-					sigma_index = param_names.index(name+'Sigma')
-					model.tied[model.param_names[sigma_index]] = TieSigma				
+					# Dispersion
+					dispersion_index = param_names.index(name+'Dispersion')
+					model.tied[model.param_names[dispersion_index]] = TieDispersion				
 					
 					# Redshhift
-					height_index = param_names.index(name+'Height')
-					TieHeight = GenTieFunc(index_flux,scale=line[1]/reference_flux)
-					model.tied[model.param_names[height_index]] = TieHeight				
-				## Tie Tie Sigma and Flux/Height
+					height_index = param_names.index(name+'Flux')
+					TieFlux = GenTieFunc(index_flux,scale=line[1]/reference_flux)
+					model.tied[model.param_names[height_index]] = TieFlux				
+				## Tie Tie Dispersion and Flux
 	##Tie parameters ##
 
 	return model
