@@ -14,7 +14,7 @@ C = 299792.458 # km/s
 # Spectral Feature Class (Gaussian)
 class SpectralFeature(Fittable1DModel):
 
-	r"""
+	"""
 	Very similar to the 1D Gaussian but parametrized differently. 
 	"""
 
