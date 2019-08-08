@@ -29,4 +29,4 @@ region_width        = 100   # Width of region around emission lines (AA)
 background_degree   = 1     # Degree of background 
 maxiter             = 1000  # Maximum LM iterations
 fthresh             = 0.95  # Probability threshold for f-test
-num_process         = None  # Number of threads, None uses all threads except 1
+num_process         = 1  # Number of threads, None uses all threads except 1
