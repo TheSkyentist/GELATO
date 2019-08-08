@@ -2,6 +2,13 @@
     Parameter file 
 '''
 
+# Import packages
+import numpy as np
+
+# Names and redshifts
+names = [np.genfromtxt('SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])[27]]
+print(names)
+
 # Output name
 outname = 'test.fits'
 

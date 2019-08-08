@@ -9,13 +9,13 @@ import astropy.io.fits as pyfits
 import matplotlib.pyplot as plt
 
 # HQUAILS supporting files
-import PARAMS
+import PARAMS as P
 import RegionFinding as RF
 import FittingModel as FM
 # emissionLines: Emission Lines Dictionary
 
 # Main Function
-def HQUAILS(outname,spectra,emissionLines):
+def HQUAILS(outname,spectra,emissionLines,region_width,background_degree,maxiter,fthresh,num_process):
 
 	## Verify Emission Line Dictionary ##
 	if not verifyDict(emissionLines):
@@ -195,8 +195,4 @@ def verifyDict(emissionLines):
 						
 	return True
 
-# Names
-names = [np.genfromtxt('SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])[27]]
-
-test = HQUAILS('test.fits',names,emissionLines)
-# print(test.columns)
+test = HQUAILS(P.outname,P.names,P.emissionLines,P.region_width,P.background_degree,P.maxiter,P.fthresh,P.num_process)
