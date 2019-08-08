@@ -1,0 +1,5 @@
+{
+    "python.pythonPath": "/home/rhviding/miniconda3/envs/astroconda/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
+}

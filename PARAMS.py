@@ -6,11 +6,10 @@
 import numpy as np
 
 # Names and redshifts
-names = [np.genfromtxt('SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])[27]]
-print(names)
+names = np.genfromtxt('/home/rhviding/Documents/WISEAGN/SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])[27:30]
 
 # Output name
-outname = 'test.fits'
+outfolder = '/home/rhviding/Documents/WISEAGN/Results/' # Folder where Results will go
 
 # Emission line dictionary
 emissionLines = {
@@ -21,12 +20,12 @@ emissionLines = {
         'Halpha':([(6562.80,1)],1,['Broad']),
         'Hbeta':([(4861.32,1)],3,['Broad','Galaxy'])
             },
-    'Bad':{},
     }
 
 # Fitting Parameters
 region_width        = 100   # Width of region around emission lines (AA)
 background_degree   = 1     # Degree of background 
 maxiter             = 1000  # Maximum LM iterations
+n_boot              = 500   # Number of Bootstrap Iterations
 fthresh             = 0.95  # Probability threshold for f-test
-num_process         = 1  # Number of threads, None uses all threads except 1
+num_process         = 1     # Number of threads, None uses all threads except 1

@@ -6,16 +6,15 @@ import pandas as pd
 import multiprocessing as mp
 from astropy.table import Table
 import astropy.io.fits as pyfits
-import matplotlib.pyplot as plt
 
 # HQUAILS supporting files
 import PARAMS as P
-import RegionFinding as RF
+import Plotting as PL
 import FittingModel as FM
-# emissionLines: Emission Lines Dictionary
+import RegionFinding as RF
 
 # Main Function
-def HQUAILS(outname,spectra,emissionLines,region_width,background_degree,maxiter,fthresh,num_process):
+def main(outfolder,spectra,emissionLines,region_width,background_degree,maxiter,fthresh,num_process):
 
 	## Verify Emission Line Dictionary ##
 	if not verifyDict(emissionLines):
@@ -33,48 +32,31 @@ def HQUAILS(outname,spectra,emissionLines,region_width,background_degree,maxiter
 	results = []
 	for spectrum in spectra:
 		names.append(spectrum[0])
-		inputs.append((spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh))
-	
-		# Not multiprocessing
-		results.append(ProcessSpectrum(spectrum,emissionLines,regions_master,\
-						background_degree,maxiter,fthresh))
-	
+		inputs.append((outfolder,spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh))
 	## Prepare Inputs ##
 	
-	## Multiprocessing ##
-	if num_process == None: num_process = mp.cpu_count() - 1
-	pool = mp.Pool(processes=num_process)
-	results = pool.starmap(ProcessSpectrum, inputs)
-	## Multiprocessing ##
+	## Process Spectra ##
+	if num_process == 1: # Single Thread
+		results = []
+		for i in inputs:
+			outfolder,spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh = i
+			results.append(ProcessSpectrum(outfolder,spectrum,emissionLines,regions_master,\
+											background_degree,maxiter,fthresh))			
+	else: # Multi-threading
+		if num_process == None: num_process = mp.cpu_count() - 1
+		pool 	= mp.Pool(processes=num_process)
+		results = pool.starmap(ProcessSpectrum, inputs)
+	## Process Spectra ##
 	
-	## Gather Results ##
-	df = pd.concat([result[0] for result in results], axis=0, ignore_index=True, sort=False)
-
-	return df
-
+	## Gather and Write Results ##
+	df = pd.concat([result for result in results], ignore_index=True, sort=False)
 	df.insert(0,'Object',names)
 	t = Table.from_pandas(df)
-	t.write(outname,overwrite = True)
-	## Gather Results ##
-
-	return t
-
-# Load in spectrum
-def LoadSpectrum(filename,z):
-
-	# Import spectrum
-	spectrum = pyfits.getdata(filename,1)
-
-	# Only take good values
-	weight = spectrum['ivar']
-	good = weight > 0
-	wav = 10**spectrum['loglam'][good]
-	flux = spectrum['flux'][good]
-	
-	return wav,flux,weight[good],z
+	t.write(outfolder+'results.fits',overwrite = True)
+	## Gather and Write Results ##
 
 # Get fit parameters for galaxy
-def ProcessSpectrum(spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh):
+def ProcessSpectrum(outfolder,spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh):
 
 	# Load Spectrum
 	full_spectrum = LoadSpectrum(spectrum[0],spectrum[1])
@@ -89,26 +71,35 @@ def ProcessSpectrum(spectrum,emissionLines_master,regions_master,background_degr
 
 	## Model Fitting ##
 	model,param_names,cov = FM.FitSpectrum(limited_spectrum,emissionLines,regions,background_degree,maxiter,fthresh)
+	parameters = model.parameters
 	## Model Fitting ##
 
 	## Add regions to parameters ##
 	for i,region in enumerate(regions):
 		param_names.append('Background_'+str(i)+'_Low')
 		param_names.append('Background_'+str(i)+'_High')
-		parameters = np.concatenate([model.parameters,region])
+		parameters = np.concatenate([parameters,region])
 	## Add regions to parameters ##
 	
 	## Plotting ##
-	figname = spectrum[0].split('/')[-1].split('.')[-2] + '.pdf'
-	fig, ax = plt.subplots(figsize = (10,7))
-	ax.step(full_spectrum[0],full_spectrum[1],'k')
-	ax.step(full_spectrum[0],model(full_spectrum[0]),'r')
-	fig.savefig(figname)
-	plt.close(fig)
-	
+	PL.Plot(outfolder,spectrum[0],model,full_spectrum,regions)
 	## Plotting ##
+
+	return pd.DataFrame(data=parameters.reshape((1,parameters.size)),columns=param_names)
+
+# Load in spectrum
+def LoadSpectrum(filename,z):
+
+	# Import spectrum
+	spectrum = pyfits.getdata(filename,1)
+
+	# Only take good values
+	weight = spectrum['ivar']
+	good = weight > 0
+	wav = 10**spectrum['loglam'][good]
+	flux = spectrum['flux'][good]
 	
-	return pd.DataFrame([parameters],columns=param_names),cov
+	return wav,flux,weight[good],z
 
 # Pair down spectrum
 def LimitSpectrum(spectrum,regions):
@@ -195,4 +186,5 @@ def verifyDict(emissionLines):
 						
 	return True
 
-test = HQUAILS(P.outname,P.names,P.emissionLines,P.region_width,P.background_degree,P.maxiter,P.fthresh,P.num_process)
+# Main Call
+main(P.outfolder,P.names,P.emissionLines,P.region_width,P.background_degree,P.maxiter,P.fthresh,P.num_process)
