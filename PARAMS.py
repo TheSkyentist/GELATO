@@ -6,10 +6,10 @@
 import numpy as np
 
 # Names and redshifts
-names = np.genfromtxt('/home/rhviding/Documents/WISEAGN/SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])[27:30]
+names = np.genfromtxt('../WISEAGN/SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])[27:30]
 
 # Output name
-outfolder = '/home/rhviding/Documents/WISEAGN/Results/' # Folder where Results will go
+outfolder = '../WISEAGN/Results/' # Folder where Results will go
 
 # Emission line dictionary
 emissionLines = {
