@@ -9,53 +9,13 @@ import astropy.io.fits as pyfits
 import matplotlib.pyplot as plt
 
 # HQUAILS supporting files
+import PARAMS
 import RegionFinding as RF
 import FittingModel as FM
 # emissionLines: Emission Lines Dictionary
 
-
-# Emission line dictionary
-# Full testing for chip gaps
-emissionLines = {
-'AGN':{
-	'OIII':([(5006.77,1),(4958.83,0.350)],1,['Broad']),	
-	'NII':([(6583.34,1),(6547.96,0.340)],1,['Broad'])},
-'Galaxy':{
-	'Halpha':([(6562.80,1)],1,['Broad']),
-	'Hbeta':([(4861.32,1)],3,['Broad','Absorption']),
-	'Htest':([(6500,1)],0,[])
-		},
-'Broad':{},
-'Absorption':{},
-'Bad':{
-	'Test':([(6000,1)],1,['Broad'])
-	},
-}
-
-emissionLines = {
-'AGN':{
-	'OIII':([(5006.77,1),(4958.83,0.350)],1,['Outflow']),	
-	'NII':([(6583.34,1),(6547.96,0.340)],1,['Broad'])},
-'Galaxy':{
-	'Halpha':([(6562.80,1)],1,['Broad']),
-	'Hbeta':([(4861.32,1)],3,['Broad','Galaxy'])
-		},
-'Bad':{},
-}
-
-emissionLines = {
-'AGN':{
-	'OIII':([(5006.77,1),(4958.83,0.350)],1,['Outflow']),	
-	'NII':([(6583.34,1),(6547.96,0.340)],0,[])},
-'Galaxy':{
-	'Halpha':([(6562.80,1)],1,['Broad']),
-	'Hbeta':([(4861.32,1)],3,['Broad','Galaxy'])
-		},
-'Bad':{},
-}
-
 # Main Function
-def HQUAILS(outname,spectra,emissionLines,region_width=100,background_degree=1,maxiter=1000,fthresh=0.95,num_process=None):
+def HQUAILS(outname,spectra,emissionLines):
 
 	## Verify Emission Line Dictionary ##
 	if not verifyDict(emissionLines):
@@ -240,18 +200,3 @@ names = [np.genfromtxt('SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['F
 
 test = HQUAILS('test.fits',names,emissionLines)
 # print(test.columns)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
