@@ -28,4 +28,4 @@ background_degree   = 1     # Degree of background
 maxiter             = 1000  # Maximum LM iterations
 n_boot              = 500   # Number of Bootstrap Iterations
 fthresh             = 0.95  # Probability threshold for f-test
-num_process         = 2     # Number of threads, None uses all threads except 1
+num_process         = 1     # Number of threads, None uses all threads except 1
