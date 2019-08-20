@@ -18,7 +18,7 @@ emissionLines = {
         'NII':([(6583.34,1),(6547.96,0.340)],0,[])},
     'Galaxy':{
         'Halpha':([(6562.80,1)],1,['Broad']),
-        'Hbeta':([(4861.32,1)],3,['Broad','Galaxy'])
+        'Hbeta':([(4861.32,1)],3,['Broad','Absorption'])
             },
     }
 

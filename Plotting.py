@@ -24,7 +24,7 @@ def Plot(outfolder,name,model,full_spectrum,regions):
         good    = np.logical_and(full_spectrum[0] < region[1],full_spectrum[0] > region[0])
         wav     = full_spectrum[0][good]
         flux    = full_spectrum[1][good]
-        sigma  = 1/np.sqrt(full_spectrum[2][good])
+        # sigma  = 1/np.sqrt(full_spectrum[2][good])
 
         # Axis to plot spectrum
         fax = fig.add_subplot(gs[0,i])
@@ -41,10 +41,11 @@ def Plot(outfolder,name,model,full_spectrum,regions):
         rax = fig.add_subplot(gs[1,i],sharex = fax)
         rax.step(wav,flux - model(wav),'k')
         ymax = np.max(np.abs(rax.get_ylim()))
-        rax.set(xlim=region,xlabel='Wavelength [\AA]',ylim=[-ymax,ymax],ylabel='r')
+        rax.set(xlim=region,xlabel='Wavelength [\AA]',ylim=[-ymax,ymax])
+        rax.set_ylabel('data $-$ model',fontsize=15)
 
     # Add title and save figure
     fig.suptitle(figname)
-    fig.tight_layout(rect = [0, 0, 1, 0.95])
+    fig.tight_layout(rect = [0, 0, 1, 0.96])
     fig.savefig(outfolder + figname + '.pdf')
     plt.close(fig)
