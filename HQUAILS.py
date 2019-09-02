@@ -8,52 +8,9 @@ from astropy.table import Table
 import astropy.io.fits as pyfits
 
 # HQUAILS supporting files
-import PARAMS as P
 import Plotting as PL
 import FittingModel as FM
 import RegionFinding as RF
-
-# Main Function
-def main(outfolder,spectra,emissionLines,region_width,background_degree,maxiter,fthresh,num_process):
-
-	## Verify Emission Line Dictionary ##
-	if not verifyDict(emissionLines):
-		print('Unable to verify emission line dictionary, exiting.')
-		return
-	## Verify Emission Line Dictionary ##
-
-	## Identify fitting regions
-	regions_master = RF.identifyComplexes(emissionLines,tol=region_width)
-	## Identify fitting regions
-
-	## Prepare Inputs ##
-	inputs = []
-	names = []
-	results = []
-	for spectrum in spectra:
-		names.append(spectrum[0])
-		inputs.append((outfolder,spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh))
-	## Prepare Inputs ##
-	
-	## Process Spectra ##
-	if num_process == 1: # Single Thread
-		results = []
-		for i in inputs:
-			outfolder,spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh = i
-			results.append(ProcessSpectrum(outfolder,spectrum,emissionLines,regions_master,\
-											background_degree,maxiter,fthresh))			
-	else: # Multi-threading
-		if num_process == None: num_process = mp.cpu_count() - 1
-		pool 	= mp.Pool(processes=num_process)
-		results = pool.starmap(ProcessSpectrum, inputs)
-	## Process Spectra ##
-	
-	## Gather and Write Results ##
-	df = pd.concat([result for result in results], ignore_index=True, sort=False)
-	df.insert(0,'Object',names)
-	t = Table.from_pandas(df)
-	t.write(outfolder+'results.fits',overwrite = True)
-	## Gather and Write Results ##
 
 # Get fit parameters for galaxy
 def ProcessSpectrum(outfolder,spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh):
@@ -103,7 +60,7 @@ def LoadSpectrum(filename,z):
 
 # Pair down spectrum
 def LimitSpectrum(spectrum,regions):
-
+    z
 	# Unpack
 	wav,flux,weight,z = spectrum 
 	
@@ -185,6 +142,52 @@ def verifyDict(emissionLines):
 				return False
 						
 	return True
+
+# Main Function
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+ 
+    parser.add_argument("Settings", type=str, help="Settings file")
+
+	## Verify Emission Line Dictionary ##
+	if not verifyDict(p.emissionLines):
+		print('Unable to verify emission line dictionary, exiting.')
+		return
+	## Verify Emission Line Dictionary ##
+
+	## Identify fitting regions
+	regions_master = RF.identifyComplexes(p.emissionLines,tol=p.region_width)
+	## Identify fitting regions
+
+	## Prepare Inputs ##
+	inputs = []
+	names = []
+	results = []
+	for spectrum in p.names:
+		names.append(spectrum[0])
+		inputs.append((p.outfolder,p.spectrum,p.emissionLines,p.regions_master,p.background_degree,p.maxiter,p.fthresh))
+	## Prepare Inputs ##
+	
+	## Process Spectra ##
+	if num_process == 1: # Single Thread
+		results = []
+		for i in inputs:
+			outfolder,spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh = i
+			results.append(ProcessSpectrum(outfolder,spectrum,emissionLines,regions_master,\
+											background_degree,maxiter,fthresh))			
+	else: # Multi-threading
+		if num_process == None: num_process = mp.cpu_count() - 1
+		pool 	= mp.Pool(processes=num_process)
+		results = pool.starmap(ProcessSpectrum, inputs)
+	## Process Spectra ##
+	
+	## Gather and Write Results ##
+	df = pd.concat([result for result in results], ignore_index=True, sort=False)
+	df.insert(0,'Object',names)
+	t = Table.from_pandas(df)
+	t.write(outfolder+'results.fits',overwrite = True)
+	## Gather and Write Results ##
 
 # Main Call
 main(P.outfolder,P.names,P.emissionLines,P.region_width,P.background_degree,P.maxiter,P.fthresh,P.num_process)

@@ -66,7 +66,7 @@ def FitModel(spectrum,init_model,maxiter):
 	
 	# Fit model
 	fit = fitting.LevMarLSQFitter()
-	fit_model = fit(init_model,wav,flux,weights=weight,maxiter=maxiter)
+	fit_model = fit(init_model,wav,flux,weights=np.sqrt(weight),maxiter=maxiter)
 	
 	return fit_model,fit.fit_info['param_cov']
 
