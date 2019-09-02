@@ -175,13 +175,13 @@ if __name__ == "__main__":
 	## Prepare Inputs ##
 	
 	## Process Spectra ##
-	if num_process == 1: # Single Thread
+	if p['num_process'] == 1: # Single Thread
 		results = []
 		for i in inputs:
 			results.append(ProcessSpectrum(expand(i))			
 	else: # Multi-threading
-		if num_process == None: num_process = mp.cpu_count() - 1
-		pool 	= mp.Pool(processes=num_process)
+		if p['num_process'] == None: p['num_process'] = mp.cpu_count() - 1
+		pool 	= mp.Pool(processes=p['num_process'])
 		results = pool.starmap(ProcessSpectrum, inputs)
 	## Process Spectra ##
 	
