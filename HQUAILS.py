@@ -191,6 +191,3 @@ if __name__ == "__main__":
 	t = Table.from_pandas(df)
 	t.write(p['outfolder']+'results.fits',overwrite = True)
 	## Gather and Write Results ##
-
-# Main Call
-main(P.outfolder,P.names,P.emissionLines,P.region_width,P.background_degree,P.maxiter,P.fthresh,P.num_process)
