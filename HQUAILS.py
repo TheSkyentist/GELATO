@@ -146,36 +146,39 @@ def verifyDict(emissionLines):
 # Main Function
 if __name__ == "__main__":
 
+	## Parse Arguements to find Parameter File ##
     parser = argparse.ArgumentParser()
- 
     parser.add_argument("Settings", type=str, help="Settings file")
+    args = parser.parse_args()
+    execfile(args.Settings)
+	p = PARAMETERS()
+	## Parse Arguements to find Parameter File ##
 
 	## Verify Emission Line Dictionary ##
-	if not verifyDict(p.emissionLines):
+	if not verifyDict(p['emissionLines']):
 		print('Unable to verify emission line dictionary, exiting.')
 		return
 	## Verify Emission Line Dictionary ##
 
 	## Identify fitting regions
-	regions_master = RF.identifyComplexes(p.emissionLines,tol=p.region_width)
+	regions_master = RF.identifyComplexes(p['emissionLines'],tol=p['region_width'])
 	## Identify fitting regions
 
 	## Prepare Inputs ##
 	inputs = []
 	names = []
 	results = []
-	for spectrum in p.names:
+	for spectrum in p['names']:
 		names.append(spectrum[0])
-		inputs.append((p.outfolder,p.spectrum,p.emissionLines,p.regions_master,p.background_degree,p.maxiter,p.fthresh))
+		inputs.append((p['outfolder'],p['spectrum'],p['emissionLines'],p['regions_master'],\
+						p['background_degree'],p['maxiter'],p['fthresh']))
 	## Prepare Inputs ##
 	
 	## Process Spectra ##
 	if num_process == 1: # Single Thread
 		results = []
 		for i in inputs:
-			outfolder,spectrum,emissionLines,regions_master,background_degree,maxiter,fthresh = i
-			results.append(ProcessSpectrum(outfolder,spectrum,emissionLines,regions_master,\
-											background_degree,maxiter,fthresh))			
+			results.append(ProcessSpectrum(expand(i))			
 	else: # Multi-threading
 		if num_process == None: num_process = mp.cpu_count() - 1
 		pool 	= mp.Pool(processes=num_process)
@@ -186,7 +189,7 @@ if __name__ == "__main__":
 	df = pd.concat([result for result in results], ignore_index=True, sort=False)
 	df.insert(0,'Object',names)
 	t = Table.from_pandas(df)
-	t.write(outfolder+'results.fits',overwrite = True)
+	t.write(p['outfolder']+'results.fits',overwrite = True)
 	## Gather and Write Results ##
 
 # Main Call
