@@ -21,7 +21,7 @@ class SpectralFeature(Fittable1DModel):
 	# Parameters
 	Redshift 	= Parameter(default=0)
 	Flux	 	= Parameter(default=0,bounds=(0,None)) # Must be non-negative for emission
-	Dispersion	= Parameter(default=300,bounds=(FLOAT_EPSILON, None)) # Must be positive
+	Dispersion	= Parameter(default=200,bounds=(FLOAT_EPSILON, None)) # Must be positive
 
 	def __init__(self, center, spectrum, regions, Dispersion = Dispersion.default, **kwargs):
 	
@@ -35,7 +35,7 @@ class SpectralFeature(Fittable1DModel):
 				break
 		inregion = np.logical_and(wav > region[0],wav < region[1])				
 		Height = np.max(flux[inregion]) - np.median(flux[inregion])
-		Flux = Height * Dispersion * SQRT_2_PI
+		Flux = Height * Dispersion * center * SQRT_2_PI / C
 		
 		# Set parameters
 		self.center = center

@@ -34,7 +34,9 @@ def Plot(outfolder,name,model,full_spectrum,regions):
         fax.step(wav,model(wav),'r')
 
         # Axis set
-        fax.set(ylabel='$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]')
+        ylim = list(fax.get_ylim())
+        ylim[0] = np.max((0,ylim[0]))
+        fax.set(ylabel='$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
         plt.setp(fax.get_yticklabels()[0],visible = False)
 
         # Residual Axis

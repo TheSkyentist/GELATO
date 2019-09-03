@@ -1,6 +1,7 @@
 """ Main Function """
 
 # Packages
+import argparse
 import numpy as np
 import pandas as pd
 import multiprocessing as mp
@@ -13,7 +14,8 @@ import FittingModel as FM
 import RegionFinding as RF
 
 # Get fit parameters for galaxy
-def ProcessSpectrum(outfolder,spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh):
+# outfolder,spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh
+def ProcessSpectrum(outfolder,spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh,n_boot):
 
 	# Load Spectrum
 	full_spectrum = LoadSpectrum(spectrum[0],spectrum[1])
@@ -27,7 +29,7 @@ def ProcessSpectrum(outfolder,spectrum,emissionLines_master,regions_master,backg
 	## Limit spectrum to regions and good values ##
 
 	## Model Fitting ##
-	model,param_names,cov = FM.FitSpectrum(limited_spectrum,emissionLines,regions,background_degree,maxiter,fthresh)
+	model,param_names = FM.FitSpectrum(limited_spectrum,emissionLines,regions,background_degree,maxiter,fthresh,n_boot)
 	parameters = model.parameters
 	## Model Fitting ##
 
@@ -60,7 +62,7 @@ def LoadSpectrum(filename,z):
 
 # Pair down spectrum
 def LimitSpectrum(spectrum,regions):
-    z
+
 	# Unpack
 	wav,flux,weight,z = spectrum 
 	
@@ -147,17 +149,17 @@ def verifyDict(emissionLines):
 if __name__ == "__main__":
 
 	## Parse Arguements to find Parameter File ##
-    parser = argparse.ArgumentParser()
-    parser.add_argument("Settings", type=str, help="Settings file")
-    args = parser.parse_args()
-    execfile(args.Settings)
+	parser = argparse.ArgumentParser()
+	parser.add_argument("Settings", type=str, help="Settings file")
+	args = parser.parse_args()
+	exec(open(args.Settings).read())
 	p = PARAMETERS()
 	## Parse Arguements to find Parameter File ##
 
 	## Verify Emission Line Dictionary ##
 	if not verifyDict(p['emissionLines']):
 		print('Unable to verify emission line dictionary, exiting.')
-		return
+		sys.exit(1)
 	## Verify Emission Line Dictionary ##
 
 	## Identify fitting regions
@@ -170,15 +172,15 @@ if __name__ == "__main__":
 	results = []
 	for spectrum in p['names']:
 		names.append(spectrum[0])
-		inputs.append((p['outfolder'],p['spectrum'],p['emissionLines'],p['regions_master'],\
-						p['background_degree'],p['maxiter'],p['fthresh']))
+		inputs.append((p['outfolder'],spectrum,p['emissionLines'],regions_master,\
+						p['background_degree'],p['maxiter'],p['fthresh'],p['n_boot']))
 	## Prepare Inputs ##
 	
 	## Process Spectra ##
 	if p['num_process'] == 1: # Single Thread
 		results = []
 		for i in inputs:
-			results.append(ProcessSpectrum(expand(i))			
+			results.append(ProcessSpectrum(*i))
 	else: # Multi-threading
 		if p['num_process'] == None: p['num_process'] = mp.cpu_count() - 1
 		pool 	= mp.Pool(processes=p['num_process'])

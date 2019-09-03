@@ -10,10 +10,10 @@ def PARAMETERS():
     params = {}
 
     # Names and redshifts
-    params['names'] = np.genfromtxt('../WISEAGN/SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])[27:30]
+    params['names'] = np.genfromtxt('./SDSSWISEAGN.csv',delimiter=',',dtype='U100,f8',names=['File','z'])[27:30]
 
     # Output name
-    params['outfolder'] = '../WISEAGN/Results/' # Folder where Results will go
+    params['outfolder'] = './Results/' # Folder where Results will go
 
     # Emission line dictionary
     params['emissionLines'] = {
@@ -32,6 +32,6 @@ def PARAMETERS():
     params['maxiter']             = 1000  # Maximum LM iterations
     params['n_boot']              = 500   # Number of Bootstrap Iterations
     params['fthresh']             = 0.95  # Probability threshold for f-test
-    params['num_process']         = 1     # Number of threads, None uses all threads except 1
+    params['num_process']         = None     # Number of threads, None uses all threads except 1
 
     return params

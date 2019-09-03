@@ -9,12 +9,12 @@ import AdditionalComponents as AC
 import FischerTest as FT
 
 # Construct Full Model with F-tests for additional parameters
-def FitSpectrum(spectrum,emissionLines_base,regions,background_degree,maxiter,threshold):
+def FitSpectrum(spectrum,emissionLines_base,regions,background_degree,maxiter,threshold,n_boot):
 	
 	# Build initial model
-	base_model,base_param_names = BuildModel(spectrum,emissionLines_base,regions,background_degree)
+	init_model,base_param_names = BuildModel(spectrum,emissionLines_base,regions,background_degree)
 	# Fit model
-	base_model,_ = FitModel(spectrum,base_model,maxiter)
+	base_model = FitModel(spectrum,init_model,maxiter)
 
 	# Find number of flags
 	flags = 0
@@ -37,7 +37,7 @@ def FitSpectrum(spectrum,emissionLines_base,regions,background_degree,maxiter,th
 		model = SourceParams(model,param_names,base_model,base_param_names)		
 		
 		# Fit model
-		model,_ = FitModel(spectrum,model,maxiter)
+		model = FitModel(spectrum,model,maxiter)
 
 		if FT.FTest(spectrum,regions,base_model,model,threshold):
 			accepted.append(i)
@@ -54,9 +54,19 @@ def FitSpectrum(spectrum,emissionLines_base,regions,background_degree,maxiter,th
 	model = SourceParams(model,param_names,base_model,base_param_names)		
 	
 	# Fit model
-	model,cov = FitModel(spectrum,model,maxiter)		
-		
-	return model,param_names,cov
+	model = FitModel(spectrum,model,maxiter)
+
+	# Bootstrap
+	parameters = [FitModel(Bootstrap(spectrum),model,maxiter) for i in n_boot]
+	model = SourceParams(model,param_names,source,source_params)
+
+	return model,param_names,parameters
+
+def Bootstrap(spectrum):
+
+	wav,flux,weight,redshift = spectrum
+
+	return wav,np.random.normal(loc=flux,scale=1/np.sqrt(weight)),weight,redshift
 
 # Fit Model
 def FitModel(spectrum,init_model,maxiter):
@@ -68,7 +78,7 @@ def FitModel(spectrum,init_model,maxiter):
 	fit = fitting.LevMarLSQFitter()
 	fit_model = fit(init_model,wav,flux,weights=np.sqrt(weight),maxiter=maxiter)
 	
-	return fit_model,fit.fit_info['param_cov']
+	return fit_model
 
 # Carry over parameters from another model
 def SourceParams(model,param_names,source,source_params):
