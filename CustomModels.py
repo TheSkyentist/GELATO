@@ -44,7 +44,7 @@ class SpectralFeature(Fittable1DModel):
 
 	@property
 	def sigma(self):
-		"""Gaussian full Sigma at half maximum."""
+		"""Gaussian full Sigma at half maximum.  """
 		return self.Dispersion * self.center / C 
 		
 	@property
