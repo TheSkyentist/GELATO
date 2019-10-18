@@ -35,7 +35,7 @@ class SpectralFeature(Fittable1DModel):
 				break
 		inregion = np.logical_and(wav > region[0],wav < region[1])				
 		Height = np.max(flux[inregion]) - np.median(flux[inregion])
-		Flux = Height * Dispersion * center * SQRT_2_PI / C
+		Flux = Height * (1 + Redshift) * Dispersion * center * SQRT_2_PI / C
 		
 		# Set parameters
 		self.center = center
@@ -52,6 +52,7 @@ class SpectralFeature(Fittable1DModel):
 		"""Gaussian full Sigma at half maximum."""
 		return self.sigma() * GAUSSIAN_Sigma_TO_FWHM
 
+	@classmethod
 	def evaluate(self, x, Redshift, Flux, Dispersion):
 		"""
 		Gaussian1D model function.
@@ -71,30 +72,30 @@ class SpectralFeature(Fittable1DModel):
 		return y
 		
 	# Derivative with respect to every parameter
+	@classmethod
 	def fit_deriv(self, x, Redshift, Flux, Dispersion):
 				
 		# 1 + z
 		oneplusz = (1 + Redshift)
 		# observed center
 		lam_obs = oneplusz * self.center
+		C2 = C*C
 
 		# Zero outside region
-		outdomain = np.logical_or(x < self.domain[0],x > self.domain[1])
+		indomain = np.logical_and(x > self.domain[0],x < self.domain[1])		
 		
 		exponand = ( C / Dispersion ) * ( x[indomain] / lam_obs - 1) 
 
-		d_Flux = np.exp(-0.5 * exponand * exponand) * C / (SQRT_2_PI * Dispersion * lam_obs)
-		d_Flux[outdomain] = 0
-
+		d_Flux = np.zeros(x.shape)	
+		d_Flux[indomain] = np.exp(-0.5 * exponand * exponand) * C / (SQRT_2_PI * Dispersion * lam_obs)
 
 		d_Redshift = Flux * d_Flux * \
-					 ( C / (2 * lam_obs * oneplusz * Dispersion * Dispersion) ) * \
-					 ( C * C * x - 2 * lam_obs * Disperion * Disperion)
-
+					 (C2*x*x - C2*x*lam_obs + lam_obs*lam_obs*Dispersion*Dispersion) / \
+					 (lam_obs*lam_obs*oneplusz*Dispersion*Dispersion)
 
 		d_Dispersion = Flux * d_Flux * \
-						( C / (lam_obs * Dispersion * Dispersion * Dispersion) ) * \
-					 	( C * C * ( x - lam_obs ) - lam_obs * Disperion * Disperion )
+						(C2*(lam_obs - x)*(lam_obs - x) - lam_obs*lam_obs*Dispersion*Dispersion) / \
+				        (lam_obs*lam_obs*Dispersion*Dispersion*Dispersion)
 		
 		return [d_Redshift, d_Flux, d_Dispersion]
 

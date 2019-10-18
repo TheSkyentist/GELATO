@@ -57,8 +57,7 @@ def FitSpectrum(spectrum,emissionLines_base,regions,background_degree,maxiter,th
 	model = FitModel(spectrum,model,maxiter)
 
 	# Bootstrap
-	parameters = [FitModel(Bootstrap(spectrum),model,maxiter) for i in n_boot]
-	model = SourceParams(model,param_names,source,source_params)
+	parameters = [FitModel(Bootstrap(spectrum),model,maxiter).parameters for i in range(n_boot)]
 
 	return model,param_names,parameters
 

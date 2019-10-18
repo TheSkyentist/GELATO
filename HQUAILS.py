@@ -17,8 +17,12 @@ import RegionFinding as RF
 # outfolder,spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh
 def ProcessSpectrum(outfolder,spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh,n_boot):
 
+	## Setting Up ##
+	# Print
+	print('Fitting '+spectrum[0].split('/')[-1])
 	# Load Spectrum
 	full_spectrum = LoadSpectrum(spectrum[0],spectrum[1])
+	## Setting Up ##
 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 	regions,emissionLines =  RF.specRegionAndLines(full_spectrum,emissionLines_master,regions_master) 
@@ -29,22 +33,35 @@ def ProcessSpectrum(outfolder,spectrum,emissionLines_master,regions_master,backg
 	## Limit spectrum to regions and good values ##
 
 	## Model Fitting ##
-	model,param_names = FM.FitSpectrum(limited_spectrum,emissionLines,regions,background_degree,maxiter,fthresh,n_boot)
-	parameters = model.parameters
+	model,param_names,parameters = FM.FitSpectrum(limited_spectrum,emissionLines,regions,background_degree,maxiter,fthresh,n_boot)
+	sigma = np.std(parameters,0)
+	parameters = np.median(parameters,0)
+	model.parameters = parameters
 	## Model Fitting ##
+
+	## Create ouput ##
+	out = np.empty(parameters.size*2)
+	out[0::2] = parameters
+	out[1::2] = sigma
+	outnames = []
+	for p in param_names:
+		outnames.append(p)
+		outnames.append(p+'_sig')
+	## Create ouput ##
 
 	## Add regions to parameters ##
 	for i,region in enumerate(regions):
-		param_names.append('Background_'+str(i)+'_Low')
-		param_names.append('Background_'+str(i)+'_High')
-		parameters = np.concatenate([parameters,region])
+		outnames = np.append(outnames,'Background_'+str(i)+'_Low')
+		outnames = np.append(outnames,'Background_'+str(i)+'_High')
+		out = np.concatenate([out,region])
 	## Add regions to parameters ##
-	
+
 	## Plotting ##
 	PL.Plot(outfolder,spectrum[0],model,full_spectrum,regions)
 	## Plotting ##
 
-	return pd.DataFrame(data=parameters.reshape((1,parameters.size)),columns=param_names)
+	print('Finished fitting '+spectrum[0].split('/')[-1])
+	return pd.DataFrame(data=out.reshape((1,out.size)),columns=outnames)
 
 # Load in spectrum
 def LoadSpectrum(filename,z):
