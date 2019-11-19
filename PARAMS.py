@@ -27,11 +27,11 @@ def PARAMETERS():
         }
 
     # Fitting Parameters
-    params['region_width']        = 100   # Width of region around emission lines (AA)
+    params['region_width']        = 50   # Width of region around emission lines (AA)
     params['background_degree']   = 1     # Degree of background 
     params['maxiter']             = 1000  # Maximum LM iterations
     params['n_boot']              = 500   # Number of Bootstrap Iterations
     params['fthresh']             = 0.95  # Probability threshold for f-test
-    params['num_process']         = None     # Number of threads, None uses all threads except 1
+    params['num_process']         = 1  # Number of threads, None uses all threads except 1
 
     return params

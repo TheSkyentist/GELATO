@@ -1,29 +1,29 @@
 """ Main Function """
 
 # Packages
+import copy
 import argparse
 import numpy as np
-import pandas as pd
+# import pandas as pd
 import multiprocessing as mp
-from astropy.table import Table
-import astropy.io.fits as pyfits
+from functools import partial
+# from astropy.table import Table
+# import astropy.io.fits as pyfits
 
 # HQUAILS supporting files
-import Plotting as PL
-import FittingModel as FM
-import RegionFinding as RF
+# import Plotting as PL
+# import FittingModel as FM
+# import RegionFinding as RF
+import SpectrumClass as SC
 
 # Get fit parameters for galaxy
 # outfolder,spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh
-def ProcessSpectrum(outfolder,spectrum,emissionLines_master,regions_master,background_degree,maxiter,fthresh,n_boot):
+def ProcessSpectrum(obj,p):
 
-	## Setting Up ##
-	# Print
-	print('Fitting '+spectrum[0].split('/')[-1])
-	# Load Spectrum
-	full_spectrum = LoadSpectrum(spectrum[0],spectrum[1])
-	## Setting Up ##
+	### Load in Spectrum ###
+	spectrum = SC.Spectrum(obj,p)
 
+	return
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
 	regions,emissionLines =  RF.specRegionAndLines(full_spectrum,emissionLines_master,regions_master) 
 	## Seting up regions list and emissionLines dictionary for this spectrum ##
@@ -62,20 +62,6 @@ def ProcessSpectrum(outfolder,spectrum,emissionLines_master,regions_master,backg
 
 	print('Finished fitting '+spectrum[0].split('/')[-1])
 	return pd.DataFrame(data=out.reshape((1,out.size)),columns=outnames)
-
-# Load in spectrum
-def LoadSpectrum(filename,z):
-
-	# Import spectrum
-	spectrum = pyfits.getdata(filename,1)
-
-	# Only take good values
-	weight = spectrum['ivar']
-	good = weight > 0
-	wav = 10**spectrum['loglam'][good]
-	flux = spectrum['flux'][good]
-	
-	return wav,flux,weight[good],z
 
 # Pair down spectrum
 def LimitSpectrum(spectrum,regions):
@@ -167,7 +153,7 @@ if __name__ == "__main__":
 
 	## Parse Arguements to find Parameter File ##
 	parser = argparse.ArgumentParser()
-	parser.add_argument("Settings", type=str, help="Settings file")
+	parser.add_argument("Settings", type=str, help="Path to settings file")
 	args = parser.parse_args()
 	exec(open(args.Settings).read())
 	p = PARAMETERS()
@@ -179,34 +165,20 @@ if __name__ == "__main__":
 		sys.exit(1)
 	## Verify Emission Line Dictionary ##
 
-	## Identify fitting regions
-	regions_master = RF.identifyComplexes(p['emissionLines'],tol=p['region_width'])
-	## Identify fitting regions
-
-	## Prepare Inputs ##
-	inputs = []
-	names = []
-	results = []
-	for spectrum in p['names']:
-		names.append(spectrum[0])
-		inputs.append((p['outfolder'],spectrum,p['emissionLines'],regions_master,\
-						p['background_degree'],p['maxiter'],p['fthresh'],p['n_boot']))
-	## Prepare Inputs ##
-	
-	## Process Spectra ##
+	# ## Prepare Inputs ##
+	object_list = p.pop('names')
 	if p['num_process'] == 1: # Single Thread
-		results = []
-		for i in inputs:
-			results.append(ProcessSpectrum(*i))
+		results = [ProcessSpectrum(obj,copy.deepcopy(p)) for obj in object_list]
 	else: # Multi-threading
 		if p['num_process'] == None: p['num_process'] = mp.cpu_count() - 1
-		pool 	= mp.Pool(processes=p['num_process'])
-		results = pool.starmap(ProcessSpectrum, inputs)
-	## Process Spectra ##
+		pool = mp.Pool(processes=p['num_process'])
+		results = pool.map(partial(ProcessSpectrum, p = p),object_list)
+		
+	# ## Process Spectra ##
 	
-	## Gather and Write Results ##
-	df = pd.concat([result for result in results], ignore_index=True, sort=False)
-	df.insert(0,'Object',names)
-	t = Table.from_pandas(df)
-	t.write(p['outfolder']+'results.fits',overwrite = True)
-	## Gather and Write Results ##
+	# ## Gather and Write Results ##
+	# df = pd.concat([result for result in results], ignore_index=True, sort=False)
+	# df.insert(0,'Object',names)
+	# t = Table.from_pandas(df)
+	# t.write(p['outfolder']+'results.fits',overwrite = True)
+	# ## Gather and Write Results ##

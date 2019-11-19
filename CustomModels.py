@@ -44,7 +44,7 @@ class SpectralFeature(Fittable1DModel):
 
 	@property
 	def sigma(self):
-		"""Gaussian full Sigma at half maximum.  """
+		"""Gaussian full Sigma at half maximum."""
 		return self.Dispersion * self.center / C 
 		
 	@property
@@ -52,7 +52,6 @@ class SpectralFeature(Fittable1DModel):
 		"""Gaussian full Sigma at half maximum."""
 		return self.sigma() * GAUSSIAN_Sigma_TO_FWHM
 
-	@classmethod
 	def evaluate(self, x, Redshift, Flux, Dispersion):
 		"""
 		Gaussian1D model function.
@@ -72,14 +71,13 @@ class SpectralFeature(Fittable1DModel):
 		return y
 		
 	# Derivative with respect to every parameter
-	@classmethod
 	def fit_deriv(self, x, Redshift, Flux, Dispersion):
-				
 		# 1 + z
 		oneplusz = (1 + Redshift)
 		# observed center
 		lam_obs = oneplusz * self.center
 		C2 = C*C
+		DDll = lam_obs*lam_obs*Dispersion*Dispersion
 
 		# Zero outside region
 		indomain = np.logical_and(x > self.domain[0],x < self.domain[1])		
@@ -90,12 +88,12 @@ class SpectralFeature(Fittable1DModel):
 		d_Flux[indomain] = np.exp(-0.5 * exponand * exponand) * C / (SQRT_2_PI * Dispersion * lam_obs)
 
 		d_Redshift = Flux * d_Flux * \
-					 (C2*x*x - C2*x*lam_obs + lam_obs*lam_obs*Dispersion*Dispersion) / \
-					 (lam_obs*lam_obs*oneplusz*Dispersion*Dispersion)
+					 (C2*x*x - C2*x*lam_obs + DDll) / \
+					 (oneplusz*DDll)
 
 		d_Dispersion = Flux * d_Flux * \
-						(C2*(lam_obs - x)*(lam_obs - x) - lam_obs*lam_obs*Dispersion*Dispersion) / \
-				        (lam_obs*lam_obs*Dispersion*Dispersion*Dispersion)
+						(C2*(lam_obs - x)*(lam_obs - x) - DDll) / \
+				        (DDll*Dispersion)
 		
 		return [d_Redshift, d_Flux, d_Dispersion]
 

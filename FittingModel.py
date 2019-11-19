@@ -1,4 +1,4 @@
-''' Build Model for Spectrum '''
+"""Build Model for Spectrum"""
 
 import copy
 import numpy as np
