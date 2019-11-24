@@ -1,21 +1,22 @@
 """Spectrum Class"""
 
+# Packages
+import copy
 import numpy as np
-
 import astropy.io.fits as pyfits
 
 class Spectrum:
     
-    def __init__(self,obj,p):
+    def __init__(self,path,z,p):
 
         # Object Parameter List
-        self.params = p
+        self.p = p
 
         # Object's redshift
-        self.redshift = obj[1]
+        self.z = z
 
         # Load Spectrum
-        spectrum = pyfits.getdata(obj[0],1)
+        spectrum = pyfits.getdata(path,1)
 
         # Only take good values
         weight = spectrum['ivar']
@@ -26,18 +27,20 @@ class Spectrum:
         self.flux = spectrum['flux'][good]
         self.weight = weight[good]
 
-        # Find regions and emission line lists
-        self.regions = []
-        for group in p['emissionLines'].keys():
-            for species in p['emissionLines'][group].keys():
-                for line in p['emissionLines'][group][species][0]:
-                    self.regions.append([line[0]-p['region_width'],line[0]+p['region_width']])
-        self.specRegionAndLines()
-        
-        
+        # Create regions and lines
+        self.regionAndLines()
+        self.reduceRegions()
+        self.LimitSpectrum()
     
     # Return reduced regions and emission lines based on spectrum wavelength
-    def specRegionAndLines(self):
+    def regionAndLines(self):
+
+        # Find regions and emission line lists
+        self.regions = []
+        for group in self.p['EmissionLines'].keys():
+            for species in self.p['EmissionLines'][group].keys():
+                for line in self.p['EmissionLines'][group][species][0]:
+                    self.regions.append([(1+self.z)*(line[0]-self.p['RegionWidth']),(1+self.z)*(line[0]+self.p['RegionWidth'])])
 
         # Check if there is spectral coverage of the regions
         for region in self.regions:
@@ -46,24 +49,56 @@ class Spectrum:
                 # ...remove region
                 self.regions.remove(region)
             
-        # # Remove emission lines not in regions
-        # # For each emission line	
-        # for group in emissionLines_master.keys():
-        #     for species in emissionLines_master[group].keys():
-        #         for line in emissionLines_master[group][species][0]:
+        # Remove emission lines not in regions
+        # For each emission line
+        eL = copy.deepcopy(self.p['EmissionLines'])
+        for group in eL:
+            for species in eL[group].keys():
+                for line in eL[group][species][0]:
 
-        #             # Check for removal
-        #             remove = True # Initialize as removing
-        #             for region in regions: # Check if it is in any region
-        #                 if (region[0] < line[0]*(1+z)) and (line[0]*(1+z) < region[1]):
-        #                     remove = False # If it is, set as remove 
+                    # Check for removal
+                    remove = True # Initialize as removing
+                    for region in self.regions: # Check if it is in any region
+                        if (region[0] < line[0]*(1+self.z)) and (line[0]*(1+self.z) < region[1]):
+                            remove = False # If it is, set as remove 
                     
-        #             # Remove if necessary
-        #             if remove:
-        #                 emissionLines[group][species][0].remove(line)
+                    # Remove if necessary
+                    if remove:
+                        self.p['EmissionLines'][group][species][0].remove(line)
                 
-        #         # If species is empty, delete it
-        #         if (len(emissionLines[group][species][0]) == 0):
-        #             del emissionLines[group][species]		
+                # If species is empty, delete it
+                if (len(self.p['EmissionLines'][group][species][0]) == 0):
+                    del self.p['EmissionLines'][group][species]
 
-        # return regions,emissionLines
+    # Reduce number of regions so none overlap
+    def reduceRegions(self):
+
+        # Sort regions
+        self.regions = np.sort(self.regions,0)
+
+        # Initalize loop
+        for i,self.region in enumerate(self.regions[:-1]):
+            if self.regions[i+1][0] < self.region[1]:
+                self.regions[i] = [self.region[0],self.regions[i+1][1]]
+                self.regions = np.delete(self.regions,i+1,0)
+                self.reduceRegions()
+                break
+    
+    # Pair down spectrum
+    def LimitSpectrum(self):
+
+        # Only take data in regions
+        inregion = []
+        for region in self.regions:
+            inregion.append(np.logical_and(region[0]<self.wav,self.wav<region[1]))
+        inregion = np.logical_or.reduce(inregion)
+        self.wav = self.wav[inregion]
+        self.flux = self.flux[inregion]
+        self.weight = self.weight[inregion]
+        self.sqrtweight = np.sqrt(self.weight)
+        self.sigma = 1/self.sqrtweight
+
+    # Boostrap the Flux
+    def Boostrap(self):
+
+        return np.random.normal(self.flux,self.sigma)

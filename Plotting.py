@@ -4,27 +4,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Plot figure
-def Plot(outfolder,name,model,full_spectrum,regions):
+def Plot(spectrum,model,path):
 
     # Initialize Figure
-    ncols   = len(regions)
-    figname = name.split('/')[-1].split('.')[-2]
+    ncols   = len(spectrum.regions)
+    figname = path.split('/')[-1].replace('.fits','')
     fig     = plt.figure(figsize = (5*ncols,7))
     gs      = fig.add_gridspec(ncols=ncols,nrows=2,height_ratios=[4,1],hspace=0)
-
-    # Sort regions list for good order
-    regions.sort()
 
     # Background
     background = np.sum([model[i] for i in range(ncols)])
 
-    for i,region in enumerate(regions):
+    for i,region in enumerate(spectrum.regions):
 
         # Choose inside wavelength
-        good    = np.logical_and(full_spectrum[0] < region[1],full_spectrum[0] > region[0])
-        wav     = full_spectrum[0][good]
-        flux    = full_spectrum[1][good]
-        # sigma  = 1/np.sqrt(full_spectrum[2][good])
+        good    = np.logical_and(spectrum.wav < region[1],spectrum.wav > region[0])
+        wav     = spectrum.wav[good]
+        flux    = spectrum.flux[good]
+        sigma   = spectrum.sigma[good]
 
         # Axis to plot spectrum
         fax = fig.add_subplot(gs[0,i])
@@ -49,5 +46,5 @@ def Plot(outfolder,name,model,full_spectrum,regions):
     # Add title and save figure
     fig.suptitle(figname)
     fig.tight_layout(rect = [0, 0, 1, 0.96])
-    fig.savefig(outfolder + figname + '.pdf')
+    fig.savefig(spectrum.p['OutFolder'] + figname + '.pdf')
     plt.close(fig)

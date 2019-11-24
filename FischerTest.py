@@ -8,16 +8,8 @@ import matplotlib.pyplot as plt
 plt.close('all')
 
 # Preform an f-test
-def FTest(spectrum,regions,model1,model2,threshold):
+def FTest(spectrum,model1,model2):
 
-	# Unpack
-	wav,flux,weight,redshift = spectrum
-
-# 	plt.step(wav,flux,where='mid')
-# 	plt.step(wav,model1(wav),where='mid')
-# 	plt.step(wav,model2(wav),where='mid')
-# 	plt.show()
-	
 	# Find full and reduced model
 	if (model1.parameters.size < model2.parameters.size):
 		model_full = model2
@@ -28,22 +20,21 @@ def FTest(spectrum,regions,model1,model2,threshold):
 	
 	# Degrees of freedom
 	N = 0
-	for region in regions:
-		N += np.sum(np.logical_and(region[0] < wav,wav < region[1]))
+	for region in spectrum.regions:
+		N += np.sum(np.logical_and(region[0] < spectrum.wav,spectrum.wav < region[1]))
 	df_redu = N - np.sum([val == False for val in model_redu.tied.values()])
 	df_full = N - np.sum([val == False for val in model_full.tied.values()])
 
-
 	# Calculate Chi2
-	RSS_redu = Chi2(model_redu,wav,flux,weight)
-	RSS_full = Chi2(model_full,wav,flux,weight)
+	RSS_redu = Chi2(model_redu,spectrum.wav,spectrum.flux,spectrum.weight)
+	RSS_full = Chi2(model_full,spectrum.wav,spectrum.flux,spectrum.weight)
 
 	# F-test
 	F_value		= ((RSS_redu - RSS_full)/(df_redu - df_full))/(RSS_full/df_full)
 	F_distrib 	= stats.f(df_redu - df_full,df_full)
 
     # Greater than threshold?
-	return F_distrib.cdf(F_value) > threshold
+	return F_distrib.cdf(F_value) > spectrum.p['FThresh']
 
 # Chi Squared of model
 def Chi2(model,x,y,weights):

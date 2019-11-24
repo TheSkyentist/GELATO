@@ -23,24 +23,21 @@ class SpectralFeature(Fittable1DModel):
 	Flux	 	= Parameter(default=0,bounds=(0,None)) # Must be non-negative for emission
 	Dispersion	= Parameter(default=200,bounds=(FLOAT_EPSILON, None)) # Must be positive
 
-	def __init__(self, center, spectrum, regions, Dispersion = Dispersion.default, **kwargs):
-	
-		# Unpack
-		wav,flux,_,Redshift = spectrum 
+	def __init__(self, center, spectrum, Dispersion = Dispersion.default, **kwargs):
 		
 		# Find starting height
 		# Find corresponding region
-		for region in regions:
-			if (center*(1+Redshift) < region[1]) and (center*(1+Redshift) > region[0]):
+		for region in spectrum.regions:
+			if (center*(1+spectrum.z) < region[1]) and (center*(1+spectrum.z) > region[0]):
 				break
-		inregion = np.logical_and(wav > region[0],wav < region[1])				
-		Height = np.max(flux[inregion]) - np.median(flux[inregion])
-		Flux = Height * (1 + Redshift) * Dispersion * center * SQRT_2_PI / C
+		inregion = np.logical_and(spectrum.wav > region[0],spectrum.wav < region[1])				
+		Height = np.max(spectrum.flux[inregion]) - np.median(spectrum.flux[inregion])
+		Flux = Height * (1 + spectrum.z) * Dispersion * center * SQRT_2_PI / C
 		
 		# Set parameters
 		self.center = center
 		self.domain = region
-		super().__init__(Redshift = Redshift, Flux=Flux, Dispersion=Dispersion, **kwargs)
+		super().__init__(Redshift = spectrum.z, Flux=Flux, Dispersion=Dispersion, **kwargs)
 
 	@property
 	def sigma(self):

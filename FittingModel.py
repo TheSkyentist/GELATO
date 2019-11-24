@@ -1,52 +1,56 @@
-"""Build Model for Spectrum"""
+"""Fit Model for Spectrum"""
 
+# Packages
 import copy
 import numpy as np
 from astropy.modeling import fitting
+fit = fitting.LevMarLSQFitter()
 
-import CustomModels as CM
-import AdditionalComponents as AC
+# HQUAILS supporting files
+import BuildModel as BD
 import FischerTest as FT
+import AdditionalComponents as AC
+
+import matplotlib.pyplot as plt
 
 # Construct Full Model with F-tests for additional parameters
-def FitSpectrum(spectrum,emissionLines_base,regions,background_degree,maxiter,threshold,n_boot):
+def FitComponents(spectrum,base_model,base_param_names):
 	
-	# Build initial model
-	init_model,base_param_names = BuildModel(spectrum,emissionLines_base,regions,background_degree)
-	# Fit model
-	base_model = FitModel(spectrum,init_model,maxiter)
+	# Fit first model
+	base_model = FitModel(spectrum,base_model)
 
 	# Find number of flags
 	flags = 0
-	for group in emissionLines_base.keys():
-		for species in emissionLines_base[group].keys():
-			flagbits = bin(emissionLines_base[group][species][1])[2:]
+	for group in spectrum.p['EmissionLines'].keys():
+		for species in spectrum.p['EmissionLines'][group].keys():
+			flagbits = bin(spectrum.p['EmissionLines'][group][species][1])[2:]
 			flags += len(flagbits.replace('0',''))
 					
-	# Initial F-tests
+	# F-tests
 	accepted = []
 	accepted_models = []
 	accepted_names = []
 	for i in range(flags):
-	
+		
 		# Add new component
-		emissionLines = AddComplexity(emissionLines_base,i)
-		model,param_names = BuildModel(spectrum,emissionLines,regions,background_degree)
+		emissionLines = AddComplexity(spectrum.p['EmissionLines'],i)
+		model,param_names = BD.BuildModel(spectrum,emissionLines)
 		
 		# Source starting parameters
-		model = SourceParams(model,param_names,base_model,base_param_names)		
-		
-		# Fit model
-		model = FitModel(spectrum,model,maxiter)
+		model = SourceParams(model,param_names,base_model,base_param_names)
 
-		if FT.FTest(spectrum,regions,base_model,model,threshold):
+		# Fit model
+		model = FitModel(spectrum,model)
+
+		# Perform F-test
+		if FT.FTest(spectrum,base_model,model):
 			accepted.append(i)
 			accepted_models.append(model)
 			accepted_names.append(param_names)
 
 	# Add new component
-	emissionLines = AddComplexity(emissionLines_base,accepted)
-	model,param_names = BuildModel(spectrum,emissionLines,regions,background_degree)
+	spectrum.p['EmissionLines'] = AddComplexity(spectrum.p['EmissionLines'],accepted)
+	model,param_names = BD.BuildModel(spectrum)
 	
 	# Source starting parameters
 	for source,source_params in zip(accepted_models,accepted_names):
@@ -54,183 +58,75 @@ def FitSpectrum(spectrum,emissionLines_base,regions,background_degree,maxiter,th
 	model = SourceParams(model,param_names,base_model,base_param_names)		
 	
 	# Fit model
-	model = FitModel(spectrum,model,maxiter)
+	model = FitModel(spectrum,model)
 
 	# Bootstrap
-	parameters = [FitModel(Bootstrap(spectrum),model,maxiter).parameters for i in range(n_boot)]
+	parameters = np.array([FitBoot(spectrum,model) for i in range(spectrum.p['NBoot'])])
 
-	return model,param_names,parameters
+	# Set model parameters to median values
+	model.parameters = np.median(parameters,0)
 
-def Bootstrap(spectrum):
-
-	wav,flux,weight,redshift = spectrum
-
-	return wav,np.random.normal(loc=flux,scale=1/np.sqrt(weight)),weight,redshift
+	return model,parameters,param_names
 
 # Fit Model
-def FitModel(spectrum,init_model,maxiter):
-	
-	# Unpack
-	wav,flux,weight,redshift = spectrum
+def FitModel(spectrum,model):
 	
 	# Fit model
-	fit = fitting.LevMarLSQFitter()
-	fit_model = fit(init_model,wav,flux,weights=np.sqrt(weight),maxiter=maxiter)
+	fit_model = fit(model,spectrum.wav,spectrum.flux,weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxLMIter'])
 	
 	return fit_model
+
+# Fit (Bootstrapped) Model
+def FitBoot(spectrum,model):
+
+	fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxLMIter'])
+
+	return fit_model.parameters
 
 # Carry over parameters from another model
 def SourceParams(model,param_names,source,source_params):
 	
-	# Iterate over source_oaram names
+	# Iterate over param names
 	for i,source_param in enumerate(source_params):
 		if source_param in param_names:
 			index = param_names.index(source_param)
 			model.parameters[index] = source.parameters[i]
+
+	# Count up number of components for a line
+	numcomp = {}
+	for param_name in param_names:
+		if 'Flux' in param_name:
+			line = param_name.split('_')[-2]
+			if line not in numcomp.keys():
+				numcomp[line] = 1
+			else: 
+				numcomp[line] += 1
+	
+	# Reduce flux of a line by number of components
+	for i,param_name in enumerate(param_names):
+		if 'Flux' in param_name:
+			model.parameters[i] /= numcomp[param_name.split('_')[-2]]
 			
 	return model
 
-# Build the model from the emissionLines and spectrum with initial guess
-def BuildModel(spectrum,emissionLines,regions,background_degree):
-
-	# Unpack
-	wav,flux,_,redshift = spectrum 
-	
-	## Build Base Model
-	# True param names
-	param_names	= []
-	
-	# Model
-	model_components = []
-		
-	# Add background regions
-	for i,region in enumerate(regions):
-		
-		# Name of region
-		name = 'Background_' + str(i) +'_'
-		
-		# Generate model
-		background = CM.ContinuumBackground(background_degree,region)
-		
-		# Add starting parameters
-		inregion = np.logical_and(wav > region[0],wav < region[1])
-		background.parameters[0] = np.median(flux[inregion])
-		
-		# Add model
-		model_components.append(background)
-		
-		# Collect param names
-		for pname in model_components[-1].param_names:
-			param_names.append(name+pname)
-	
-	# Over all emission lines
-	for z in emissionLines.keys():
-		for species in emissionLines[z].keys():				
-		
-			for line in emissionLines[z][species][0]:
-				name =  z + '_' + species + '_' + str(line[0]) + '_'
-				
-				# If additional component
-				if emissionLines[z][species][1] < 0:
-					model = AC.AddComponent(emissionLines[z][species][1],line[0],spectrum, regions)
-					
-				# IF original model component
-				else:
-					model = CM.SpectralFeature(center = line[0],spectrum = spectrum,regions = regions)
-
-				# Add model
-				model_components.append(model)
-				
-				# Collect param names
-				for pname in model_components[-1].param_names:
-					param_names.append(name+pname)
-	model = np.sum(model_components)
-	## Build Base Model
-
-	## Tie parameters ##
-	model = TieParams(model,emissionLines,param_names)
-	## Tie parameters ##
-
-	return model,param_names
-
-# Tied all model parameters
-def	TieParams(model,emissionLines,param_names):
-
-	## Tie parameters ##
-	for z in emissionLines.keys():
-		reference_z = True
-		for species in emissionLines[z].keys():
-				
-			reference_line = True
-			for line in emissionLines[z][species][0]:
-
-				# Find parameter name prefix
-				name =  z + '_' + species + '_' + str(line[0]) + '_'
-				
-				## Tie Redshift
-				# Check for first line in redshift and make tie function
-				if reference_z:
-					reference_z = False
-					TieRedshift = GenTieFunc(param_names.index(name+'Redshift'))
-				# Otherwise tie redshift
-				else:
-					redshift_index = param_names.index(name+'Redshift')
-					model.tied[model.param_names[redshift_index]] = TieRedshift
-					
-				## Tie Dispersion and Flux
-				# Check for first line in species and make tie function or initialize scale
-				if reference_line:
-					# Dispersion
-					reference_line	= False
-					TieDispersion 		= GenTieFunc(param_names.index(name+'Dispersion'))
-					
-					# Flux
-					reference_flux 	= line[1]
-					index_flux		= param_names.index(name+'Flux')
-
-				# Otherwise tie param
-				else:
-					# Dispersion
-					dispersion_index = param_names.index(name+'Dispersion')
-					model.tied[model.param_names[dispersion_index]] = TieDispersion				
-					
-					# Redshhift
-					height_index = param_names.index(name+'Flux')
-					TieFlux = GenTieFunc(index_flux,scale=line[1]/reference_flux)
-					model.tied[model.param_names[height_index]] = TieFlux				
-				## Tie Tie Dispersion and Flux
-	##Tie parameters ##
-
-	return model
-	
-# Generate Tie Paramater Function, needed to preserve static values in function
-# Note: tried using lambda function in place, but it didn't work. 
-def GenTieFunc(index,scale=1):
-
-	def TieFunc(model):
-		return model.parameters[index]*scale
-
-	return TieFunc
-
 # Add additional component to a model
-def AddComplexity(emissionLines,index):
-	
+def AddComplexity(emissionLines_old,index):
+
 	# If multiple indices, add all of them
 	if hasattr(index,'__iter__'):
 		for i in index:
-			emissionLines = AddComplexity(emissionLines,i)
-		return emissionLines
-
+			emissionLines_old = AddComplexity(emissionLines_old,i)
+		return emissionLines_old
+	
 	# Deepcopy
-	emissionLines = copy.deepcopy(emissionLines)
-			
+	emissionLines = copy.deepcopy(emissionLines_old)
 	# Keeping track
 	i = 0
 	
 	# Iterate in emission line dictionary 
 	for z in emissionLines.keys():
 		for species in emissionLines[z].keys():
-			
+
 			# Flag
 			flag 		= bin(emissionLines[z][species][1])[2:]
 			flag_len 	= np.sum([int(bit) for bit in flag])
@@ -239,7 +135,7 @@ def AddComplexity(emissionLines,index):
 			if (flag_len > 0):
 				
 				# Check that our index is in the range
-				if (index >= i) and (index < i + flag_len):		
+				if (index >= i) and (index < i + flag_len):
 				
 					# Position in flagged bits
 					j = 0
@@ -265,12 +161,15 @@ def AddComplexity(emissionLines,index):
 								# Species key
 								species = species + '-' + AC.ComponentName(j)
 
+								# Add new entry
 								emissionLines[z][species] = entry
-								
+
 								return emissionLines
-						
+														
 							# Increment along the bit							
 							i += 1
 							j += 1
 					
 				i += flag_len
+
+	

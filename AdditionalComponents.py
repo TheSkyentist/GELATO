@@ -19,10 +19,9 @@ def ComponentName(index):
 	if index == 1:
 		return 'Absorption'
 
-def AddComponent(flag, line, spectrum, regions):
+def AddComponent(flag, line, spectrum):
 
-	# Unpack
-	wav,flux,weight,redshift = spectrum 
+
 
 	'''
 	For each bit position, what is the model that we implement,
@@ -40,7 +39,7 @@ def AddComponent(flag, line, spectrum, regions):
 	
 		# Broad line model
 		# Use wider default dispersion
-		model = CM.SpectralFeature(center = line,spectrum = spectrum,regions = regions, Dispersion = 1200)
+		model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 400)
 			
 		return model
 
@@ -49,14 +48,14 @@ def AddComponent(flag, line, spectrum, regions):
 	
 		# Absorption line model
 		# Use wider default dispersion		
-		model = CM.SpectralFeature(center = line,spectrum = spectrum,regions = regions, Dispersion = 600)
+		model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 600)
 		model.Flux.bounds = (None,0) # Must be non-positive
 		
 		# Set default depth
-		for region in regions:
-			if (line*(1+redshift) < region[1]) and (line*(1+redshift) > region[0]):
+		for region in spectrum.regions:
+			if (line*(1+spectrum.z) < region[1]) and (line*(1+spectrum.z) > region[0]):
 				break
-		inregion = np.logical_and(wav > region[0],wav < region[1])				
-		model.Flux = ( np.min(flux[inregion]) - np.median(flux[inregion]) ) * model.Dispersion * SQRT_2_PI
+		inregion = np.logical_and(spectrum.wav > region[0],spectrum.wav < region[1])				
+		model.Flux = ( np.min(spectrum.flux[inregion]) - np.median(spectrum.flux[inregion]) ) * model.Dispersion * SQRT_2_PI
 				
 		return model
