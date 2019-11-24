@@ -1,0 +1,74 @@
+{
+    "OutFolder": "./Results/",
+    "RegionWidth": 50,
+    "BackgroundDeg": 1,
+    "MaxLMIter": 1000,
+    "NBoot": 500,
+    "FThresh": 0.95,
+    "NPool": 1,
+    "Plotting": 1,
+    "EmissionLines": [
+        {
+            "Group":"AGN",
+            "Species": [
+                {
+                    "Name":"OIII",
+                    "Lines": [
+                        {
+                            "Wavelength": 5006.77,
+                            "RelStrength": 1
+                        },
+                        { 
+                            "Wavelength": 4958.83,
+                            "RelStrength": 0.35
+                        }
+                    ],
+                    "Flag": 1,
+                    "FlagGroups": ["Outflow"]
+                },
+                {
+                    "Name":"NII",
+                    "Lines": [
+                        {
+                            "Wavelength": 6583.34,
+                            "RelStrength": 1
+                        },
+                        { 
+                            "Wavelength": 6547.96,
+                            "RelStrength": 0.34
+                        }
+                    ],
+                    "Flag": 0,
+                    "FlagGroups": []
+                }
+            ]
+        },
+        {
+            "Group":"Galaxy",
+            "Species": [
+                {
+                    "Name":"Halpha",
+                    "Lines": [
+                        {
+                            "Wavelength": 6562.80,
+                            "RelStrength": 1
+                        }
+                    ],
+                    "Flag": 1,
+                    "FlagGroups": ["Broad"]
+                },
+                {
+                    "Name":"Hbeta",
+                    "Lines": [
+                        {
+                            "Wavelength": 4861.32,
+                            "RelStrength": 1
+                        }
+                    ],
+                    "Flag": 3,
+                    "FlagGroups": ["Broad","Absorption"]
+                }
+            ]
+        }
+    ]
+}
