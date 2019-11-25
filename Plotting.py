@@ -1,4 +1,4 @@
-''' Plotting for Fit'''
+'''Plotting for Fit'''
 
 import numpy as np
 import matplotlib

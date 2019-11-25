@@ -60,13 +60,7 @@ def FitComponents(spectrum,base_model,base_param_names):
 	# Fit model
 	model = FitModel(spectrum,model)
 
-	# Bootstrap
-	parameters = np.array([FitBoot(spectrum,model) for i in range(spectrum.p['NBoot'])])
-
-	# Set model parameters to median values
-	model.parameters = np.median(parameters,0)
-
-	return model,parameters,param_names
+	return model,param_names
 
 # Fit Model
 def FitModel(spectrum,model):

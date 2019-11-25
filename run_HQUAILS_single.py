@@ -11,6 +11,8 @@ import ConstructParams as CP
 # Main Function
 if __name__ == "__main__":
 
+	HQUAILS.header()
+
 	## Parse Arguements to find Parameter File ##
 	parser = argparse.ArgumentParser()
 	parser.add_argument('Parameters', type=str, help='Path to parameters file')
