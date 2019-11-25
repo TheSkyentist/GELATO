@@ -9,7 +9,7 @@ HQUAILS
 -------------
 * CustomModels.py
 Here are where the custom models used in HQUAILS are defined. Defined here are 
-* * test
+  * CustomModels.py
 
 Requirements
 -------------
