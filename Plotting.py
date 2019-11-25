@@ -51,13 +51,42 @@ def Plot(spectrum,model,path):
     plt.close(fig)
 
 # Plot from results
+def plotfromresults(params,path,z):
+
+    ## Load in Spectrum ##
+    spectrum = SC.Spectrum(path,z,params)
+
+    ## Load Results ##
+    parameters = pyfits.getdata(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits'),1)
+    median = np.array([np.median(parameters[n]) for n in parameters.columns.names])
+
+    ## Create model ##
+    model = []
+    # Add background
+    for region in spectrum.regions:
+        model.append(CM.ContinuumBackground(params['BackgroundDeg'],region))
+    # Add spectral lines
+    ind = (params['BackgroundDeg']+1)*len(spectrum.regions) # index where emission lines begin
+    for i in range(int((median.size - ind)/3)):
+        center = float(parameters.columns.names[3*i+ind].split('_')[-2])
+        model.append(CM.SpectralFeature(center,spectrum))
+    
+    # Finish model and add parameters
+    model = np.sum(model)
+    model.parameters = median
+
+    # Plot
+    Plot(spectrum,model,path)
+
+# Plot from results
 if __name__ == "__main__":
 
     # Import if we need them
     import sys
+    import copy
     import argparse
-    import astrop.io.fits as pyfits
-    import BuildModel as BM
+    import astropy.io.fits as pyfits
+    import CustomModels as CM
     import SpectrumClass as SC
     import ConstructParams as CP
 
@@ -78,33 +107,20 @@ if __name__ == "__main__":
     ## Verify Emission Line Dictionary ##
 
     # Check if we are doing single or multi
-    single = args.Spectrum != None and args.Redshift == None
+    single = args.Spectrum != None and args.Redshift != None
     multi = args.ObjectList != None
 
-    if single != multi:
+    if single == multi:
         print('Specify either Object List XOR Spectrum and Redshift.')
         print('Both or neither were entered.')
-    elif single:
-        ## Create Base Model ##
-        model,param_names = BM.BuildModel(args.Spectrum)
-        
-    elif multi:
-        pass
-
-    ## Create Base Model ##
-    model,param_names = BM.BuildModel(spectrum)
-
-    ## Load Results ##
-
-def plotfromresults(params,path,z):
-
-    ## Load in Spectrum ##
-    spectrum = SC.Spectrum(path,z,params)
-
-    ## Create Base Model ##
-    model,param_names = BM.BuildModel(spectrum)
-
-    ## Load Results ##
-    parameters = pyfits.open(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits')
-
-    print(np.median(parameters,1))
+    elif single: # One Plot
+        plotfromresults(p, args.Spectrum, args.Redshift)
+    elif multi: # Many plots
+        # Load Obkects
+        objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype='U100,f8',names=['File','z'])
+        if p['NPool'] > 1: # Mutlithread
+            pools = mp.Pool(processes=p['NPool'])
+            inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
+            pools.starmap(plotfromresults, inputs)
+        else: # Single Thread
+            for o in objects: plotfromresults(copy.deepcopy(p),o['File'],o['z'])
