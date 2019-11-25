@@ -5,6 +5,12 @@ HQUAILS
 
 HQUAILS is a Python code designed to fit emission lines in the spectra of active galactic nuclei. In particular, it was built in order to fit AGN spectra where many of the parameters of the emission lines are tied with respect to one another. HQUAILS attempts to automate this process. 
 
+HQUAILS
+-------------
+* CustomModels.py
+Here are where the custom models used in HQUAILS are defined. Defined here are 
+* * test
+
 Requirements
 -------------
 
