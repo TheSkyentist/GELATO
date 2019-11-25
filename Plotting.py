@@ -49,3 +49,62 @@ def Plot(spectrum,model,path):
     fig.tight_layout(rect = [0, 0, 1, 0.96])
     fig.savefig(spectrum.p['OutFolder'] + figname + '.pdf')
     plt.close(fig)
+
+# Plot from results
+if __name__ == "__main__":
+
+    # Import if we need them
+    import sys
+    import argparse
+    import astrop.io.fits as pyfits
+    import BuildModel as BM
+    import SpectrumClass as SC
+    import ConstructParams as CP
+
+    ## Parse Arguements to find Parameter File ##
+    parser = argparse.ArgumentParser()
+    parser.add_argument('Parameters', type=str, help='Path to parameters file')
+    parser.add_argument('--ObjectList', type=str, help='Path to object list with paths to spectra and their redshifts.')
+    parser.add_argument('--Spectrum', type=str, help='Path to spectrum.')
+    parser.add_argument('--Redshift', type=float, help='Redshift of object')
+    args = parser.parse_args()
+    p = CP.construct(args.Parameters)
+    ## Parse Arguements to find Parameter File ##
+
+    ## Verify Emission Line Dictionary ##
+    if not CP.verify(p['EmissionLines']):
+        print('Unable to verify emission line dictionary, exiting.')
+        sys.exit(1)
+    ## Verify Emission Line Dictionary ##
+
+    # Check if we are doing single or multi
+    single = args.Spectrum != None and args.Redshift == None
+    multi = args.ObjectList != None
+
+    if single != multi:
+        print('Specify either Object List XOR Spectrum and Redshift.')
+        print('Both or neither were entered.')
+    elif single:
+        ## Create Base Model ##
+        model,param_names = BM.BuildModel(args.Spectrum)
+        
+    elif multi:
+        pass
+
+    ## Create Base Model ##
+    model,param_names = BM.BuildModel(spectrum)
+
+    ## Load Results ##
+
+def plotfromresults(params,path,z):
+
+    ## Load in Spectrum ##
+    spectrum = SC.Spectrum(path,z,params)
+
+    ## Create Base Model ##
+    model,param_names = BM.BuildModel(spectrum)
+
+    ## Load Results ##
+    parameters = pyfits.open(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits')
+
+    print(np.median(parameters,1))

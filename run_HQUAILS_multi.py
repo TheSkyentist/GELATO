@@ -33,10 +33,10 @@ if __name__ == "__main__":
 	## Assemble Objects
 
 	## Run HQUAILS ##
-	if p['NPool'] == 1: # Single Thread
-		for o in objects: HQUAILS.HQUAILS(copy.deepcopy(p),o['File'],o['z'])
-	else: # Multithread
+	if p['NPool'] > 1: # Mutlithread
 		pools = mp.Pool(processes=p['NPool'])
 		inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
 		pools.starmap(HQUAILS.HQUAILS, inputs)
+	else: # Single Thread
+		for o in objects: HQUAILS.HQUAILS(copy.deepcopy(p),o['File'],o['z'])
 	## Run HQUAILS ##

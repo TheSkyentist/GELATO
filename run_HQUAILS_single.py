@@ -17,7 +17,6 @@ if __name__ == "__main__":
 	parser.add_argument('Spectrum', type=str, help='Path to spectrum.')
 	parser.add_argument('Redshift', type=float, help='Redshift of object')
 	args = parser.parse_args()
-	args = parser.parse_args()
 	p = CP.construct(args.Parameters)
 	## Parse Arguements to find Parameter File ##
 
