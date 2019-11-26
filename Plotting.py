@@ -119,6 +119,7 @@ if __name__ == "__main__":
         # Load Obkects
         objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype='U100,f8',names=['File','z'])
         if p['NPool'] > 1: # Mutlithread
+            import multiprocessing as mp
             pools = mp.Pool(processes=p['NPool'])
             inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
             pools.starmap(plotfromresults, inputs)

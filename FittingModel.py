@@ -66,14 +66,14 @@ def FitComponents(spectrum,base_model,base_param_names):
 def FitModel(spectrum,model):
 	
 	# Fit model
-	fit_model = fit(model,spectrum.wav,spectrum.flux,weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxLMIter'])
+	fit_model = fit(model,spectrum.wav,spectrum.flux,weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
 	
 	return fit_model
 
 # Fit (Bootstrapped) Model
 def FitBoot(spectrum,model):
 
-	fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxLMIter'])
+	fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
 
 	return fit_model.parameters
 

@@ -5,7 +5,6 @@ import sys
 import copy
 import argparse
 import numpy as np
-import multiprocessing as mp
 
 # HQUAILS supporting files
 import HQUAILS
@@ -36,6 +35,7 @@ if __name__ == "__main__":
 
 	## Run HQUAILS ##
 	if p['NPool'] > 1: # Mutlithread
+		import multiprocessing as mp
 		pools = mp.Pool(processes=p['NPool'])
 		inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
 		pools.starmap(HQUAILS.HQUAILS, inputs)

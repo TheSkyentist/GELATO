@@ -21,8 +21,6 @@ def ComponentName(index):
 
 def AddComponent(flag, line, spectrum):
 
-
-
 	'''
 	For each bit position, what is the model that we implement,
 	and how do we set the initial parameters.
