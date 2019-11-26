@@ -44,7 +44,7 @@ def HQUAILS(params,path,z):
 		PL.Plot(spectrum,model,path)
 		print("Figure saved:",name)
 
-	print("HQUAILS finished running on":,name)
+	print("HQUAILS finished running on:",name)
 
 def header():
 	print("Welcome to HQUAILS")
