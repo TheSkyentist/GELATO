@@ -8,8 +8,8 @@ SQRT_2_PI = np.sqrt(2*np.pi)
 def ComponentName(index):
 
 	'''
-	For each bit position, what is the name given to each additional component such that
-	they can be identified in the list of model name parameters.
+	For each bit position, from right to left, what is the name given to each additional component such that they can be identified in the list of model name parameters.
+	So the rightmost bit corresponds to index 0.
 	Can be as many as desired as long as paired with a component below. 
 	'''
 

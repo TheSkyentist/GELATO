@@ -52,25 +52,33 @@ Emission Line Dictionary
 Here we describe the format of the emission line dictionary.
 
 1. The emission line dictionary is made up of Groups. All spectral features in the same Group will share a common redshift. This means, during fitting, their redshifts will be forcibly tied to be equal.
+
 2. Each Group is made out of Species. All spectral features in the same Species will share a velocity dispersion. This means, during fitting, their velocity dispersions will be forcibly tied to be equal.
 
-   Each Species is also associated with an integer flag. The integer flag controls will additional parameters HQUAILS will attempt to add to the spectral features of this species. The value in each bit is a boolean flag for each kind of additional component, which can be found in the "AdditionalComponents.py" file. 
+   Each Species is also associated with an integer flag. The integer flag controls will additional parameters HQUAILS will attempt to add to the spectral features of this species. The value in each bit, from right to left, is a boolean flag for each kind of additional component, which can be found in the "AdditionalComponents.py" file. 
    
    Each additional component must be associated with a Group, which may or may not be the same Group as the original species. An additional list is passed to each species, specifying where each additional component that will attempt to be added must go. It can even be a group that does not exist in the emission line dictionary, it will simply be added. (Note: This means the sum of the binary integer flag must be equal to the length of the FlagGroups list.)
 
-
-Each Species is assocaited with an integer flag. This flag decides which additional parameters HQUAILS will attempt to add to this species. The value of the bit in each position of the integer decides what type of extra component will attempt to be added. The  contains the types of additional components that can be added, and makes it easy to add more in the future. Finally, each species is associated with a list of Groups
-3. Each species contains "lines". Lines are made up of a (rest) wavelength (same units as spectrun wavelength) and relative flux. Lines within each species will have their flux scaled relative to each other based on this factor.
+3. Each Species is made out of Lines. Lines are made up of a (rest) wavelength (same units as spectrun wavelength) and relative flux. Lines within each species will have their flux scaled relative to each other based on this factor. This means, during fitting, their fluxes will be tied to have the given relative values.
 
 The "PARAMS.json" file in the directory gives a good example of how to take advantage of these features. It consists of two groups:
+
 1. AGN. These features will all share the same redshift. It is made up of two species. 
-   1) OIII. These features will share the same velocity dispersion. In addition, these have been flagged
+   1. OIII. These features will share the same velocity dispersion. In addition, these have been flagged with a 1, which corresponds to an larger velocity component. This additional component will be placed in its own new group, which will be labelled "Outflow". It is made out of two lines.
+      * A line with a rest wavelength of 5006.77 and a relative flux of 1. 
+      * A line with a rest wavelength of 4958.83 and a relative flux of 0.35. This means this line will always have 0.35/1 times the flux of the first line.
+   2. NII. These features will share the same velocity dispersion. There are no flags on this component, so the list is empty. It is made out of two lines.
+      * A line with a rest wavelength of 5006.77 and a relative flux of 1. 
+      * A line with a rest wavelength of 4958.83 and a relative flux of 0.35. This means this line will always have 0.35/1 times the flux of the first line.
 2. Galaxy
+   1. Halpha. There are no flags on this component, so the list is empty. It is made out of one line.
+      * A line with a rest wavelength of 6562.80 and a relative flux of 1. Since there is only one line, the relative flux value does not matter.
+   2. Hbeta. These have been flagged with a 3, or in binary, 11. This corresponds to both a larger velocity component and an absorption component. These will be placed in the "Broad" and "Absorption" groups respetively. Not that if both "Broad" lines are accepted, they will share the same redshift by design. It is made out of one line.
+      * A line with a rest wavelength of 4861.32 and a relative flux of 1. Since there is only one line, the relative flux value does not matter.
 
 Running HQUAILS
 -------------
-
-
+s
 HQUAILS can be run from any directory as long as the full path to the code is provided. 
 
 HQUAILS ships with scripts for running:
@@ -79,13 +87,11 @@ HQUAILS ships with scripts for running:
 
    This script is designed to run HQUAILS over a single object. 
 
-HQUAILS
+HQUAILS Scripts
 -------------
 * CustomModels.py
 
   Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum background. While the parameters are in the rest frame, the model fits in the observed frame.
-
-
 
 License
 -------------
