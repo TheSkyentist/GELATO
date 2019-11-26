@@ -3,6 +3,7 @@
 # Packages
 import os
 import numpy as np
+from datetime import datetime
 from astropy.table import Table
 import astropy.io.fits as pyfits
 
@@ -55,4 +56,7 @@ def header():
     print("Welcome to HQUAILS")
     print("Handy QUAsar emIssion Line fitS (pronounced like 'quails')")
     print("Developed by R. E. Hviding")
-    
+    print("Started run at:",datetime.now())
+
+def footer():
+    print("Finished run at:",datetime.now())    

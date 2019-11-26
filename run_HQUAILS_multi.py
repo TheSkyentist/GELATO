@@ -48,3 +48,5 @@ if __name__ == "__main__":
         import ConcatResults as CR
         CR.concatfromresults(p,objects)
     ## Concatenate Results ##
+
+    HQUAILS.footer()

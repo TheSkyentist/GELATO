@@ -30,3 +30,5 @@ if __name__ == "__main__":
 
     ## Run HQUAILS ##
     HQUAILS.HQUAILS(p, args.Spectrum, args.Redshift)
+
+    HQUAILS.footer()
