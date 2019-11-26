@@ -45,12 +45,9 @@ class Spectrum:
 
         # Check if there is spectral coverage of the regions
         for region in copy.deepcopy(self.regions):
-            print(region)
-            print(np.sum(np.logical_and(self.wav > region[0],self.wav < region[1])))
             # If not...
             if np.sum(np.logical_and(self.wav > region[0],self.wav < region[1])) == 0:
-                print(region)
-                # ...remove region
+                 # ...remove region
                 self.regions.remove(region)
             
         # Remove emission lines not in regions
