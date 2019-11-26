@@ -43,6 +43,8 @@ How it works
 
 5. The full set of bootstrapped parameters is then saved to disk. Finally, a figure of the final fit is produced and saved. There exists a convinience function for finding the median values of each spectrum model fit and collecting them into one final table.
 
+6. The median of each parameter is then found for each object, and the results from each object are then joined into one final results file.
+
 Parameter File
 -------------
 
