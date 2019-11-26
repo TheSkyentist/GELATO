@@ -56,6 +56,7 @@ The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And e
 * FThresh: F-test threshold to incorproate additional model parameters.
 * NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
 * Plotting: Produce plots or not.
+* Concatenate: To concatenate the results of a multiple HQUAILS run or not.
 * EmissionLines: Dictionary of emission lines to be fit by HQUAILS. The structure of this dictionary is crucial to the operation of HQUAILS. The following section details the format of this dictionary.
 
 Emission Line Dictionary
@@ -130,6 +131,12 @@ For multiple plots:
 python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
 ```
 
+The concated results for HQUAILS can also be created directly the results files in the following manners:
+
+```
+python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
+```
+
 HQUAILS cast (in order of appearance)
 ------------
 * README.md
@@ -183,6 +190,10 @@ HQUAILS cast (in order of appearance)
 * Plotting.py
 
   Here are the scripts for creating and saving figures of the fits. Can also be run directly on HQUAILS results in order to create figures after the fact. 
+
+* ConcatenateResults.py
+
+  Scripts for contatenating results from a multi HQUAILS run. Can also be run independantly on results after the fact. 
 
 * matplotlibrc
 

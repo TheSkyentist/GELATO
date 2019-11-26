@@ -42,3 +42,9 @@ if __name__ == "__main__":
     else: # Single Thread
         for o in objects: HQUAILS.HQUAILS(copy.deepcopy(p),o['File'],o['z'])
     ## Run HQUAILS ##
+
+    ## Concatenate Results ##
+    if p['Concatenate']:
+        import ConcatResults as CR
+        CR.concatfromresults(p,objects)
+    ## Concatenate Results ##

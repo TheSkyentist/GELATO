@@ -3,6 +3,7 @@
 # Packages
 import os
 import numpy as np
+from astropy.table import Table
 import astropy.io.fits as pyfits
 
 # HQUAILS supporting files
@@ -35,9 +36,10 @@ def HQUAILS(params,path,z):
     print("Bootstrap iterations finished:",name)
 
     ## Save Results
-    if not os.path.exits(params['OutFolder']):
+    if not os.path.exists(params['OutFolder']):
         os.mkdir(params['OutFolder'])
-    pyfits.BinTableHDU.from_columns([pyfits.Column(name=pn,format='D',array=p) for p,pn in zip(parameters.T,param_names)]).writeto(params['OutFolder']+name.replace('.fits','-results.fits'),overwrite=True)
+
+    Table(data=parameters,names=param_names).write(params['OutFolder']+name.replace('.fits','-results.fits'),overwrite=True)
     print("Results saved:",name)
 
     ## Plotting ##
