@@ -104,31 +104,31 @@ The two wrappers for HQUAILS are:
 
    This script is designed to run HQUAILS over a single object. This takes 3 positional arguements, the path to the parameters file, the path to the spectrum, and the redshift of the object. 
 
-'''
+```
 python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectrum.fits 1.122
-'''
+```
 
 2. "run_HQUAILS_multi.py"
 
    This script is designed to run HQUAILS over a list of objects. This takes 2 positional arguements, the path to the parameters file, and the path to the list of objects. 
 
-'''
+```
 python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
-'''
+```
 
 The plots for HQUAILS can also be created directly from the spectra and the results file in the following manners:
 
 For a single plot:
 
-'''
+```
 python ~/Documents/HQUAILS/Plotting.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
-'''
+```
 
 For multiple plots:
 
-'''
+```
 python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
-'''
+```
 
 HQUAILS cast (in order of appearance)
 ------------
