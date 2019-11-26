@@ -31,10 +31,20 @@ In your working directory, you need to copy "matplotlibrc" file to control the p
 How it works
 -------------
 
+1. First, the spectrum is loaded. Here, based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. It then constructs regions around these emission lines based on the region width provided. If regions overlap, they are merged.
+
+2. The base model is then constructed based on the emission line dictionary. The model is then fit to the spectrum. The default fitting minization is the Levenberg–Marquardt non-linear least squares algorithm. This can be adjusted.
+
+3. The additional components are then added to the base model and tested seperately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing and F-test. All accepted additional components are then collected and incorporated into the final model.
+
+4. In order to constraint fit uncertainites, the flux is bootstrapped with respect to provided uncertainties and the fit is run again. This process is repeated as many times as required by the user. 
+
+5. The full set of bootstrapped parameters is then saved to disk. Finally, a figure of the final fit is produced and saved. There exists a convinience function for finding the median values of each spectrum model fit and collecting them into one final table.
+
 Parameter File
 -------------
 
-HQUAILS is controlled entirely by the "PARAMS.json" file. And example parameter file is included in the repository.
+The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And example parameter file is included in the repository.
 
 * Outfolder: This parameter is the path to the output directory. 
 * RegionWidth: The border around emission lines (same units as spectrun wavelength).
@@ -78,7 +88,7 @@ The "PARAMS.json" file in the directory gives a good example of how to take adva
 
 Running HQUAILS
 -------------
-s
+
 HQUAILS can be run from any directory as long as the full path to the code is provided. 
 
 HQUAILS ships with scripts for running:
@@ -89,13 +99,14 @@ HQUAILS ships with scripts for running:
 
 HQUAILS Scripts
 -------------
+
 * CustomModels.py
 
-  Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum background. While the parameters are in the rest frame, the model fits in the observed frame.
+  Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum background. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame.
 
 License
 -------------
-HQUAILS is an open-source software available under the GNU General Public Licence. In a nutshell, this code can be used and distributed by anyone, but any code that includes HQUAILS must also be distributed freely and openly (see LICENCE file for details).
+HQUAILS is an open-source software available under the GNU General Public Licence 3. In a nutshell, this code can be used and distributed by anyone, but any code that includes HQUAILS must also be distributed freely and openly (see LICENCE file for details).
 
 FAQ
 -------------
