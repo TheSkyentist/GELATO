@@ -1,4 +1,4 @@
-"""Fit Model for Spectrum"""
+""" Fit Model for Spectrum """
 
 # Packages
 import copy

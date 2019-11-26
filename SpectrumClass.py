@@ -1,4 +1,4 @@
-"""Spectrum Class"""
+""" Spectrum Class """
 
 # Packages
 import copy

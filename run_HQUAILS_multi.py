@@ -1,4 +1,4 @@
-""" Main Function """
+""" Wrapper for mulitple HQUAILS runs """
 
 # Packages
 import sys
