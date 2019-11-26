@@ -4,6 +4,7 @@
 import copy
 import numpy as np
 import astropy.io.fits as pyfits
+import matplotlib.pyplot as plt
 
 class Spectrum:
     
@@ -43,9 +44,12 @@ class Spectrum:
                     self.regions.append([(1+self.z)*(line[0]-self.p['RegionWidth']),(1+self.z)*(line[0]+self.p['RegionWidth'])])
 
         # Check if there is spectral coverage of the regions
-        for region in self.regions:
+        for region in copy.deepcopy(self.regions):
+            print(region)
+            print(np.sum(np.logical_and(self.wav > region[0],self.wav < region[1])))
             # If not...
             if np.sum(np.logical_and(self.wav > region[0],self.wav < region[1])) == 0:
+                print(region)
                 # ...remove region
                 self.regions.remove(region)
             
@@ -77,9 +81,9 @@ class Spectrum:
         self.regions = np.sort(self.regions,0)
 
         # Initalize loop
-        for i,self.region in enumerate(self.regions[:-1]):
-            if self.regions[i+1][0] < self.region[1]:
-                self.regions[i] = [self.region[0],self.regions[i+1][1]]
+        for i,region in enumerate(self.regions[:-1]):
+            if self.regions[i+1][0] < region[1]:
+                self.regions[i] = [region[0],self.regions[i+1][1]]
                 self.regions = np.delete(self.regions,i+1,0)
                 self.reduceRegions()
                 break
