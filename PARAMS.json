@@ -5,7 +5,7 @@
     "MaxIter": 1000,
     "NBoot": 500,
     "FThresh": 0.95,
-    "NPool": 1,
+    "NProcess": 1,
     "Plotting": 1,
     "EmissionLines": [
         {

@@ -52,7 +52,7 @@ The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And e
 * MaxIter: Maximum number of minimazation algorithm iterations.
 * NBoot: Number of bootstrap iterations to constrain error on parameters.
 * FThresh: F-test threshold to incorproate additional model parameters.
-* NPool: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
+* NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
 * Plotting: Produce plots or not.
 * EmissionLines: Dictionary of emission lines to be fit by HQUAILS. The structure of this dictionary is crucial to the operation of HQUAILS. The following section details the format of this dictionary.
 
@@ -97,12 +97,61 @@ HQUAILS ships with scripts for running:
 
    This script is designed to run HQUAILS over a single object. 
 
-HQUAILS Scripts
--------------
+HQUAILS cast (in order of appearance)
+------------
+* run_HQUAILS_single.py
+  
+  Wrapper for running HQUAILS on a single object. 
+  
+* run_HQUAILS_multi.py
+  
+  Wrapper for running HQUAILS on multiple objects. If specifying mulitple processes, each object will be run on an independant thread. 
+
+* PARAMS.json
+  
+  Paramter file that controls HQUAILS behaviour.
+
+* ConstructParams.py
+
+  Routines for turning the PARAMS.json file into a python dictionary, and verifying that it is in the correct format. 
+
+* HQUAILS.py
+
+  Main HQUAILS function that calls and coordinates the whole operation.
+
+* SpectrumClass.py
+
+  A class the defines how a spectrum is loaded. HQUAILS was designed for SDSS spectra. To load in any other kind of spectrum, you can edit the way this class is initalized.
+
+* BuildModel.py
+
+  Thise file handles the construction of models and for tying the various parameters together as outlined by the emission line dictionary.
 
 * CustomModels.py
 
   Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum background. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame.
+
+* AdditionalComponents.py
+
+  Here are where the additional components are defined along with their bit flag positions. In order to add extra additional components, this file can be easily extended to include more models.
+
+* FittingModel.py
+
+  Here are the scripts for fitting HQUAILS generated models and for testing the inclusion of additional parameters. To change the fitting algorithm, this file can be edited. 
+
+* FischerTest.py
+
+  Here are scripts for performing an F-test to test whethere the inclusion of an additional model parameter is statistically better.
+
+* Plotting.py
+
+* matplotlibrc
+
+  A matplotlib settings file that controls the output of figures. Can be changed to the user's liking. However, for running HQUAILS on multiple threads.
+
+* LICENSE
+
+  Code license, HQUAILS is distributed under the GNU General Public Licence 3.
 
 License
 -------------

@@ -34,9 +34,9 @@ if __name__ == "__main__":
 	## Assemble Objects
 
 	## Run HQUAILS ##
-	if p['NPool'] > 1: # Mutlithread
+	if p['NProcess'] > 1: # Mutlithread
 		import multiprocessing as mp
-		pools = mp.Pool(processes=p['NPool'])
+		pools = mp.Pool(processes=p['NProcess'])
 		inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
 		pools.starmap(HQUAILS.HQUAILS, inputs)
 	else: # Single Thread
