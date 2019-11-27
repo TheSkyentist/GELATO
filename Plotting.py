@@ -119,8 +119,10 @@ if __name__ == "__main__":
         objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype='U100,f8',names=['File','z'])
         if p['NProcess'] > 1: # Mutlithread
             import multiprocessing as mp
-            pools = mp.Pool(processes=p['NProcess'])
+            pool = mp.Pool(processes=p['NProcess'])
             inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
-            pools.starmap(plotfromresults, inputs)
+            pool.starmap(plotfromresults, inputs)
+            pool.close()
+            pool.join()
         else: # Single Thread
             for o in objects: plotfromresults(copy.deepcopy(p),o['File'],o['z'])
