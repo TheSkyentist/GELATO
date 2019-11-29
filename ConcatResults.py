@@ -14,10 +14,13 @@ def concatfromresults(p,objects):
         name = path.split('/')[-1].replace('.fits','')
         parameters = pyfits.getdata(p['OutFolder']+name+'-results.fits',1)
         data = [np.median(parameters[n]) for n in parameters.columns.names]
+        dtype = [np.float_ for d in data]
+        dtype.insert(0,np.unicode_)
         data.insert(0,name)
         names = parameters.names
         names.insert(0,'Name')
-        tables.append(Table(data = np.array(data), names = names))
+        tables.append(Table(data = np.array(data), names = names,dtype=dtype))
+
     vstack(tables,join_type = 'outer').write(p['OutFolder']+'HQUAILS-results.fits',overwrite=True)
 
 
