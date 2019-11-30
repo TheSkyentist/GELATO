@@ -59,4 +59,4 @@ def header():
     print("Started run at:",datetime.now())
 
 def footer():
-    print("Finished run at:",datetime.now())    
+    print("Finished run at:",datetime.now())
