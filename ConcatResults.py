@@ -9,16 +9,31 @@ from astropy.table import Table,vstack
 # Concatenate results
 def concatfromresults(p,objects):
     
+    # Initalize list of tables
     tables = []
     for path in objects['File']:
+
+        # Load name and parameters
         name = path.split('/')[-1].replace('.fits','')
         parameters = pyfits.getdata(p['OutFolder']+name+'-results.fits',1)
-        data = [np.median(parameters[n]) for n in parameters.columns.names]
-        dtype = [np.float_ for d in data]
-        dtype.insert(0,np.unicode_)
-        data.insert(0,name)
-        names = parameters.names
-        names.insert(0,'Name')
+
+        # Initalize Lists
+        data = [name]
+        names = ['Name']
+        dtype = [np.unicode_] + [np.float_ for i in range(2*len(parameters.columns.names))]
+
+        # Iterate over columns and add
+        for n in parameters.columns.names:
+            
+            # Add medians
+            data.append(np.median(parameters[n]))
+            names.append(n)
+
+            # Add errors
+            data.append(np.std(parameters[n]))
+            names.append(n+'_err')
+
+
         tables.append(Table(data = np.array(data), names = names,dtype=dtype))
 
     vstack(tables,join_type = 'outer').write(p['OutFolder']+'HQUAILS-results.fits',overwrite=True)
