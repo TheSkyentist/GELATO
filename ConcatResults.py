@@ -9,7 +9,7 @@ from astropy.table import Table,vstack
 # Concatenate results
 def concatfromresults(p,objects):
     
-    print("Concatenating Results")
+    print("Concatenating Results...")
 
     # Initalize list of tables
     tables = []
