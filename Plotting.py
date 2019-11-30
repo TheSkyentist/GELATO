@@ -46,7 +46,7 @@ def Plot(spectrum,model,path):
         ylim = list(fax.get_ylim())
         ylim[0] = np.max((0,ylim[0]))
         fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
-        fax.set(yticks=fax.get_yticks()[0:],xlim=region,xticks=[])
+        fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
 
         # Residual Axis
         rax = fig.add_subplot(gs[1,i])
