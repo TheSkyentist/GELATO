@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 # Colorblind friendly colors
-colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,0),(36,255,36)])/255
+colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,0),(36,255,36),(219,109,0)])/255
 
 # Plot figure
 def Plot(spectrum,model,path):
@@ -47,7 +47,7 @@ def Plot(spectrum,model,path):
         ylim[0] = np.max((0,ylim[0]))
         fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
         fax.set(yticks=fax.get_yticks()[0:],xlim=region,xticks=[])
-        
+
         # Residual Axis
         rax = fig.add_subplot(gs[1,i])
         rax.step(wav,(flux - model(wav))*isig,'gray')
