@@ -7,6 +7,7 @@
     "FThresh": 0.95,
     "NProcess": 1,
     "Plotting": 1,
+    "PlotComp": 1,
     "Concatenate": 0,
     "EmissionLines": [
         {

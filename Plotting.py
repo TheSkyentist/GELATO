@@ -3,12 +3,16 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
+# Colorblind friendly colors
+colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,0),(36,255,36)])/255
+
 # Plot figure
 def Plot(spectrum,model,path):
 
     # Initialize Figure
     ncols   = len(spectrum.regions)
     figname = path.split('/')[-1].replace('.fits','')
+    if spectrum.p['PlotComp']: figname += '-comp'
     fig     = plt.figure(figsize = (5*ncols,7))
     gs      = fig.add_gridspec(ncols=ncols,nrows=2,height_ratios=[4,1],hspace=0)
 
@@ -21,27 +25,35 @@ def Plot(spectrum,model,path):
         good    = np.logical_and(spectrum.wav < region[1],spectrum.wav > region[0])
         wav     = spectrum.wav[good]
         flux    = spectrum.flux[good]
-        sigma   = spectrum.sigma[good]
+        isig    = 1/spectrum.sigma[good]
 
         # Axis to plot spectrum
         fax = fig.add_subplot(gs[0,i])
 
-        # Plot data and model
-        fax.step(wav,flux,'k')
-        fax.step(wav,model(wav),'r')
+        # Plot data
+        fax.step(wav,flux,'gray')
+
+        # Plot model
+        # Are we plotting components?
+        if spectrum.p['PlotComp']:
+            # Plot components
+            for j,component in enumerate(model[ncols:]):
+                fax.step(wav,background(wav)+component(wav),'--',c=colors[j % len(colors)])
+        else:
+            fax.step(wav,model(wav),'r')
 
         # Axis set
         ylim = list(fax.get_ylim())
         ylim[0] = np.max((0,ylim[0]))
-        fax.set(ylabel='$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
-        plt.setp(fax.get_yticklabels()[0],visible = False)
-
+        fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+        fax.set(yticks=fax.get_yticks()[0:],xlim=region,xticks=[])
+        
         # Residual Axis
-        rax = fig.add_subplot(gs[1,i],sharex = fax)
-        rax.step(wav,flux - model(wav),'k')
+        rax = fig.add_subplot(gs[1,i])
+        rax.step(wav,(flux - model(wav))*isig,'gray')
         ymax = np.max(np.abs(rax.get_ylim()))
-        rax.set(xlim=region,xlabel='Wavelength [\AA]',ylim=[-ymax,ymax])
-        rax.set_ylabel('data $-$ model',fontsize=15)
+        rax.set(xlim=region,xlabel=r'Wavelength [\AA]',ylim=[-ymax,ymax])
+        rax.set_ylabel('Deviation',fontsize=15)
 
     # Add title and save figure
     fig.suptitle(figname)
