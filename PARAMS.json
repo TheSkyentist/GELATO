@@ -1,13 +1,13 @@
 {
     "OutFolder": "./Results/",
-    "RegionWidth": 50,
+    "RegionWidth": 100,
     "BackgroundDeg": 1,
     "MaxIter": 1000,
-    "NBoot": 100,
+    "NBoot": 500,
     "FThresh": 0.95,
-    "NProcess": 1,
-    "Plotting": 1,
-    "PlotComp": 1,
+    "NProcess": 6,
+    "Plotting": 0,
+    "PlotComp": 0,
     "Concatenate": 0,
     "EmissionLines": [
         {
