@@ -12,7 +12,10 @@ def Plot(spectrum,model,path):
     # Initialize Figure
     ncols   = len(spectrum.regions)
     figname = path.split('/')[-1].replace('.fits','')
-    if spectrum.p['PlotComp']: figname += '-comp'
+    if spectrum.p['PlotComp']: 
+        figname += '-comp'
+    else:
+        figname += '-fit'
     fig     = plt.figure(figsize = (5*ncols,7))
     gs      = fig.add_gridspec(ncols=ncols,nrows=2,height_ratios=[4,1],hspace=0)
 
