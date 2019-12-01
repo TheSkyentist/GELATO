@@ -3,7 +3,7 @@ HQUAILS
 *Handy QUAsar emissIon Line fitS (pronounced Quails) by Raphael Hviding*
 -------------
 
-HQUAILS is a Python code designed to fit emission lines in the spectra of active galactic nuclei. In particular, it was built in order to fit AGN spectra where many of the parameters of the emission lines are tied with respect to one another. HQUAILS attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that seperate from the redshifts of galaxy lines (e.g. Balmer series lines).
+HQUAILS is a Python code designed to fit emission lines in the spectra of active galactic nuclei. In particular, it was built in order to fit AGN spectra where many of the parameters of the emission lines are tied with respect to one another. HQUAILS attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines).
 
 HQUAILS was also built in order to test the inclusion of additional fitting parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? HQUAILS builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test.
 
@@ -35,13 +35,13 @@ How it works
 
 1. First, the spectrum is loaded. Here, based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. It then constructs regions around these emission lines based on the region width provided. If regions overlap, they are merged.
 
-2. The base model is then constructed based on the emission line dictionary. The starting values are generated based on the spectrum. The model is then fit to the spectrum. The default fitting minization is the Levenberg–Marquardt non-linear least squares algorithm. This can be adjusted.
+2. The base model is then constructed based on the emission line dictionary. The starting values are generated based on the spectrum. The model is then fit to the spectrum. The default fitting minimization is the Levenberg–Marquardt non-linear least squares algorithm. This can be adjusted.
 
-3. The additional components are then added to the base model and tested seperately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing and F-test. All accepted additional components are then collected and incorporated into the final model.
+3. The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing and F-test. All accepted additional components are then collected and incorporated into the final model.
 
-4. In order to constraint fit uncertainites, the flux is bootstrapped with respect to provided uncertainties and the fit is run again. This process is repeated as many times as required by the user. 
+4. In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again. This process is repeated as many times as required by the user. 
 
-5. The full set of bootstrapped parameters is then saved to disk. Finally, a figure of the final fit is produced and saved. There exists a convinience function for finding the median values of each spectrum model fit and collecting them into one final table.
+5. The full set of bootstrapped parameters is then saved to disk. Finally, a figure of the final fit is produced and saved. There exists a convenience function for finding the median values of each spectrum model fit and collecting them into one final table.
 
 6. The median of each parameter is then found for each object, and the results from each object are then joined into one final results file.
 
@@ -53,9 +53,9 @@ The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And e
 * Outfolder: This parameter is the path to the output directory. 
 * RegionWidth: The border around emission lines (same units as spectrum wavelength).
 * BackgroundDeg: Degree of polynomial for continuum background.
-* MaxIter: Maximum number of minimazation algorithm iterations.
+* MaxIter: Maximum number of minimization algorithm iterations.
 * NBoot: Number of bootstrap iterations to constrain error on parameters.
-* FThresh: F-test threshold to incorproate additional model parameters.
+* FThresh: F-test threshold to incorporate additional model parameters.
 * NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
 * Plotting: Produce plots or not.
 * PlotComp: To plot only the components of the fit or the total fit.
@@ -89,7 +89,7 @@ The "PARAMS.json" file in the directory gives a good example of how to take adva
 2. Galaxy
    1. Halpha. These have been flagged with a 1, which corresponds to an larger velocity component. This additional component will be placed in its own new group, which will be labelled "Broad". It is made out of one line.
       * A line with a rest wavelength of 6562.80 and a relative flux of 1. Since there is only one line, the relative flux value does not matter.
-   2. Hbeta. These have been flagged with a 3, or in binary, 11. This corresponds to both a larger velocity component and an absorption component. These will be placed in the "Broad" and "Absorption" groups respetively. Not that if both "Broad" lines are accepted (from Hbeta and Halpha), they will share the same redshift by design. It is made out of one line.
+   2. Hbeta. These have been flagged with a 3, or in binary, 11. This corresponds to both a larger velocity component and an absorption component. These will be placed in the "Broad" and "Absorption" groups respectively. Not that if both "Broad" lines are accepted (from Hbeta and Halpha), they will share the same redshift by design. It is made out of one line.
       * A line with a rest wavelength of 4861.32 and a relative flux of 1. Since there is only one line, the relative flux value does not matter.
 
 Running HQUAILS
@@ -106,7 +106,7 @@ The two wrappers for HQUAILS are:
 
 1. "run_HQUAILS_single.py"
 
-   This script is designed to run HQUAILS over a single object. This takes 3 positional arguements, the path to the parameters file, the path to the spectrum, and the redshift of the object. 
+   This script is designed to run HQUAILS over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object. 
 
 ```
 python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectrum.fits 1.122
@@ -114,7 +114,7 @@ python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spe
 
 2. "run_HQUAILS_multi.py"
 
-   This script is designed to run HQUAILS over a list of objects. This takes 2 positional arguements, the path to the parameters file, and the path to the list of objects. 
+   This script is designed to run HQUAILS over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. 
 
 ```
 python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
@@ -144,7 +144,7 @@ HQUAILS cast (in order of appearance)
 ------------
 * README.md
   
-  Here you are! The documenation for HQUAILS.
+  Here you are! The documentation for HQUAILS.
 
 * run_HQUAILS_single.py
   
@@ -152,11 +152,11 @@ HQUAILS cast (in order of appearance)
   
 * run_HQUAILS_multi.py
   
-  Wrapper for running HQUAILS on multiple objects. If specifying mulitple processes, each object will be run on an independant thread. To load an object file differently, this file should be edited.
+  Wrapper for running HQUAILS on multiple objects. If specifying multiple processes, each object will be run on an independent thread. To load an object file differently, this file should be edited.
 
 * PARAMS.json
   
-  Paramter file that controls HQUAILS behaviour.
+  Paramter file that controls HQUAILS behavior.
 
 * ConstructParams.py
 
@@ -196,7 +196,7 @@ HQUAILS cast (in order of appearance)
 
 * ConcatenateResults.py
 
-  Scripts for contatenating results from a multi HQUAILS run. Can also be run independantly on results after the fact. 
+  Scripts for contatenating results from a multi HQUAILS run. Can also be run independently on results after the fact. 
 
 * matplotlibrc
 
@@ -204,11 +204,11 @@ HQUAILS cast (in order of appearance)
 
 * LICENSE
 
-  Code license, HQUAILS is distributed under the GNU General Public Licence 3.
+  Code license, HQUAILS is distributed under the GNU General Public License 3.
 
 License
 -------------
-HQUAILS is an open-source software available under the GNU General Public Licence 3. In a nutshell, this code can be used and distributed by anyone, but any code that includes HQUAILS must also be distributed freely and openly (see LICENCE file for details).
+HQUAILS is an open-source software available under the GNU General Public License 3. In a nutshell, this code can be used and distributed by anyone, but any code that includes HQUAILS must also be distributed freely and openly (see LICENSE file for details).
 
 FAQ
 -------------
@@ -218,4 +218,4 @@ FAQ
 
 **How can I fit my spectra with Voight or Lorentzian profiles?**
 
-*In order to fit with with other functions, you can simply add them to the "CustomModels.py" file. However, you'll have to make sure they are built in the same framwork as the other models there.*
+*In order to fit with with other functions, you can simply add them to the "CustomModels.py" file. However, you'll have to make sure they are built in the same framework as the other models there.*
