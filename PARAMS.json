@@ -5,9 +5,9 @@
     "MaxIter": 1000,
     "NBoot": 500,
     "FThresh": 0.95,
-    "NProcess": 6,
+    "NProcess": 1,
     "Plotting": 0,
-    "PlotComp": 0,
+    "PlotComp": 1,
     "Concatenate": 0,
     "EmissionLines": [
         {

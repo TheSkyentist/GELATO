@@ -5,7 +5,7 @@ HQUAILS
 
 HQUAILS is a Python code designed to fit emission lines in the spectra of active galactic nuclei. In particular, it was built in order to fit AGN spectra where many of the parameters of the emission lines are tied with respect to one another. HQUAILS attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that seperate from the redshifts of galaxy lines (e.g. Balmer series lines).
 
-HQUAILS was also built in order to test the inclusion of additional fitting parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? HQUAILS builds a base model based on the spectrum, and iteratively tests whethere different additional components are justified to add to the model, based on an F-test.
+HQUAILS was also built in order to test the inclusion of additional fitting parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? HQUAILS builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test.
 
 HQUAILS was designed to be run on SDSS spectra using a LM non-linear least squares algorithm with Gaussian line profiles. However, it is written in such a way that these assumptions can be switched out as needed. Please read through the entire documentation to see how this can be done.
 
@@ -188,7 +188,7 @@ HQUAILS cast (in order of appearance)
 
 * FischerTest.py
 
-  Here are scripts for performing an F-test to test whethere the inclusion of an additional model parameter is statistically better.
+  Here are scripts for performing an F-test to test whether the inclusion of an additional model parameter is statistically better.
 
 * Plotting.py
 
