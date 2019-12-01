@@ -32,7 +32,7 @@ def HQUAILS(params,path,z):
     print("Additional components added:",name)
 
     # Bootstrap
-    print("Beggining bootstrap (this may take a while):",name)
+    print("Beginning bootstrap (this may take a while):",name)
     parameters = np.array([FM.FitBoot(spectrum,model) for i in range(params['NBoot'])])
     print("Bootstrap iterations finished:",name)
 
