@@ -31,7 +31,7 @@ class SpectralFeature(Fittable1DModel):
             if (center*(1+spectrum.z) < region[1]) and (center*(1+spectrum.z) > region[0]):
                 break
         inregion = np.logical_and(spectrum.wav > region[0],spectrum.wav < region[1])
-        Height = np.max(spectrum.flux[inregion]) - np.median(spectrum.flux[inregion])
+        Height = np.max(spectrum.flux[np.argmin(np.abs(spectrum.wav - center*(1+spectrum.z)))]) - np.median(spectrum.flux[inregion])
         Flux = Height * (1 + spectrum.z) * Dispersion * center * SQRT_2_PI / C
         
         # Set parameters

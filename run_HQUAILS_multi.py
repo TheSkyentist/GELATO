@@ -30,7 +30,7 @@ if __name__ == "__main__":
     ## Verify Emission Line Dictionary ##
 
     ## Assemble Objects
-    objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype='U100,f8',names=['File','z'])
+    objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['File','z'])
     ## Assemble Objects
 
     ## Run HQUAILS ##
