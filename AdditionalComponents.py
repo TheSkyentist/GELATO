@@ -48,7 +48,8 @@ def AddComponent(flag, line, spectrum):
         # Use wider default dispersion        
         model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 600)
         model.Flux.bounds = (None,0) # Must be non-positive
-        
+        model.Dispersion.bounds = (50,600)
+
         # Set default depth
         for region in spectrum.regions:
             if (line*(1+spectrum.z) < region[1]) and (line*(1+spectrum.z) > region[0]):

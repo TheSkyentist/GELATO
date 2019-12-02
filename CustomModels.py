@@ -38,7 +38,7 @@ class SpectralFeature(Fittable1DModel):
         self.center = center
         self.domain = region
         super().__init__(Redshift = spectrum.z, Flux=Flux, Dispersion=Dispersion, **kwargs)
-        self.Redshift.bounds = (spectrum.z - 0.005,spectrum.z + 0.005)
+        self.Redshift.bounds = (spectrum.z - 0.0025,spectrum.z + 0.0025)
 
     @property
     def sigma(self):
