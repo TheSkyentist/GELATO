@@ -38,7 +38,8 @@ def AddComponent(flag, line, spectrum):
         # Broad line model
         # Use wider default dispersion
         model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 400)
-            
+        model.Dispersion.bounds(350,1000)
+
         return model
 
     ''' Absorption '''
@@ -48,7 +49,7 @@ def AddComponent(flag, line, spectrum):
         # Use wider default dispersion        
         model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 600)
         model.Flux.bounds = (None,0) # Must be non-positive
-        model.Dispersion.bounds = (50,600)
+        model.Dispersion.bounds = (350,1000)
 
         # Set default depth
         for region in spectrum.regions:

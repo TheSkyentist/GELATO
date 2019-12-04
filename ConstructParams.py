@@ -80,11 +80,14 @@ def verify(emissionLines):
                 if not (len(line) == 2):
                     print('Each line tuple must have two elements.')
                     return False
-                for l in line:
-                    if not ((type(l) == float) or (type(l) == int)):
-                        print('Each element of tuple must be a float or int.')
-                        return False
-            
+                if not ((type(line[0]) == float) or (type(line[0]) == int)):
+                    print('Line wavelength must be a float or int.')
+                    return False
+                if not ((type(line[1]) == float) or (type(line[1]) == int) or (line[1] == None)):
+                    print('Line strength must be a float or int or None.')
+                    return False
+                     
+        
             # Check if flag bit sum is equal to length of 
             if not (sum([int(bit) for bit in bin(emissionLines[z][species][1])[2:]]) == \
                     len(emissionLines[z][species][2])):

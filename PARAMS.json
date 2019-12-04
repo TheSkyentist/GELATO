@@ -1,9 +1,9 @@
 {
-    "OutFolder": "./Results/",
+    "OutFolder": "./Test/",
     "RegionWidth": 100,
     "BackgroundDeg": 1,
     "MaxIter": 1000,
-    "NBoot": 500,
+    "NBoot": 10,
     "FThresh": 0.95,
     "NProcess": 1,
     "Plotting": 0,
@@ -46,14 +46,14 @@
             ]
         },
         {
-            "Group":"Galaxy",
+            "Group":"Balmer",
             "Species": [
                 {
                     "Name":"Halpha",
                     "Lines": [
                         {
                             "Wavelength": 6562.80,
-                            "RelStrength": 1
+                            "RelStrength": null
                         }
                     ],
                     "Flag": 1,
@@ -64,7 +64,7 @@
                     "Lines": [
                         {
                             "Wavelength": 4861.32,
-                            "RelStrength": 1
+                            "RelStrength": null
                         }
                     ],
                     "Flag": 3,

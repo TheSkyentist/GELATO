@@ -72,7 +72,7 @@ def BuildModel(spectrum, emissionLines=None):
     return model, param_names
 
 # Tied all model parameters
-def    TieParams(spectrum,model,param_names,emissionLines):
+def TieParams(spectrum,model,param_names,emissionLines):
 
     ## Tie parameters ##
     for z in emissionLines.keys():
@@ -97,7 +97,7 @@ def    TieParams(spectrum,model,param_names,emissionLines):
                     
                 ## Tie Dispersion and Flux
                 # Check for first line in species and make tie function or initialize scale
-                if reference_line:
+                if (reference_line and (line[1] != None)):
                     # Dispersion
                     reference_line    = False
                     TieDispersion         = GenTieFunc(param_names.index(name+'Dispersion'))
@@ -107,7 +107,7 @@ def    TieParams(spectrum,model,param_names,emissionLines):
                     index_flux        = param_names.index(name+'Flux')
 
                 # Otherwise tie param
-                else:
+                elif (line[1] != None):
                     # Dispersion
                     dispersion_index = param_names.index(name+'Dispersion')
                     model.tied[model.param_names[dispersion_index]] = TieDispersion                
