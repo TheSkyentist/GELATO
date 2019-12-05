@@ -1,7 +1,6 @@
 """ Wrapper for mulitple HQUAILS runs """
 
 # Packages
-import sys
 import copy
 import argparse
 import numpy as np
@@ -22,12 +21,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     p = CP.construct(args.Parameters)
     ## Parse Arguements to find Parameter File ##
-
-    ## Verify Emission Line Dictionary ##
-    if not CP.verify(p['EmissionLines']):
-        print('Unable to verify emission line dictionary, exiting.')
-        sys.exit(1)
-    ## Verify Emission Line Dictionary ##
 
     ## Assemble Objects
     objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['File','z'])

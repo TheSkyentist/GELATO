@@ -22,12 +22,6 @@ if __name__ == "__main__":
     p = CP.construct(args.Parameters)
     ## Parse Arguements to find Parameter File ##
 
-    ## Verify Emission Line Dictionary ##
-    if not CP.verify(p['EmissionLines']):
-        print('Unable to verify emission line dictionary, exiting.')
-        sys.exit(1)
-    ## Verify Emission Line Dictionary ##
-
     ## Run HQUAILS ##
     HQUAILS.HQUAILS(p, args.Spectrum, args.Redshift)
 

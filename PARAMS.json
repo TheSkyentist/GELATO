@@ -6,15 +6,47 @@
     "NBoot": 10,
     "FThresh": 0.95,
     "NProcess": 1,
-    "Plotting": 0,
-    "PlotComp": 1,
-    "Concatenate": 0,
-    "EmissionLines": [
+    "Plotting": true,
+    "PlotComp": false,
+    "Concatenate": true,
+    "EmissionGroups": [
         {
-            "Group":"AGN",
+            "Name":"NLR",
+            "TieRedshift": false,
+            "TieSigma": false,
             "Species": [
                 {
-                    "Name":"OIII",
+                    "Name":"[SII]",
+                    "Lines": [
+                        {
+                            "Wavelength": 6716.31,
+                            "RelStrength": null
+                        },
+                        {
+                            "Wavelength": 6730.68,
+                            "RelStrength": null
+                        }
+                    ],
+                    "Flag": 0,
+                    "FlagGroups": []
+                },
+                {
+                    "Name":"[NII]",
+                    "Lines": [
+                        {
+                            "Wavelength": 6583.34,
+                            "RelStrength": 1
+                        },
+                        { 
+                            "Wavelength": 6547.96,
+                            "RelStrength": 0.34
+                        }
+                    ],
+                    "Flag": 0,
+                    "FlagGroups": []
+                },
+                {
+                    "Name":"[OIII]",
                     "Lines": [
                         {
                             "Wavelength": 5006.77,
@@ -29,15 +61,33 @@
                     "FlagGroups": ["Outflow"]
                 },
                 {
-                    "Name":"NII",
+                    "Name":"[NeIII]",
                     "Lines": [
                         {
-                            "Wavelength": 6583.34,
-                            "RelStrength": 1
-                        },
-                        { 
-                            "Wavelength": 6547.96,
-                            "RelStrength": 0.34
+                            "Wavelength": 3868.69,
+                            "RelStrength": null
+                        }
+                    ],
+                    "Flag": 0,
+                    "FlagGroups": []
+                },
+                {
+                    "Name":"[OII]",
+                    "Lines": [
+                        {
+                            "Wavelength": 3727.38,
+                            "RelStrength": null
+                        }
+                    ],
+                    "Flag": 0,
+                    "FlagGroups": []
+                },
+                {
+                    "Name":"[NeV]",
+                    "Lines": [
+                        {
+                            "Wavelength": 3426.85,
+                            "RelStrength": null
                         }
                     ],
                     "Flag": 0,
@@ -46,7 +96,9 @@
             ]
         },
         {
-            "Group":"Balmer",
+            "Name":"Stars",
+            "TieRedshift": true,
+            "TieSigma": true,
             "Species": [
                 {
                     "Name":"Halpha",
@@ -71,6 +123,24 @@
                     "FlagGroups": ["Broad","Absorption"]
                 }
             ]
+        },
+        {
+            "Name":"Outflow",
+            "TieRedshift": false,
+            "TieSigma": false,
+            "Species": []
+        },
+        {
+            "Name":"Broad",
+            "TieRedshift": true,
+            "TieSigma": true,
+            "Species": []
+        },
+        {
+            "Name":"Absorption",
+            "TieRedshift": false,
+            "TieSigma": false,
+            "Species": []
         }
     ]
 }

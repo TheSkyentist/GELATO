@@ -1,6 +1,7 @@
 """ Construct and Verify input Parameters """
 
 import json
+import sys
 
 # Construct emission line dictionary from input JSON file.
 def construct(path):
@@ -10,88 +11,164 @@ def construct(path):
     p = json.load(file)
     file.close()
 
-    # Iterate through and load
-    emissionLines = {}
-    for group in p['EmissionLines']:
-        emissionLines[group['Group']] = {}
-        for species in group['Species']:
-            lines = []
-            for line in species['Lines']:
-                lines.append((line['Wavelength'],line['RelStrength']))
-            emissionLines[group['Group']][species['Name']] = (lines,species['Flag'],species['FlagGroups'])
+    # Verify
+    if not verify(p):
+        print('Parameters file is not correct, exiting.')
+        sys.exit(1)
 
-    # Reset emission lines
-    p['EmissionLines'] = emissionLines
-    
     return p
 
-# Verify if emission line dictionary is in correct format. 
-def verify(emissionLines):
+# Verify if parameters json file is correct.
+def verify(params):
 
     # Check if Emission Lines are in dictionary
-    if not type(emissionLines) == dict:
-        print('Emission lines must be in dictionary.')
+    if not type(params) == dict:
+        print('Parameters not loaded as a dictionary.')
         return False
-    
-    # Check if redshift group is in a dictionary
-    for z in emissionLines.keys():
-        if not type(emissionLines[z]) == dict:
-            print('Each redshift must be a dictionary.')
+
+    # Check that all parameters are specified
+    for p in ['OutFolder', 'RegionWidth', 'BackgroundDeg', 'MaxIter', 'NBoot', 'FThresh', 'NProcess', 'Plotting', 'PlotComp', 'Concatenate', 'EmissionGroups']:
+        if not p in params.keys():
+            print('Parameters does not contain parameter:',p)
             return False
-        if not type(z) == str:
-            print('Redshift key must be a string.')
+
+    # Check that all parameters are specified and of correct types
+    for p in params.keys():
+        # Now check that parameters are of the correct types
+        if p in ['OutFolder']:
+            if not (type(params[p]) == str):
+                print('Parameter',p,'must be a string.')
+                return False
+        elif p in ['RegionWidth']:
+            if not ((type(params[p]) == float) or (type(params[p]) == int)):
+                print('Parameter',p,'must be an int or a float.')
+                return False
+        elif p in ['BackgroundDeg','MaxIter','NBoot','NProcess']:
+            if not ((type(params[p]) == int) and (params[p] > 0)):
+                print('Parameter',p,'must be a positive int.')
+                return False
+        elif p in ['FThresh']:
+            if not (((type(params[p]) == float) or (type(params[p]) == int)) and ((params[p] >= 0) and (params[p] <= 1))):
+                print('Parameter',p,'must be an int or a float between 0 and 1 (inclusive).')
+                return False
+        elif p in ['Plotting', 'PlotComp','Concatenate']:
+            if not (type(params[p]) == bool):
+                print('Parameter',p,'must be a boolean.')
+                return False
+        elif p in ['EmissionGroups']:
+            if not type(params[p] == list):
+                print('Parameter',p,'must be a list.')
+                return False
+        else:
+            print('Additional parameter was specified.')
+            return False
+
+    # Check each group
+    for group in params['EmissionGroups']:
+
+        # Check group is a dict
+        if not (type(group) == dict):
+            print('Group must be a dict')
             return False
         
-        # Check if species is in an appropriate tuple or list
-        for species in emissionLines[z]:
-            if not ((type(emissionLines[z][species]) == tuple) or \
-                    (type(emissionLines[z][species]) == list)):
-                print('Each species must be a tuple or list.')
+        # Check if all keys are in there
+        for g in ['Name', 'TieRedshift', 'TieSigma', 'Species']:
+            if not g in group.keys():
+                print('A group does not contain parameter:',g)
                 return False
-            if not (type(species) == str):
-                print('Species key must be a string.')
-                return False
-            if not (len(emissionLines[z][species]) == 3):
-                print('Species must be length 3.')
-                return False
-            # Check if lines are in a list or tuple
-            if not (type(emissionLines[z][species][0]) == list):
-                print('Lines must be in a list.')
-                return False
-                
-            # Check if flag is an good int
-            if not (type(emissionLines[z][species][1]) == int):
-                print('Lines flag must be an int.')
-                return False
-            if not (emissionLines[z][species][1] >= 0):
-                print('Lines flag must be a positive int.')
-                return False
-                
-            # Check if additional components are in a list 
-            if not (type(emissionLines[z][species][2]) == list):
-                print('Line component redshift groups must be a list.')
+        
+        # Check the type of each key
+        for g in group.keys():
+            if g in ['Name']:
+                if not (type(group[g]) == str):
+                    print('Group parameter',g,'must be a string.')
+                    return False
+            elif g in ['TieRedshift','TieSigma']:
+                if not (type(group[g]) == bool):
+                    print('Group parameter',g,'must be a booolean.')
+                    return False
+            elif g in ['Species']:
+                if not (type(group[g]) == list):
+                    print('Group parameter',g,'must be a list.')
+                    return False
+            else:
+                print('Additional group parameter was specified.')
                 return False
 
-            # Check if each line is an appropriate tuple or list
-            for line in emissionLines[z][species][0]:
-                if not (type(line) == tuple) or (type(line) == list):
-                    print('Each line must be a tuple or list.')
-                    return False
-                if not (len(line) == 2):
-                    print('Each line tuple must have two elements.')
-                    return False
-                if not ((type(line[0]) == float) or (type(line[0]) == int)):
-                    print('Line wavelength must be a float or int.')
-                    return False
-                if not ((type(line[1]) == float) or (type(line[1]) == int) or (line[1] == None)):
-                    print('Line strength must be a float or int or None.')
-                    return False
-                     
+    # Iterate over groups
+    for group in params['EmissionGroups']:
+
+        # Keep track of where
+        g = 'In group ' + group['Name'] + ':'
         
-            # Check if flag bit sum is equal to length of 
-            if not (sum([int(bit) for bit in bin(emissionLines[z][species][1])[2:]]) == \
-                    len(emissionLines[z][species][2])):
-                print('Flag number does not match number of additional components.')
+        # Check each species
+        for species in group['Species']:            
+            
+            # Check species is a dict
+            if not (type(species) == dict):
+                print(g,'Species must be a dict')
                 return False
-                        
+
+            # Check if all keys are in there
+            for s in ['Name', 'Lines', 'Flag', 'FlagGroups']:
+                if not s in species.keys():
+                    print(g,'A species does not contain parameter:',s)
+                    return False
+
+            # Check the type of each key
+            for s in species.keys():
+                if s in ['Name']:
+                    if not (type(species[s]) == str):
+                        print(g,'Species parameter',s,'must be a string.')
+                        return False
+                elif s in ['Lines','FlagGroups']:
+                    if not (type(species[s]) == list):
+                        print(g,'Species parameter',s,'must be a list.')
+                        return False
+                elif s in ['Flag']:
+                    if not ((type(species[s]) == int) and (species[s] >= 0)):
+                        print(g,'Species parameter',s,'must be nonnegative int.')
+                        return False
+                else:
+                    print(g,'Additional species parameter was specified.')
+                    return False
+
+            # Keep track of where
+            s = 'In group ' + group['Name'] + ' and species ' + species['Name'] + ':'
+
+            # Check if flag bit sum is equal to length of list
+            if not (sum([int(bit) for bit in bin(species['Flag'])[2:]]) == len(species['FlagGroups'])):
+                print(s,'Flag number does not match number of additional components.')
+                return False
+            
+            # Check if each FlagGroup exists
+            groupnames = [g['Name'] for g in params['EmissionGroups']]
+            for flagroup in species['FlagGroups']:
+                if not (flagroup in groupnames):
+                    print(s,'FlagGroup',flagroup,'does not exist.')
+                    return False
+
+            # Iterate over lines
+            for line in species['Lines']:
+                
+                # Check line is a dict
+                if not (type(line) == dict):
+                    print(s,'Line must be a dict.')
+
+                # Check if all keys are in there
+                for l in ['Wavelength', 'RelStrength']:
+                    if not l in line.keys():
+                        print(s,'A species does not contain parameter:',l)
+                        return False   
+            
+                # Check the type of each key
+                for l in line.keys():
+                    if l in ['Wavelength']:
+                        if not (((type(line[l]) == float) or (type(line[l]) == int)) and (line[l] > 0)):
+                            print(s,'Line parameter',l,'must positive float or int.')
+                            return False
+                    elif l in ['RelStrength']:
+                        if not ((( (type(line[l]) == float) or (type(line[l]) == int)) and (line[l] > 0)) or (line[l] == None)):
+                            print(s,'Line parameter',l,'must positive float or int or none')
+                            return False
     return True
