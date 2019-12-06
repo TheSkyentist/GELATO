@@ -35,7 +35,7 @@ def FitComponents(spectrum,base_model,base_param_names):
         # Add new component
         EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],i)
         model,param_names = BD.BuildModel(spectrum,EmissionGroups)
-        
+
         # Source starting parameters
         model = SourceParams(model,param_names,base_model,base_param_names)
 
@@ -47,7 +47,7 @@ def FitComponents(spectrum,base_model,base_param_names):
             accepted.append(i)
             accepted_models.append(model)
             accepted_names.append(param_names)
-
+    
     # Add new component
     spectrum.p['EmissionGroups'] = AddComplexity(spectrum.p['EmissionGroups'],accepted)
     model,param_names = BD.BuildModel(spectrum)
@@ -150,9 +150,11 @@ def AddComplexity(EmissionGroups_old,index):
                                    'Flag': int('-0b1'+j*'0',2),
                                    'FlagGroups':[]
                                 }
-                                
-                                # Add new entry
-                                group['Species'].append(entry)
+
+                                # Destination groupname
+                                for group in EmissionGroups:
+                                    if group['Name'] == species['FlagGroups'][j]:
+                                        group['Species'].append(entry)
 
                                 return EmissionGroups
                                                         
