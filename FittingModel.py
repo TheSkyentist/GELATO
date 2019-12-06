@@ -120,13 +120,13 @@ def AddComplexity(EmissionGroups_old,index):
     # Iterate in emission line dictionary 
     for group in EmissionGroups:
         for species in group['Species']:
-
-            # Flag
-            flag         = bin(species['Flag'])[2:]
-            flag_len     = np.sum([int(bit) for bit in flag])
             
             # If we have a flag
-            if (flag_len > 0):
+            if (species['Flag'] > 0):
+
+                # Flag
+                flag         = bin(species['Flag'])[2:]
+                flag_len     = np.sum([int(bit) for bit in flag])
                 
                 # Check that our index is in the range
                 if (index >= i) and (index < i + flag_len):
