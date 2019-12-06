@@ -7,8 +7,8 @@ import numpy as np
 import CustomModels as CM
 import AdditionalComponents as AC
 
-# Build the model from the emissionLines and spectrum with initial guess
-def BuildModel(spectrum, emissionLines=None):
+# Build the model from the EmissionGroups and spectrum with initial guess
+def BuildModel(spectrum, EmissionGroups=None):
     
     ## Build Base Model
     # True param names
@@ -38,23 +38,23 @@ def BuildModel(spectrum, emissionLines=None):
             param_names.append(name+pname)
 
     # Check if we were passed an emission lines
-    if emissionLines == None:
-        emissionLines = spectrum.p['EmissionLines']
+    if EmissionGroups == None:
+        EmissionGroups = spectrum.p['EmissionGroups']
 
     # Over all emission lines
-    for z in emissionLines.keys():
-        for species in emissionLines[z].keys():                
-        
-            for line in emissionLines[z][species][0]:
-                name =  z + '_' + species + '_' + str(line[0]) + '_'
+    for group in EmissionGroups:
+        for species in group['Species']:
+            for line in species['Lines']:
+                name =  group['Name'] + '-' + species['Name'] + '-' + str(line['Wavelength']) + '-'
+                print(name)
                 
                 # If additional component
-                if emissionLines[z][species][1] < 0:
-                    model = AC.AddComponent(emissionLines[z][species][1],line[0],spectrum)
+                if species['Flag'] < 0:
+                    model = AC.AddComponent(species['Flag'],line['Wavelength'],spectrum)
                     
                 # IF original model component
                 else:
-                    model = CM.SpectralFeature(center = line[0],spectrum = spectrum)
+                    model = CM.SpectralFeature(center = line['Wavelength'],spectrum = spectrum)
 
                 # Add model
                 model_components.append(model)
@@ -66,57 +66,61 @@ def BuildModel(spectrum, emissionLines=None):
     ## Build Base Model
 
     ## Tie parameters ##
-    model = TieParams(spectrum,model,param_names,emissionLines)
+    model = TieParams(spectrum,model,param_names,EmissionGroups)
     ## Tie parameters ##
 
     return model, param_names
 
 # Tied all model parameters
-def TieParams(spectrum,model,param_names,emissionLines):
+def TieParams(spectrum,model,param_names,EmissionGroups):
 
     ## Tie parameters ##
-    for z in emissionLines.keys():
-        reference_z = True
-        for species in emissionLines[z].keys():
-                
-            reference_line = True
-            for line in emissionLines[z][species][0]:
+    for group in EmissionGroups:
+        first_group_member = True
 
+        for species in group['Species']:
+            first_species_line = True
+
+            for line in species['Lines']:
+                
                 # Find parameter name prefix
-                name =  z + '_' + species + '_' + str(line[0]) + '_'
-                
-                ## Tie Redshift
-                # Check for first line in redshift and make tie function
-                if reference_z:
-                    reference_z = False
-                    TieRedshift = GenTieFunc(param_names.index(name+'Redshift'))
-                # Otherwise tie redshift
-                else:
-                    redshift_index = param_names.index(name+'Redshift')
-                    model.tied[model.param_names[redshift_index]] = TieRedshift
-                    
-                ## Tie Dispersion and Flux
-                # Check for first line in species and make tie function or initialize scale
-                if (reference_line and (line[1] != None)):
-                    # Dispersion
-                    reference_line    = False
-                    TieDispersion         = GenTieFunc(param_names.index(name+'Dispersion'))
-                    
-                    # Flux
-                    reference_flux     = line[1]
-                    index_flux        = param_names.index(name+'Flux')
+                name =  group['Name'] + '-' + species['Name'] + '-' + str(line['Wavelength']) + '-'
 
-                # Otherwise tie param
-                elif (line[1] != None):
+                ## Tie Group Components
+                # Check for first line in group and make tie functions
+                if first_group_member:
+                    first_group_member = False
+                    TieGroupRedshift = GenTieFunc(param_names.index(name+'Redshift'))
+                    TieGroupDispersion = GenTieFunc(param_names.index(name+'Dispersion'))
+                # Otherwise tie redshift (check if we should)
+                elif group['TieRedshift']:
+                    model.tied[model.param_names[param_names.index(name+'Redshift')]] = TieGroupRedshift
+                # Otherwise tie dispersion (check if we should)
+                elif group['TieSigma']:
+                    model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieGroupDispersion
+                    
+                ## Tie Species Components
+                # Check for first line in species and make tie functions
+                if (first_species_line and line['RelStrength'] != None):
                     # Dispersion
-                    dispersion_index = param_names.index(name+'Dispersion')
-                    model.tied[model.param_names[dispersion_index]] = TieDispersion                
+                    first_species_line = False
+                    TieSpeciesRedshift = GenTieFunc(param_names.index(name+'Redshift'))
+                    TieSpeciesDispersion = GenTieFunc(param_names.index(name+'Dispersion'))
+
+                    # Flux
+                    reference_flux = line['Wavelength']
+                    index_flux = param_names.index(name+'Flux')
+
+                # Otherwise tie params
+                elif (line['RelStrength'] != None):
+                    # Dispersion
+                    model.tied[model.param_names[param_names.index(name+'Redshift')]] = TieSpeciesRedshift                
+                    model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieSpeciesDispersion                
                     
                     # Redshhift
                     height_index = param_names.index(name+'Flux')
-                    TieFlux = GenTieFunc(index_flux,scale=line[1]/reference_flux)
-                    model.tied[model.param_names[height_index]] = TieFlux                
-                ## Tie Tie Dispersion and Flux
+                    TieFlux = GenTieFunc(index_flux,scale=line['RelStrength']/reference_flux)
+                    model.tied[model.param_names[height_index]] = TieFlux
     ##Tie parameters ##
 
     return model
