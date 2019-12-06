@@ -45,11 +45,21 @@ def Plot(spectrum,model,path):
         else:
             fax.step(wav,model(wav),'r')
 
-        # Axis set
+        # Plot Line Names
         ylim = list(fax.get_ylim())
+        for group in spectrum.p['EmissionGroups']:
+            for species in group['Species']:
+                if species['Flag'] >= 0:
+                    for line in species['Lines']:
+                        x = line['Wavelength']*(1+spectrum.z)
+                        if ((x < region[1]) and (x > region[0])):
+                            fax.text(x,ylim[1]*1.09,species['Name'],rotation=90,fontsize=12,ha='center',va='top')
+
+        # Axis set
         ylim[0] = np.max((0,ylim[0]))
-        fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+        ylim[1] = ylim[1]*1.1
         fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
+        fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
 
         # Residual Axis
         rax = fig.add_subplot(gs[1,i])
@@ -82,7 +92,7 @@ def plotfromresults(params,path,z):
     # Add spectral lines
     ind = (params['BackgroundDeg']+1)*len(spectrum.regions) # index where emission lines begin
     for i in range(int((median.size - ind)/3)):
-        center = float(parameters.columns.names[3*i+ind].split('_')[-2])
+        center = float(parameters.columns.names[3*i+ind].split('-')[-2])
         model.append(CM.SpectralFeature(center,spectrum))
     
     # Finish model and add parameters
@@ -113,12 +123,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     p = CP.construct(args.Parameters)
     ## Parse Arguements to find Parameter File ##
-
-    ## Verify Emission Line Dictionary ##
-    if not CP.verify(p['EmissionLines']):
-        print('Unable to verify emission line dictionary, exiting.')
-        sys.exit(1)
-    ## Verify Emission Line Dictionary ##
 
     # Check if we are doing single or multi
     single = args.Spectrum != None and args.Redshift != None

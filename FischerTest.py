@@ -3,10 +3,6 @@
 import numpy as np
 import scipy.stats as stats
 
-# Temporary packages
-import matplotlib.pyplot as plt
-plt.close('all')
-
 # Preform an f-test
 def FTest(spectrum,model1,model2):
 
