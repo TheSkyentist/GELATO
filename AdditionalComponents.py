@@ -37,8 +37,8 @@ def AddComponent(flag, line, spectrum):
     
         # Broad line model
         # Use wider default dispersion
-        model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 400)
-        model.Dispersion.bounds = (350,1000)
+        model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 500)
+        model.Dispersion.bounds = (100,1000)
 
         return model
 

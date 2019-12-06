@@ -21,7 +21,7 @@ def BuildModel(spectrum, EmissionGroups=None):
     for i,region in enumerate(spectrum.regions):
         
         # Name of region
-        name = 'Background_' + str(i) +'_'
+        name = 'Background-' + str(i) +'-'
         
         # Generate model
         background = CM.ContinuumBackground(spectrum.p['BackgroundDeg'],region)
@@ -46,7 +46,6 @@ def BuildModel(spectrum, EmissionGroups=None):
         for species in group['Species']:
             for line in species['Lines']:
                 name =  group['Name'] + '-' + species['Name'] + '-' + str(line['Wavelength']) + '-'
-                print(name)
                 
                 # If additional component
                 if species['Flag'] < 0:
@@ -108,7 +107,7 @@ def TieParams(spectrum,model,param_names,EmissionGroups):
                     TieSpeciesDispersion = GenTieFunc(param_names.index(name+'Dispersion'))
 
                     # Flux
-                    reference_flux = line['Wavelength']
+                    reference_flux = line['RelStrength']
                     index_flux = param_names.index(name+'Flux')
 
                 # Otherwise tie params

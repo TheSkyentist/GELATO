@@ -21,11 +21,11 @@ def FitComponents(spectrum,base_model,base_param_names):
 
     # Find number of flags
     flags = 0
-    for group in spectrum.p['EmissionLines'].keys():
-        for species in spectrum.p['EmissionLines'][group].keys():
-            flagbits = bin(spectrum.p['EmissionLines'][group][species][1])[2:]
+    for group in spectrum.p['EmissionGroups']:
+        for species in group['Species']:
+            flagbits = bin(species['Flag'])[2:]
             flags += len(flagbits.replace('0',''))
-                    
+
     # F-tests
     accepted = []
     accepted_models = []
@@ -33,8 +33,8 @@ def FitComponents(spectrum,base_model,base_param_names):
     for i in range(flags):
         
         # Add new component
-        emissionLines = AddComplexity(spectrum.p['EmissionLines'],i)
-        model,param_names = BD.BuildModel(spectrum,emissionLines)
+        EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],i)
+        model,param_names = BD.BuildModel(spectrum,EmissionGroups)
         
         # Source starting parameters
         model = SourceParams(model,param_names,base_model,base_param_names)
@@ -49,7 +49,7 @@ def FitComponents(spectrum,base_model,base_param_names):
             accepted_names.append(param_names)
 
     # Add new component
-    spectrum.p['EmissionLines'] = AddComplexity(spectrum.p['EmissionLines'],accepted)
+    spectrum.p['EmissionGroups'] = AddComplexity(spectrum.p['EmissionGroups'],accepted)
     model,param_names = BD.BuildModel(spectrum)
     
     # Source starting parameters
@@ -90,7 +90,7 @@ def SourceParams(model,param_names,source,source_params):
     numcomp = {}
     for param_name in param_names:
         if 'Flux' in param_name:
-            line = param_name.split('_')[-2]
+            line = param_name.split('-')[-2]
             if line not in numcomp.keys():
                 numcomp[line] = 1
             else: 
@@ -99,30 +99,30 @@ def SourceParams(model,param_names,source,source_params):
     # Reduce flux of a line by number of components
     for i,param_name in enumerate(param_names):
         if 'Flux' in param_name:
-            model.parameters[i] /= numcomp[param_name.split('_')[-2]]
+            model.parameters[i] /= numcomp[param_name.split('-')[-2]]
             
     return model
 
 # Add additional component to a model
-def AddComplexity(emissionLines_old,index):
+def AddComplexity(EmissionGroups_old,index):
 
     # If multiple indices, add all of them
     if hasattr(index,'__iter__'):
         for i in index:
-            emissionLines_old = AddComplexity(emissionLines_old,i)
-        return emissionLines_old
+            EmissionGroups_old = AddComplexity(EmissionGroups_old,i)
+        return EmissionGroups_old
     
     # Deepcopy
-    emissionLines = copy.deepcopy(emissionLines_old)
+    EmissionGroups = copy.deepcopy(EmissionGroups_old)
     # Keeping track
     i = 0
     
     # Iterate in emission line dictionary 
-    for z in emissionLines.keys():
-        for species in emissionLines[z].keys():
+    for group in EmissionGroups:
+        for species in group['Species']:
 
             # Flag
-            flag         = bin(emissionLines[z][species][1])[2:]
+            flag         = bin(species['Flag'])[2:]
             flag_len     = np.sum([int(bit) for bit in flag])
             
             # If we have a flag
@@ -144,21 +144,17 @@ def AddComplexity(emissionLines_old,index):
                             if index == i:
                             
                                 # Construct the added entry
-                                entry = (emissionLines[z][species][0],int('-0b1'+j*'0',2),[])
-                            
-                                # Redshift key
-                                z = emissionLines[z][species][2][j]
-                                # Add it if it doesn't exist
-                                if z not in emissionLines.keys():
-                                    emissionLines[z] = {}
+                                entry = {
+                                   'Name':species['Name'] + '-' + AC.ComponentName(j),
+                                   'Lines':species['Lines'],
+                                   'Flag': int('-0b1'+j*'0',2),
+                                   'FlagGroups':[]
+                                }
                                 
-                                # Species key
-                                species = species + '-' + AC.ComponentName(j)
-
                                 # Add new entry
-                                emissionLines[z][species] = entry
+                                group['Species'].append(entry)
 
-                                return emissionLines
+                                return EmissionGroups
                                                         
                             # Increment along the bit                            
                             i += 1
