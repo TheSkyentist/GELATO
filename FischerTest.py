@@ -1,5 +1,4 @@
 """ Statistical F-Test Package """
-
 import numpy as np
 import scipy.stats as stats
 
