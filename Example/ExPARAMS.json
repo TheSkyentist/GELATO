@@ -1,9 +1,9 @@
 {
-    "OutFolder": "./Restuls/",
+    "OutFolder": "./Results/",
     "RegionWidth": 100,
     "BackgroundDeg": 1,
     "MaxIter": 1000,
-    "NBoot": 10,
+    "NBoot": 100,
     "FThresh": 0.95,
     "NProcess": 1,
     "Plotting": true,
