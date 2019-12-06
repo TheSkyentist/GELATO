@@ -8,7 +8,7 @@
     "NProcess": 1,
     "Plotting": true,
     "PlotComp": false,
-    "Concatenate": true,
+    "Concatenate": false,
     "EmissionGroups": [
         {
             "Name":"NLR",

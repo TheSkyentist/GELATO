@@ -155,7 +155,7 @@ For multiple plots:
 python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
 ```
 
-The concated results for HQUAILS can also be created directly the results files in the following manners:
+The concatenated results for HQUAILS can also be created directly the results files in the following manners:
 
 ```
 python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
@@ -163,9 +163,22 @@ python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spe
 
 Running the Example
 -------------
-'''
-Coming soon.
-'''
+Here are the following instructions to run HQUAILS. This tutorial assumes you start in the Example directory. First we need to activate our astroconda environment. 
+```
+conda activate astroconda
+```
+We can then run the code over the whole data set.
+```
+python ../run_HQUAILS_multi.py ExPARAMS.json ExObjList.csv
+```
+In order to produce a concatenated table of all of the results, we can run the following code. (We could have achieved the same result by changing the Concatenate parameter to true)
+```
+python ../ConcatResults.py ExPARAMS.json ExObjList.csv
+```
+This will produce result tables and some plots in the Results folder. We can then edit the value of the PlotComp parameter and change it to false in order to produce the rest of the plots.
+```
+python ../Plotting.py ExPARAMS.json --ObjectList ExObjList.csv
+```
 
 HQUAILS cast (in order of appearance)
 ------------
@@ -195,11 +208,11 @@ HQUAILS cast (in order of appearance)
 
 * SpectrumClass.py
 
-  A class the defines how a spectrum is loaded. HQUAILS was designed for SDSS spectra. To load in any other kind of spectrum, you can edit the way this class is initalized.
+  A class the defines how a spectrum is loaded. HQUAILS was designed for SDSS spectra. To load in any other kind of spectrum, you can edit the way this class is initialized.
 
 * BuildModel.py
 
-  Thise file handles the construction of models and for tying the various parameters together as outlined by the emission line dictionary.
+  This file handles the construction of models and for tying the various parameters together as outlined by the emission line dictionary.
 
 * CustomModels.py
 
@@ -223,7 +236,7 @@ HQUAILS cast (in order of appearance)
 
 * ConcatenateResults.py
 
-  Scripts for contatenating results from a multi HQUAILS run. Can also be run independently on results after the fact. 
+  Scripts for concatenating results from a multi HQUAILS run. Can also be run independently on results after the fact. 
 
 * matplotlibrc
 
