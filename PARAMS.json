@@ -1,5 +1,5 @@
 {
-    "OutFolder": "./Restuls/",
+    "OutFolder": "./Results/",
     "RegionWidth": 100,
     "BackgroundDeg": 1,
     "MaxIter": 1000,
