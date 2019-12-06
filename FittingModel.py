@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,base_model,base_param_names):
-    
+
     # Fit first model
     base_model = FitModel(spectrum,base_model)
 
