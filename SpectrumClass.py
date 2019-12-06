@@ -38,10 +38,11 @@ class Spectrum:
 
         # Find regions and emission line lists
         self.regions = []
-        for group in self.p['EmissionLines'].keys():
-            for species in self.p['EmissionLines'][group].keys():
-                for line in self.p['EmissionLines'][group][species][0]:
-                    self.regions.append([(1+self.z)*(line[0]-self.p['RegionWidth']),(1+self.z)*(line[0]+self.p['RegionWidth'])])
+        for group in self.p['EmissionGroups']:
+            for species in group['Species']:
+                for line in species['Lines']:
+                    linewav = line['Wavelength']
+                    self.regions.append([(1+self.z)*(linewav-self.p['RegionWidth']),(1+self.z)*(linewav+self.p['RegionWidth'])])
 
         # Check if there is spectral coverage of the regions
         for region in copy.deepcopy(self.regions):
@@ -52,24 +53,31 @@ class Spectrum:
             
         # Remove emission lines not in regions
         # For each emission line
-        eL = copy.deepcopy(self.p['EmissionLines'])
-        for group in eL:
-            for species in eL[group].keys():
-                for line in eL[group][species][0]:
+        eG = copy.deepcopy(self.p['EmissionGroups'])
+        for group in eG:
+            gname = group['Name']
+            for species in group['Species']:
+                sname = species['Name']
+                for line in species['Lines']:
+                    linewav = line['Wavelength']
 
                     # Check for removal
                     remove = True # Initialize as removing
                     for region in self.regions: # Check if it is in any region
-                        if (region[0] < line[0]*(1+self.z)) and (line[0]*(1+self.z) < region[1]):
+                        if (region[0] < linewav*(1+self.z)) and (linewav*(1+self.z) < region[1]):
                             remove = False # If it is, set as remove 
                     
                     # Remove if necessary
                     if remove:
-                        self.p['EmissionLines'][group][species][0].remove(line)
-                
-                # If species is empty, delete it
-                if (len(self.p['EmissionLines'][group][species][0]) == 0):
-                    del self.p['EmissionLines'][group][species]
+                        for g in self.p['EmissionGroups']:
+                            for s in g['Species']:
+                                for l in s['Lines']:
+                                    # Check if the same then remove
+                                    if ((g['Name'] == gname) and (s['Name'] == sname) and (l['Wavelength'] == linewav)):
+                                        s['Lines'].remove(l)
+                                # If species is empty, delete it
+                                if (len(s['Lines']) == 0):
+                                    g['Species'].remove(s)
 
     # Reduce number of regions so none overlap
     def reduceRegions(self):
