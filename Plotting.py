@@ -16,6 +16,7 @@ def Plot(spectrum,model,path):
         figname += '-comp'
     else:
         figname += '-fit'
+    print('Plotting Figure:',figname)
     fig     = plt.figure(figsize = (5*ncols,7))
     gs      = fig.add_gridspec(ncols=ncols,nrows=2,height_ratios=[4,1],hspace=0)
 
