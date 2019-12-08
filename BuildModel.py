@@ -79,6 +79,7 @@ def TieParams(spectrum,model,param_names,EmissionGroups):
 
         for species in group['Species']:
             first_species_line = True
+            first_species_flux = True
 
             for line in species['Lines']:
                 
@@ -99,27 +100,31 @@ def TieParams(spectrum,model,param_names,EmissionGroups):
                     model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieGroupDispersion
                     
                 ## Tie Species Components
+                # Tie Dispersion and Redshift
                 # Check for first line in species and make tie functions
-                if (first_species_line and line['RelStrength'] != None):
+                if first_species_line:
                     # Dispersion
                     first_species_line = False
                     TieSpeciesRedshift = GenTieFunc(param_names.index(name+'Redshift'))
                     TieSpeciesDispersion = GenTieFunc(param_names.index(name+'Dispersion'))
 
+                # Otherwise tie params
+                else:
+                    # Dispersion and Redshift
+                    model.tied[model.param_names[param_names.index(name+'Redshift')]] = TieSpeciesRedshift                
+                    model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieSpeciesDispersion                
+
+                # Tie Flux
+                if (first_species_flux and (line['RelStrength'] != None)):
+                    first_species_flux = False
                     # Flux
                     reference_flux = line['RelStrength']
                     index_flux = param_names.index(name+'Flux')
-
-                # Otherwise tie params
                 elif (line['RelStrength'] != None):
-                    # Dispersion
-                    model.tied[model.param_names[param_names.index(name+'Redshift')]] = TieSpeciesRedshift                
-                    model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieSpeciesDispersion                
-                    
-                    # Redshhift
                     height_index = param_names.index(name+'Flux')
                     TieFlux = GenTieFunc(index_flux,scale=line['RelStrength']/reference_flux)
                     model.tied[model.param_names[height_index]] = TieFlux
+            
     ##Tie parameters ##
 
     return model
