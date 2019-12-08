@@ -80,11 +80,11 @@ def FitBoot(spectrum,model):
 # Carry over parameters from another model
 def SourceParams(model,param_names,source,source_params):
     
-    # Iterate over param names
-    for i,source_param in enumerate(source_params):
-        if source_param in param_names:
-            index = param_names.index(source_param)
-            model.parameters[index] = source.parameters[i]
+    # # Iterate over param names
+    # for i,source_param in enumerate(source_params):
+    #     if source_param in param_names:
+    #         index = param_names.index(source_param)
+    #         model.parameters[index] = source.parameters[i]
 
     # Count up number of components for a line
     numcomp = {}
