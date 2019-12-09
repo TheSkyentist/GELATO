@@ -36,8 +36,8 @@ def FitComponents(spectrum,base_model,base_param_names):
         EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],i)
         model,param_names = BD.BuildModel(spectrum,EmissionGroups)
 
-        # Source starting parameters
-        model = SourceParams(model,param_names,base_model,base_param_names)
+        # Split Flux
+        model = SplitFlux(model,param_names)
 
         # Fit model
         model = FitModel(spectrum,model)
@@ -52,10 +52,8 @@ def FitComponents(spectrum,base_model,base_param_names):
     spectrum.p['EmissionGroups'] = AddComplexity(spectrum.p['EmissionGroups'],accepted)
     model,param_names = BD.BuildModel(spectrum)
     
-    # Source starting parameters
-    for source,source_params in zip(accepted_models,accepted_names):
-        model = SourceParams(model,param_names,source,source_params)
-    model = SourceParams(model,param_names,base_model,base_param_names)        
+    # Split Flux
+    model = SplitFlux(model,param_names)        
     
     # Fit model
     model = FitModel(spectrum,model)
@@ -77,14 +75,8 @@ def FitBoot(spectrum,model):
 
     return fit_model.parameters
 
-# Carry over parameters from another model
-def SourceParams(model,param_names,source,source_params):
-    
-    # # Iterate over param names
-    # for i,source_param in enumerate(source_params):
-    #     if source_param in param_names:
-    #         index = param_names.index(source_param)
-    #         model.parameters[index] = source.parameters[i]
+# Split flux between emission lines
+def SplitFlux(model,param_names):
 
     # Count up number of components for a line
     numcomp = {}
