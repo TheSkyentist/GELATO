@@ -20,7 +20,7 @@ class SpectralFeature(Fittable1DModel):
 
     # Parameters
     Redshift     = Parameter(default=0)
-    Flux         = Parameter(default=0,bounds=(0,None)) # Must be non-negative for emission
+    Flux         = Parameter(default=0) # Must be non-negative for emission
     Dispersion    = Parameter(default=150,bounds=(75,500)) # Reasonable range
 
     def __init__(self, center, spectrum, Dispersion = Dispersion.default, **kwargs):
@@ -39,6 +39,7 @@ class SpectralFeature(Fittable1DModel):
         self.domain = region
         super().__init__(Redshift = spectrum.z, Flux=Flux, Dispersion=Dispersion, **kwargs)
         self.Redshift.bounds = (spectrum.z - 0.0025,spectrum.z + 0.0025)
+        self.Flux.bounds = (0,1.5*Flux) # Set positive bounds
 
     @property
     def sigma(self):

@@ -48,7 +48,7 @@ def AddComponent(flag, line, spectrum):
         # Absorption line model
         # Use wider default dispersion        
         model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 600)
-        model.Flux.bounds = (None,0) # Must be non-positive
+        model.Flux.bounds = (-model.Flux,0) # Must be non-positive
         model.Dispersion.bounds = (350,1000)
 
         # Set default depth
