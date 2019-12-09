@@ -155,5 +155,3 @@ def AddComplexity(EmissionGroups_old,index):
                             j += 1
                     
                 i += flag_len
-
-    
