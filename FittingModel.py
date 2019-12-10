@@ -47,13 +47,13 @@ def FitComponents(spectrum,base_model,base_param_names):
             accepted.append(i)
             accepted_models.append(model)
             accepted_names.append(param_names)
-    
+
     # Add new component
     spectrum.p['EmissionGroups'] = AddComplexity(spectrum.p['EmissionGroups'],accepted)
     model,param_names = BD.BuildModel(spectrum)
-    
+
     # Split Flux
-    model = SplitFlux(model,param_names)        
+    model = SplitFlux(model,param_names)
     
     # Fit model
     model = FitModel(spectrum,model)
@@ -82,11 +82,12 @@ def SplitFlux(model,param_names):
     numcomp = {}
     for param_name in param_names:
         if 'Flux' in param_name:
-            line = param_name.split('-')[-2]
-            if line not in numcomp.keys():
-                numcomp[line] = 1
-            else: 
-                numcomp[line] += 1
+            if model.parameters[param_names.index(param_name)] > 0:
+                line = param_name.split('-')[-2]
+                if line not in numcomp.keys():
+                    numcomp[line] = 1
+                else: 
+                    numcomp[line] += 1
     
     # Reduce flux of a line by number of components
     for i,param_name in enumerate(param_names):
@@ -117,7 +118,7 @@ def AddComplexity(EmissionGroups_old,index):
             if (species['Flag'] > 0):
 
                 # Flag
-                flag         = bin(species['Flag'])[2:]
+                flag         = bin(species['Flag'])[2:][::-1]
                 flag_len     = np.sum([int(bit) for bit in flag])
                 
                 # Check that our index is in the range
@@ -127,7 +128,7 @@ def AddComplexity(EmissionGroups_old,index):
                     j = 0
                         
                     # Iterate over bits in flag
-                    for bit in flag:
+                    for k,bit in enumerate(flag):
                         
                         # If we arrive at the correct index
                         if bit == '1':
@@ -137,9 +138,9 @@ def AddComplexity(EmissionGroups_old,index):
                             
                                 # Construct the added entry
                                 entry = {
-                                   'Name':species['Name'] + '-' + AC.ComponentName(j),
+                                   'Name':species['Name'] + '-' + AC.ComponentName(k),
                                    'Lines':species['Lines'],
-                                   'Flag': int('-0b1'+j*'0',2),
+                                   'Flag': int('-0b1'+k*'0',2),
                                    'FlagGroups':[]
                                 }
 

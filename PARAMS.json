@@ -17,6 +17,8 @@
             "Species": [
                 {
                     "Name":"[SII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 6716.31,
@@ -26,12 +28,12 @@
                             "Wavelength": 6730.68,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 0,
-                    "FlagGroups": []
+                    ]
                 },
                 {
                     "Name":"[NII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 6583.34,
@@ -41,12 +43,12 @@
                             "Wavelength": 6547.96,
                             "RelStrength": 0.34
                         }
-                    ],
-                    "Flag": 0,
-                    "FlagGroups": []
+                    ]
                 },
                 {
                     "Name":"[OIII]",
+                    "Flag": 1,
+                    "FlagGroups": ["Outflow"],
                     "Lines": [
                         {
                             "Wavelength": 5006.77,
@@ -56,42 +58,40 @@
                             "Wavelength": 4958.83,
                             "RelStrength": 0.35
                         }
-                    ],
-                    "Flag": 1,
-                    "FlagGroups": ["Outflow"]
+                    ]
                 },
                 {
                     "Name":"[NeIII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 3868.69,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 0,
-                    "FlagGroups": []
+                    ]
                 },
                 {
                     "Name":"[OII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 3727.38,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 0,
-                    "FlagGroups": []
+                    ]
                 },
                 {
                     "Name":"[NeV]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 3426.85,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 0,
-                    "FlagGroups": []
+                    ]
                 }
             ]
         },
@@ -102,25 +102,25 @@
             "Species": [
                 {
                     "Name":"Halpha",
+                    "Flag": 1,
+                    "FlagGroups": ["Broad"],
                     "Lines": [
                         {
                             "Wavelength": 6562.80,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 1,
-                    "FlagGroups": ["Broad"]
+                    ]
                 },
                 {
                     "Name":"Hbeta",
+                    "Flag": 3,
+                    "FlagGroups": ["Broad","Absorption"],
                     "Lines": [
                         {
                             "Wavelength": 4861.32,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 3,
-                    "FlagGroups": ["Broad","Absorption"]
+                    ]
                 }
             ]
         },

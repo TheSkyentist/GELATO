@@ -2,6 +2,7 @@
 
 # Packages
 import numpy as np
+from scipy import polyfit
 
 # HQUAILS supporting files
 import CustomModels as CM
@@ -28,6 +29,7 @@ def BuildModel(spectrum, EmissionGroups=None):
         
         # Add starting parameters
         inregion = np.logical_and(spectrum.wav > region[0],spectrum.wav < region[1])
+        # parameters = polyfit(spectrum.wav[inregion],spectrum.flux[inregion],deg=spectrum.p['BackgroundDeg'],w=spectrum.sqrtweight[inregion])[::-1]
         background.parameters[0] = np.median(spectrum.flux[inregion])
         
         # Add model
