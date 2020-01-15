@@ -41,8 +41,8 @@ def Plot(spectrum,model,path):
         # Are we plotting components?
         if spectrum.p['PlotComp']:
             # Plot components
-            for j,component in enumerate(model[ncols:]):
-                fax.step(wav,background(wav)+component(wav),'--',c=colors[j % len(colors)])
+            for j in range(ncols,model.n_submodels):
+                fax.step(wav,background(wav)+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
         else:
             fax.step(wav,model(wav),'r')
 

@@ -120,8 +120,8 @@ class ContinuumBackground(PolynomialModel):
 
     """
 
-    inputs = ('x',)
-    outputs = ('y',)
+    n_inputs = 1
+    n_outputs = 1
     _separable = True
 
     def __init__(self, degree, domain, n_models=None,
