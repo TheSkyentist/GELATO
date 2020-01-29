@@ -16,7 +16,6 @@ def BuildModel(spectrum, EmissionGroups=None):
     param_names    = []
     
     # Model
-    background_components = []
     model_components = []
         
     # Add background regions
@@ -34,10 +33,10 @@ def BuildModel(spectrum, EmissionGroups=None):
         background.parameters[0] = np.median(spectrum.flux[inregion])
         
         # Add model
-        background_components.append(background)
+        model_components.append(background)
         
         # Collect param names
-        for pname in background_components[-1].param_names:
+        for pname in model_components[-1].param_names:
             param_names.append(name+pname)
 
     # Check if we were passed an emission lines
@@ -64,11 +63,10 @@ def BuildModel(spectrum, EmissionGroups=None):
                 # Collect param names
                 for pname in model_components[-1].param_names:
                     param_names.append(name+pname)
-    model = (np.sum(background_components)) + (np.sum(model_components))
     ## Build Base Model
 
     ## Tie parameters ##
-    model = TieParams(spectrum,background + model,param_names,EmissionGroups)
+    model = TieParams(spectrum,np.sum(model_components),param_names,EmissionGroups)
     ## Tie parameters ##
 
     return model, param_names
