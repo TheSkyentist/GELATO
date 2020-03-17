@@ -70,7 +70,7 @@ def Plot(spectrum,model,path):
         rax.set_ylabel('Deviation',fontsize=15)
 
     # Add title and save figure
-    fig.suptitle(figname)
+    fig.suptitle(figname.replace('_','\_'))
     fig.tight_layout(rect = [0, 0, 1, 0.96])
     fig.savefig(spectrum.p['OutFolder'] + figname + '.pdf')
     plt.close(fig)

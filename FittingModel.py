@@ -72,7 +72,7 @@ def FitModel(spectrum,model):
 def FitBoot(spectrum,model):
 
     fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
-
+    
     return fit_model.parameters
 
 # Split flux between emission lines
@@ -92,7 +92,11 @@ def SplitFlux(model,param_names):
     # Reduce flux of a line by number of components
     for i,param_name in enumerate(param_names):
         if 'Flux' in param_name:
-            model.parameters[i] /= numcomp[param_name.split('-')[-2]]
+            n = numcomp[param_name.split('-')[-2]]
+            if n > 1:
+                parameters = model.parameters
+                parameters[i] = model.parameters[i]/n
+                model.parameters = parameters
             
     return model
 

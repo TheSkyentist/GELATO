@@ -1,5 +1,7 @@
 """ Main Function """
 
+import matplotlib.pyplot as plt
+
 # Packages
 import os
 import numpy as np
