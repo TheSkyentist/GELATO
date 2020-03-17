@@ -82,7 +82,7 @@ def SplitFlux(model,param_names):
     numcomp = {}
     for param_name in param_names:
         if 'Flux' in param_name:
-            if model.parameters[param_names.index(param_name)] > 0:
+            if model.parameters[param_names.index(param_name)] >= 0:
                 line = param_name.split('-')[-2]
                 if line not in numcomp.keys():
                     numcomp[line] = 1

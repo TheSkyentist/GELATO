@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 """ Wrapper for single HQUAILS run """
 
 # Packages
