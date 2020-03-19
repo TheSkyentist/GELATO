@@ -12,7 +12,7 @@ def Plot(spectrum,model,path):
     # Initialize Figure
     ncols   = len(spectrum.regions)
     figname = path.split('/')[-1].replace('.fits','')
-    if spectrum.p['PlotComp']: 
+    if spectrum.p['PlotComp']:
         figname += '-comp'
     else:
         figname += '-fit'
@@ -58,7 +58,7 @@ def Plot(spectrum,model,path):
 
         # Axis set
         ylim[0] = np.max((0,ylim[0]))
-        ylim[1] = ylim[1]*1.1
+        ylim[1] += (ylim[1] - ylim[0])/ 10
         fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
         fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
 
