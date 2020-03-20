@@ -120,8 +120,8 @@ class ContinuumBackground(PolynomialModel):
 
     """
 
-    n_inputs = 1
-    n_outputs = 1
+    inputs = ('x',)
+    outputs = ('y',)
     _separable = True
 
     def __init__(self, degree, domain, n_models=None,
@@ -182,17 +182,3 @@ class ContinuumBackground(PolynomialModel):
             for i in range(2, len(coeffs) + 1):
                 c0 = coeffs[-i] + c0 * x
         return c0
-
-    @property
-    def input_units(self):
-        if self.degree == 0 or self.c1.unit is None:
-            return None
-        else:
-            return {'x': self.c0.unit / self.c1.unit}
-
-    def _parameter_units_for_data_units(self, inputs_unit, outputs_unit):
-        mapping = []
-        for i in range(self.degree + 1):
-            par = getattr(self, 'c{0}'.format(i))
-            mapping.append((par.name, outputs_unit['y'] / inputs_unit['x'] ** i))
-        return OrderedDict(mapping)

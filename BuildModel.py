@@ -2,11 +2,11 @@
 
 # Packages
 import numpy as np
-from scipy import polyfit
 
 # HQUAILS supporting files
 import CustomModels as CM
 import AdditionalComponents as AC
+from astropy.modeling.models import Polynomial1D
 
 # Build the model from the EmissionGroups and spectrum with initial guess
 def BuildModel(spectrum, EmissionGroups=None):
@@ -26,10 +26,9 @@ def BuildModel(spectrum, EmissionGroups=None):
         
         # Generate model
         background = CM.ContinuumBackground(spectrum.p['BackgroundDeg'],region)
-        
+
         # Add starting parameters
         inregion = np.logical_and(spectrum.wav > region[0],spectrum.wav < region[1])
-        # parameters = polyfit(spectrum.wav[inregion],spectrum.flux[inregion],deg=spectrum.p['BackgroundDeg'],w=spectrum.sqrtweight[inregion])[::-1]
         background.c0 = np.median(spectrum.flux[inregion])
         
         # Add model

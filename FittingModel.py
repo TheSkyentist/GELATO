@@ -11,8 +11,6 @@ import BuildModel as BD
 import FischerTest as FT
 import AdditionalComponents as AC
 
-import matplotlib.pyplot as plt
-
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,base_model,base_param_names):
 
@@ -65,14 +63,12 @@ def FitModel(spectrum,model):
     
     # Fit model
     fit_model = fit(model,spectrum.wav,spectrum.flux,weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
-    
     return fit_model
 
 # Fit (Bootstrapped) Model
 def FitBoot(spectrum,model):
-
-    fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
     
+    fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
     return fit_model.parameters
 
 # Split flux between emission lines

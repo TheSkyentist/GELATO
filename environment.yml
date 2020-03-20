@@ -1,0 +1,6 @@
+name: HQUAILS
+dependencies:
+  - python=3.6.10
+  - astropy=3.2.3
+  - scipy
+  - matplotlib
