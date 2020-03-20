@@ -12,16 +12,21 @@ HQUAILS was designed to be run on SDSS spectra using a LM non-linear least squar
 Requirements
 -------------
 
-HQUAILS was developed using Astroconda.
-Instructions to install Astroconda can be found at:
-https://astroconda.readthedocs.io/en/latest/
+HQUAILS was developed using Astropy 3.2.3 and Python 3.6.10.
 
-Express dependencies at time of writing are:
-* Python 3.6.9
-* NumPy 1.17.3
-* AstroPy 3.2.3
-* SciPy 1.3.1
-* json 2.0.9
+To install the dependancies, I recommend installing conda (through [Miniconda](https://docs.conda.io/en/latest/miniconda.html)).
+
+The environment can be installed from the provided "environment.yml" file.
+```
+conda env create -f environment.yml
+```
+
+The environemnt will then be installed under the name HQUAILS and can then be activated.
+```
+conda activate HQUAILS
+```
+
+Whenever running HQUAILS scripts, it must be run from this enviroment.
 
 Installation
 -------------

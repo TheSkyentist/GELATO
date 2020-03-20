@@ -41,26 +41,27 @@ def Plot(spectrum,model,path):
         # Are we plotting components?
         if spectrum.p['PlotComp']:
             # Plot components
-            for j in range(ncols,model.n_submodels):
+            for j in range(ncols,model.n_submodels()):
                 fax.step(wav,background(wav)+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
         else:
             fax.step(wav,model(wav),'r')
 
-        # Plot Line Names
+        # Axis set
         ylim = list(fax.get_ylim())
+        ylim[0] = np.max((0,ylim[0]))
+        ylim[1] += (ylim[1] - ylim[0])/8
+        fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
+        fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+
+        # Plot Line Names
+        text_height = (np.max(flux) + ylim[1])/2
         for group in spectrum.p['EmissionGroups']:
             for species in group['Species']:
                 if species['Flag'] >= 0:
                     for line in species['Lines']:
                         x = line['Wavelength']*(1+spectrum.z)
                         if ((x < region[1]) and (x > region[0])):
-                            fax.text(x,ylim[1]*1.09,species['Name'],rotation=90,fontsize=12,ha='center',va='top')
-
-        # Axis set
-        ylim[0] = np.max((0,ylim[0]))
-        ylim[1] += (ylim[1] - ylim[0])/ 10
-        fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
-        fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+                            fax.text(x,text_height,species['Name'],rotation=90,fontsize=12,ha='center',va='center')
 
         # Residual Axis
         rax = fig.add_subplot(gs[1,i])
