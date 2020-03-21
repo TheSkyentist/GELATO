@@ -33,7 +33,7 @@ Whenever running HQUAILS scripts, it must be run from this environment.
 Installation
 -------------
 
-HQUAILS can be installed by cloning this Git repository.
+HQUAILS can be installed by cloning this git repository.
 
 In your working directory, **you need to copy the "matplotlibrc" file** to control the plotting settings. This is most important if you are running HQUAILS with multiprocessing as this file sets the matplotlib backed to "Agg", a non-interactive backend, required for generating and saving figures on multiple threads.
 
@@ -234,7 +234,7 @@ HQUAILS cast (in order of appearance)
 
 * FittingModel.py
 
-  Here are the scripts for fitting HQUAILS generated models and for testing the inclusion of additional parameters. To change the fitting algorithm, this file can be edited. 
+  Here are the scripts for fitting HQUAILS generated models and for testing the inclusion of additional parameters. To change the fitting algorithm, this file can be edited.
 
 * FischerTest.py
 
@@ -246,11 +246,11 @@ HQUAILS cast (in order of appearance)
 
 * ConcatenateResults.py
 
-  Scripts for concatenating results from a multi HQUAILS run. Can also be run independently on results after the fact. 
+  Scripts for concatenating results from a multi HQUAILS run. Can also be run independently on results after the fact.
 
 * matplotlibrc
 
-  A matplotlib settings file that controls the output of figures. Can be changed to the user's liking. However, for running HQUAILS on multiple threads, the backend must be set to a non-interactive backend, e.g. "Agg". 
+  A matplotlib settings file that controls the output of figures. Can be changed to the user's liking. However, for running HQUAILS on multiple threads, the backend must be set to a non-interactive backend, e.g. "Agg".
 
 * LICENSE
 
