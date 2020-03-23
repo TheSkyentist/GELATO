@@ -8,7 +8,7 @@ fit = fitting.LevMarLSQFitter()
 
 # HQUAILS supporting files
 import BuildModel as BD
-import FischerTest as FT
+import ModelComparison as MC
 import AdditionalComponents as AC
 
 # Construct Full Model with F-tests for additional parameters
@@ -41,7 +41,7 @@ def FitComponents(spectrum,base_model,base_param_names):
         model = FitModel(spectrum,model)
 
         # Perform F-test
-        if FT.FTest(spectrum,base_model,model):
+        if MC.FTest(spectrum,base_model,model):
             accepted.append(i)
             accepted_models.append(model)
             accepted_names.append(param_names)
