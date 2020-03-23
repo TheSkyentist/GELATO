@@ -28,17 +28,17 @@ def AddComponent(flag, line, spectrum):
     '''
     
     # Find index
-    flag     = bin(flag)[3:]
-    index     = len(flag) - flag.index('1') - 1
-    
-    
+    flag = bin(flag)[3:]
+    index = len(flag) - flag.index('1') - 1
+
+
     ''' Broad '''
     if index == 0: 
     
         # Broad line model
         # Use wider default dispersion
         model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 500)
-        model.Dispersion.bounds = (100,1000)
+        model.Dispersion.bounds = (400,1000)
 
         return model
 
