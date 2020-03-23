@@ -21,7 +21,7 @@ class SpectralFeature(Fittable1DModel):
     # Parameters
     Redshift     = Parameter(default=0)
     Flux         = Parameter(default=0) # Must be non-negative for emission
-    Dispersion    = Parameter(default=150,bounds=(75,500)) # Reasonable range
+    Dispersion    = Parameter(default=150,bounds=(120,500)) # Reasonable range
 
     def __init__(self, center, spectrum, Dispersion = Dispersion.default, **kwargs):
         

@@ -276,4 +276,4 @@ FAQ
 
 **Do you mean velocity offsets, not redshifts?**
 
-*Each emission line is characterized by a redshift, which is trivial to convert to a velocity offset once a reference line is chosen. However this requires the user to choose a reference line. HQUAILS remains agnostic to this procedure and simply returns the redshift of each line. A wrapper will be produced eventually to do this task.*
+*Each emission line is characterized by a redshift, which is trivial to convert to a velocity offset once a reference line is chosen. However this requires the user to choose a reference line. HQUAILS remains agnostic to this procedure and simply returns the redshift of each line.*
