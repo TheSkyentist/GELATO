@@ -44,9 +44,9 @@ How it works
 
 2. The base model is then constructed based on the emission line dictionary. The starting values are generated based on the spectrum. The model is then fit to the spectrum. The default fitting minimization is the Levenberg–Marquardt non-linear least squares algorithm. This can be adjusted.
 
-3. The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing and F-test. All accepted additional components are then collected and incorporated into the final model.
+3. The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing and F-test. The combinations of all accepted additional components are then then tested by measuring their AICs. The model set with the lowest AIC is the final model.
 
-4. In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again. This process is repeated as many times as required by the user. 
+4. In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again. This process is repeated as many times as required by the user.
 
 5. The full set of bootstrapped parameters is then saved to disk. Finally, a figure of the final fit is produced and saved. There exists a convenience function for finding the median values of each spectrum model fit and collecting them into one final table.
 
@@ -96,13 +96,13 @@ The "PARAMS.json" file in the directory gives a good example of how to take adva
 
 1. Name: NLR. Here these features have not been set to share redshifts nor dispersions. It has a list of species:
    1. Name: SII. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
-      * A line with a rest wavelength of 6716.31 and a relative flux of null. 
+      * A line with a rest wavelength of 6716.31 and a relative flux of null.
       * A line with a rest wavelength of 6730.68 and a relative flux of null. This means the line fluxes are completely independent.
    2. Name: NII. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
-      * A line with a rest wavelength of 6583.34 and a relative flux of 1. 
+      * A line with a rest wavelength of 6583.34 and a relative flux of 1.
       * A line with a rest wavelength of 6547.96 and a relative flux of 0.34. This means this line will always have 0.34/1 times the flux of the first line.
-   3. OIII. These features will share the same velocity dispersion and redshift. In addition, these have been flagged with a 1, which corresponds to an larger velocity component. This additional component will be placed in its own new group, which will be labelled "Outflow". It is made out of two lines.
-      * A line with a rest wavelength of 5006.77 and a relative flux of 1. 
+   3. OIII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an outflowing velocity component. This additional component will be placed in its own new group, which will be labelled "Outflow". It is made out of two lines.
+      * A line with a rest wavelength of 5006.77 and a relative flux of 1.
       * A line with a rest wavelength of 4958.83 and a relative flux of 0.35. This means this line will always have 0.35/1 times the flux of the first line.
    4. Name: [NeIII]. Singlet line with no flags.
    5. Name: [OII]. Singlet line with no flags.
@@ -110,7 +110,7 @@ The "PARAMS.json" file in the directory gives a good example of how to take adva
 2. Name: Stars. Here these features are set to share redshifts and dispersions. It has a list of species:
    1. Halpha. A singlet line flagged with a 1, which corresponds to an larger velocity component. This additional component will be placed the group named "Broad". It is made out of one line.
       * A line with a rest wavelength of 6562.80 and a relative flux of null.
-   2. Hbeta. These have been flagged with a 3, or in binary, 11. This corresponds to both a larger velocity component and an absorption component. These will be placed in the "Broad" and "Absorption" groups respectively. It is made out of one line.
+   2. Hbeta. These have been flagged with a 5, or in binary, 101. This corresponds to both a larger velocity component and an absorption component. These will be placed in the "Broad" and "Absorption" groups respectively. It is made out of one line.
       * A line with a rest wavelength of 4861.32 and a relative flux of 1. Since there is only one line, the relative flux value does not matter.
 3. Name: Outflow. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will not share redshifts and dispersions.
 4. Name: Broad. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will share redshifts and dispersions. E.g. if both "Broad" lines are accepted (from Hbeta and Halpha), they will share the same redshift and dispersion by design.
@@ -166,7 +166,7 @@ python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spe
 
 Running the Example
 -------------
-Here are the following instructions to run HQUAILS. This tutorial assumes you start in the Example directory. First we need to activate our astroconda environment. 
+Here are the following instructions to run HQUAILS. This tutorial assumes you start in the Example directory. First we need to activate our astroconda environment.
 
 ```bash
 conda activate HQUAILS
@@ -236,9 +236,9 @@ HQUAILS cast (in order of appearance)
 
   Here are the scripts for fitting HQUAILS generated models and for testing the inclusion of additional parameters. To change the fitting algorithm, this file can be edited.
 
-* FischerTest.py
+* ModelComparison.py
 
-  Here are scripts for performing an F-test to test whether the inclusion of an additional model parameter is statistically better.
+  Here are scripts for model comparison and selection, including F-Tests and AIC calculation.
 
 * Plotting.py
 

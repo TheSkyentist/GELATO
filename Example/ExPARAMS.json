@@ -3,11 +3,11 @@
     "RegionWidth": 100,
     "BackgroundDeg": 1,
     "MaxIter": 1000,
-    "NBoot": 100,
+    "NBoot": 20,
     "FThresh": 0.95,
-    "NProcess": 1,
+    "NProcess": 5,
     "Plotting": true,
-    "PlotComp": false,
+    "PlotComp": true,
     "Concatenate": false,
     "EmissionGroups": [
         {
@@ -57,7 +57,7 @@
                             "RelStrength": 0.35
                         }
                     ],
-                    "Flag": 1,
+                    "Flag": 2,
                     "FlagGroups": ["Outflow"]
                 },
                 {
@@ -119,7 +119,7 @@
                             "RelStrength": null
                         }
                     ],
-                    "Flag": 3,
+                    "Flag": 5,
                     "FlagGroups": ["Broad","Absorption"]
                 }
             ]
