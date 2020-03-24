@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 """ Concatenate Results """
 
 # Import packages

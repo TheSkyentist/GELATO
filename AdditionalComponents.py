@@ -17,6 +17,9 @@ def ComponentName(index):
         return 'Broad'
 
     if index == 1:
+        return 'Outflow'
+
+    if index == 2:
         return 'Absorption'
 
 def AddComponent(flag, line, spectrum):
@@ -28,29 +31,39 @@ def AddComponent(flag, line, spectrum):
     '''
     
     # Find index
-    flag     = bin(flag)[3:]
-    index     = len(flag) - flag.index('1') - 1
-    
-    
+    flag = bin(flag)[3:]
+    index = len(flag) - flag.index('1') - 1
+
+
     ''' Broad '''
     if index == 0: 
     
         # Broad line model
         # Use wider default dispersion
         model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 500)
-        model.Dispersion.bounds = (100,1000)
+        model.Dispersion.bounds = (750,10000)
+
+        return model
+
+    ''' Outflow '''
+    if index == 1: 
+    
+        # Broad line model
+        # Use wider default dispersion
+        model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 500)
+        model.Dispersion.bounds = (500,1000)
 
         return model
 
     ''' Absorption '''
-    if index == 1: 
+    if index == 2: 
     
         # Absorption line model
         # Use wider default dispersion        
         model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 600)
         originalsigma = model.Dispersion.bounds[1]
         originalflux = model.Flux.value
-        model.Dispersion.bounds = (350,1000)
+        model.Dispersion.bounds = (350,3000)
         model.Flux.bounds = (-model.Flux.bounds[1]*1000/originalsigma,0) # Must be non-positive
 
         model.Redshift = spectrum.z - 0.005

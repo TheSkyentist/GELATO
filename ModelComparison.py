@@ -12,7 +12,7 @@ def FTest(spectrum,model1,model2):
     else: 
         model_full = model1
         model_redu = model2
-    
+
     # Degrees of freedom
     N = 0
     for region in spectrum.regions:
@@ -30,6 +30,15 @@ def FTest(spectrum,model1,model2):
 
     # Greater than threshold?
     return F_distrib.cdf(F_value) > spectrum.p['FThresh']
+
+# Calculate Akaike Information Criterion
+def AIC(model,spectrum):
+
+    # Model parameters
+    k = np.sum([val == False for val in model.tied.values()])
+
+    # Correct up to a constant
+    return Chi2(model,spectrum.wav,spectrum.flux,spectrum.weight) + 2*k
 
 # Chi Squared of model
 def Chi2(model,x,y,weights):

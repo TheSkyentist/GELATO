@@ -3,12 +3,13 @@
 # Packages
 import copy
 import numpy as np
+from itertools import combinations
 from astropy.modeling import fitting
 fit = fitting.LevMarLSQFitter()
 
 # HQUAILS supporting files
 import BuildModel as BD
-import FischerTest as FT
+import ModelComparison as MC
 import AdditionalComponents as AC
 
 # Construct Full Model with F-tests for additional parameters
@@ -24,10 +25,10 @@ def FitComponents(spectrum,base_model,base_param_names):
             flagbits = bin(species['Flag'])[2:]
             flags += len(flagbits.replace('0',''))
 
-    # F-tests
+    ## Use F-test for additional component selection
+    # Keep track of accepted flags
     accepted = []
-    accepted_models = []
-    accepted_names = []
+    # Iterate over additional components
     for i in range(flags):
         
         # Add new component
@@ -41,12 +42,37 @@ def FitComponents(spectrum,base_model,base_param_names):
         model = FitModel(spectrum,model)
 
         # Perform F-test
-        if FT.FTest(spectrum,base_model,model):
-            accepted.append(i)
-            accepted_models.append(model)
-            accepted_names.append(param_names)
+        if MC.FTest(spectrum,base_model,model):
+                accepted.append(i)
 
-    # Add new component
+
+    ## Check all combinations of accepted components with AICs
+    # All combinations
+    combs = sum([list(combinations(accepted,i+1)) for i in range(len(accepted))],[])
+
+    # Initialize AIC list
+    AICs = np.zeros(len(combs))
+
+    # Iterate over all combinations and record AICs
+    for i,c in enumerate(combs):
+
+        # Add new components
+        EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],c)
+        model,param_names = BD.BuildModel(spectrum,EmissionGroups)
+
+        # Split Flux
+        model = SplitFlux(model,param_names)
+
+        # Fit model
+        model = FitModel(spectrum,model)
+
+        # Calcualte AIC
+        AICs[i] = MC.AIC(model,spectrum)
+
+    # Use min AIC
+    accepted = combs[np.argmin(AICs)]
+
+    # Construct Final Model
     spectrum.p['EmissionGroups'] = AddComplexity(spectrum.p['EmissionGroups'],accepted)
     model,param_names = BD.BuildModel(spectrum)
 
