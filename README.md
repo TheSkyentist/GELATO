@@ -226,11 +226,11 @@ HQUAILS cast (in order of appearance)
 
 * CustomModels.py
 
-  Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum background. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame.
+  Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum background. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can bs set. 
 
 * AdditionalComponents.py
 
-  Here are where the additional components are defined along with their bit flag positions. In order to add extra additional components, this file can be easily extended to include more models.
+  Here are where the additional components are defined along with their bit flag positions. In order to add extra additional components, this file can be easily extended to include more models. This is where the velocity dispersion limits on additional components can be modified.
 
 * FittingModel.py
 
