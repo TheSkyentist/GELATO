@@ -45,7 +45,6 @@ def FitComponents(spectrum,base_model,base_param_names):
         if MC.FTest(spectrum,base_model,model):
                 accepted.append(i)
 
-
     ## Check all combinations of accepted components with AICs
     # All combinations
     combs = sum([list(combinations(accepted,i+1)) for i in range(len(accepted))],[])
@@ -70,7 +69,10 @@ def FitComponents(spectrum,base_model,base_param_names):
         AICs[i] = MC.AIC(model,spectrum)
 
     # Use min AIC
-    accepted = combs[np.argmin(AICs)]
+    if combs != []:
+        accepted = combs[np.argmin(AICs)]
+    else: 
+        accepted = []
 
     # Construct Final Model
     spectrum.p['EmissionGroups'] = AddComplexity(spectrum.p['EmissionGroups'],accepted)
