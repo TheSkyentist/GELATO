@@ -4,7 +4,7 @@
     "BackgroundDeg": 1,
     "MaxIter": 1000,
     "NBoot": 500,
-    "FThresh": "0.95",
+    "FThresh": 0.95,
     "NProcess": 1,
     "Plotting": true,
     "PlotComp": true,
