@@ -4,7 +4,6 @@
 
 # Import packages
 import numpy as np
-import pandas as pd
 import astropy.io.fits as pyfits
 from astropy.table import Table,vstack
 
