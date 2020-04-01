@@ -3,8 +3,10 @@
 # Packages
 import copy
 import numpy as np
-import astropy.io.fits as pyfits
-import matplotlib.pyplot as plt
+from astropy.io import fits
+
+# Constants
+C = 299792.458 # km/s
 
 class Spectrum:
     
@@ -17,7 +19,7 @@ class Spectrum:
         self.z = z
 
         # Load Spectrum
-        spectrum = pyfits.getdata(path,1)
+        spectrum = fits.getdata(path,1)
 
         # Only take good values
         weight = spectrum['ivar']
@@ -41,16 +43,14 @@ class Spectrum:
         for group in self.p['EmissionGroups']:
             for species in group['Species']:
                 for line in species['Lines']:
-                    linewav = line['Wavelength']
-                    self.regions.append([(1+self.z)*(linewav-self.p['RegionWidth']),(1+self.z)*(linewav+self.p['RegionWidth'])])
+                    linewav = line['Wavelength']*(1+self.z)
+                    
+                    # Ensure there is spectral coverage of the line
+                    linewidth = linewav*self.p['LineDataWidth']/(2*C)
+                    if np.logical_and(np.any(self.wav > linewav + linewidth),np.any(self.wav < linewav - linewidth)):
+                        dellam = linewav*self.p['RegionWidth']/(2*C)
+                        self.regions.append([np.max([linewav - dellam,self.wav[0]]), np.min([linewav + dellam,self.wav[-1]])])
 
-        # Check if there is spectral coverage of the regions
-        for region in copy.deepcopy(self.regions):
-            # If not...
-            if np.sum(np.logical_and(self.wav > region[0],self.wav < region[1])) == 0:
-                 # ...remove region
-                self.regions.remove(region)
-            
         # Remove emission lines not in regions
         # For each emission line
         eG = copy.deepcopy(self.p['EmissionGroups'])

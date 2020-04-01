@@ -4,7 +4,7 @@ from astropy.modeling import Fittable1DModel,Parameter
 from astropy.modeling.polynomial import PolynomialModel
 import numpy as np
 
-# Global vars
+# Constants
 FLOAT_EPSILON = float(np.finfo(np.float32).tiny)
 GAUSSIAN_Sigma_TO_FWHM = 2.0 * np.sqrt(2.0 * np.log(2.0))
 SQRT_2_PI = np.sqrt(2*np.pi)
@@ -25,20 +25,26 @@ class SpectralFeature(Fittable1DModel):
 
     def __init__(self, center, spectrum, Dispersion = Dispersion.default, **kwargs):
         
-        # Find starting height
         # Find corresponding region
         for region in spectrum.regions:
             if (center*(1+spectrum.z) < region[1]) and (center*(1+spectrum.z) > region[0]):
                 break
         inregion = np.logical_and(spectrum.wav > region[0],spectrum.wav < region[1])
-        Height = np.abs(spectrum.flux[np.argmin(np.abs(spectrum.wav - center*(1+spectrum.z)))] - np.median(spectrum.flux[inregion]))
-        Flux = Height * (1 + spectrum.z) * Dispersion * center * SQRT_2_PI / C
+
+        # Find region associated with emission line
+        linewav = center*(1+spectrum.z)
+        linewidth = linewav*spectrum.p['LineDataWidth']/(2*C)
+        inline = np.logical_and(spectrum.wav > linewav - linewidth,spectrum.wav < linewav + linewidth)
         
+        # Find starting height and then flux
+        Height = np.abs(np.max(spectrum.flux[inline]) - np.median(spectrum.flux[inregion]))
+        Flux = Height * (1 + spectrum.z) * Dispersion * center * SQRT_2_PI / C
+
         # Set parameters
         self.center = center
         self.domain = region
         super().__init__(Redshift = spectrum.z, Flux=Flux, Dispersion=Dispersion, **kwargs)
-        self.Redshift.bounds = (spectrum.z - 0.01,spectrum.z + 0.01)
+        self.Redshift.bounds = (spectrum.z - 0.005,spectrum.z + 0.005)
         self.Flux.bounds = (0,1.5*Flux*self.Dispersion.bounds[1]/self.Dispersion) # Set positive bounds
 
     @property

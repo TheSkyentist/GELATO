@@ -40,9 +40,13 @@ def AddComponent(flag, line, spectrum):
     
         # Broad line model
         # Use wider default dispersion
-        model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 500)
-        model.Dispersion.bounds = (750,10000)
+        model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 1000)
 
+        # Reassignflux bounds
+        oldMaxDispersion = model.Dispersion.bounds[1]
+        model.Dispersion.bounds = (750,10000)
+        model.Flux.bounds = (0,1.5*model.Flux*model.Dispersion.bounds[1]/oldMaxDispersion)
+        
         return model
 
     ''' Outflow '''
@@ -61,11 +65,13 @@ def AddComponent(flag, line, spectrum):
         # Absorption line model
         # Use wider default dispersion        
         model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 600)
-        originalsigma = model.Dispersion.bounds[1]
-        originalflux = model.Flux.value
-        model.Dispersion.bounds = (350,3000)
-        model.Flux.bounds = (-model.Flux.bounds[1]*1000/originalsigma,0) # Must be non-positive
 
-        model.Redshift = spectrum.z - 0.005
-        model.Flux = -originalflux*model.Dispersion/originalsigma/2
+        # Reassign Flux
+        oldMaxDispersion = model.Dispersion.bounds[1]
+        oldFlux = model.Flux.value
+        model.Dispersion.bounds = (350,3000)
+        model.Flux.bounds = (-model.Flux.bounds[1]*1000/oldMaxDispersion,0) # Must be non-positive
+
+        model.Redshift = spectrum.z
+        model.Flux = -oldFlux*model.Dispersion/oldMaxDispersion/2
         return model

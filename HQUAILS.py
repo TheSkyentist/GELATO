@@ -29,6 +29,7 @@ def HQUAILS(params,path,z):
 
     ## Fit Additional Components ##
     model,param_names = FM.FitComponents(spectrum,model,param_names)
+    param_names = np.concatenate([param_names,['rChi2']])
     print("Additional components added:",name)
 
     # Bootstrap
@@ -46,7 +47,7 @@ def HQUAILS(params,path,z):
     ## Plotting ##
     if params['Plotting']:
         # Set model parameters to median values
-        model.parameters = np.median(parameters,0)
+        model.parameters = np.median(parameters,0)[:-1]
         PL.Plot(spectrum,model,path)
         print("Figure saved:",name)
 

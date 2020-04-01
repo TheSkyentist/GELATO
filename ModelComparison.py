@@ -44,3 +44,10 @@ def AIC(model,spectrum):
 def Chi2(model,x,y,weights):
     r = y - model(x) # Residual
     return np.sum(r*r*weights)
+
+# Reduce Chi Squared of model
+def rChi2(spectrum,model):
+    # Degrees of freedom
+    N = np.sum([np.sum(np.logical_and(region[0] < spectrum.wav,spectrum.wav < region[1])) for region in spectrum.regions])
+    dof = N - np.sum([val == False for val in model.tied.values()])
+    return Chi2(model,spectrum.wav,spectrum.flux,spectrum.weight)/dof

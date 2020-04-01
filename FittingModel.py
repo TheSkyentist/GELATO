@@ -97,7 +97,7 @@ def FitModel(spectrum,model):
 def FitBoot(spectrum,model):
     
     fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
-    return fit_model.parameters
+    return np.concatenate([fit_model.parameters,[MC.rChi2(spectrum,fit_model)]])
 
 # Split flux between emission lines
 def SplitFlux(model,param_names):
