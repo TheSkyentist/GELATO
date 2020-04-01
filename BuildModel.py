@@ -92,12 +92,13 @@ def TieParams(spectrum,model,param_names,EmissionGroups):
                     first_group_member = False
                     TieGroupRedshift = GenTieFunc(param_names.index(name+'Redshift'))
                     TieGroupDispersion = GenTieFunc(param_names.index(name+'Dispersion'))
-                # Otherwise tie redshift (check if we should)
-                elif group['TieRedshift']:
-                    model.tied[model.param_names[param_names.index(name+'Redshift')]] = TieGroupRedshift
-                # Otherwise tie dispersion (check if we should)
-                elif group['TieSigma']:
-                    model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieGroupDispersion
+                else:
+                    # Otherwise tie redshift (check if we should)
+                    if group['TieRedshift']:
+                        model.tied[model.param_names[param_names.index(name+'Redshift')]] = TieGroupRedshift
+                    # Otherwise tie dispersion (check if we should)
+                    if group['TieSigma']:
+                        model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieGroupDispersion
                     
                 ## Tie Species Components
                 # Tie Dispersion and Redshift
