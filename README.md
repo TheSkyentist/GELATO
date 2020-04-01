@@ -58,7 +58,8 @@ Parameter File
 The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And example parameter file is included in the repository.
 
 * Outfolder: This parameter is the path to the output directory. 
-* RegionWidth: The border around emission lines (same units as spectrum wavelength).
+* RegionWidth: The border around emission lines in velocity space that is fit (km/s).
+* LineDataWidth: The border around an emission line that must be contained within the spectrum in order to be fit, also where the flux is calculate to assign an initial value.
 * BackgroundDeg: Degree of polynomial for continuum background.
 * MaxIter: Maximum number of minimization algorithm iterations.
 * NBoot: Number of bootstrap iterations to constrain error on parameters.
