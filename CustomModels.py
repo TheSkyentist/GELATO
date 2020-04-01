@@ -34,8 +34,9 @@ class SpectralFeature(Fittable1DModel):
         # Find region associated with emission line
         linewav = center*(1+spectrum.z)
         linewidth = linewav*spectrum.p['LineDataWidth']/(2*C)
+
         inline = np.logical_and(spectrum.wav > linewav - linewidth,spectrum.wav < linewav + linewidth)
-        
+
         # Find starting height and then flux
         Height = np.abs(np.max(spectrum.flux[inline]) - np.median(spectrum.flux[inregion]))
         Flux = Height * (1 + spectrum.z) * Dispersion * center * SQRT_2_PI / C
