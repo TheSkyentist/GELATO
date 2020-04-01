@@ -114,7 +114,7 @@
                 },
                 {
                     "Name":"Hbeta",
-                    "Flag": 3,
+                    "Flag": 5,
                     "FlagGroups": ["Broad","Absorption"],
                     "Lines": [
                         {
