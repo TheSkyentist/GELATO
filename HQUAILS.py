@@ -59,7 +59,8 @@ def HQUAILS(params,path,z):
         if params['Verbose']:
             print("Figure saved:",name)
 
-    print("HQUAILS finished running on:",name)
+    if params['Verbose']:
+        print("HQUAILS finished running on:",name)
 
 def header():
     print("Welcome to HQUAILS")
