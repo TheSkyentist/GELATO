@@ -17,39 +17,47 @@ import SpectrumClass as SC
 def HQUAILS(params,path,z):
 
     name = path.split('/')[-1]
-    print("HQUAILS running for",name)
+    if params['Verbose']:
+        print("HQUAILS running for",name)
 
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(path,z,params)
-    print("Loaded spectrum:",name)
+    if params['Verbose']:
+        print("Loaded spectrum:",name)
 
     ## Create Base Model ##
     model,param_names = BM.BuildModel(spectrum)
-    print("Base model created:",name)
+    if params['Verbose']:
+        print("Base model created:",name)
 
     ## Fit Additional Components ##
     model,param_names = FM.FitComponents(spectrum,model,param_names)
     param_names = np.concatenate([param_names,['rChi2']])
-    print("Additional components added:",name)
+    if params['Verbose']:
+        print("Additional components added:",name)
 
     # Bootstrap
-    print("Beginning bootstrap (this may take a while):",name)
+    if params['Verbose']:
+        print("Beginning bootstrap (this may take a while):",name)
     parameters = np.array([FM.FitBoot(spectrum,model) for i in range(params['NBoot'])])
-    print("Bootstrap iterations finished:",name)
+    if params['Verbose']:
+        print("Bootstrap iterations finished:",name)
 
     ## Save Results
     if not os.path.exists(params['OutFolder']):
         os.mkdir(params['OutFolder'])
 
     Table(data=parameters,names=param_names).write(params['OutFolder']+name.replace('.fits','-results.fits'),overwrite=True)
-    print("Results saved:",name)
+    if params['Verbose']:
+        print("Results saved:",name)
 
     ## Plotting ##
     if params['Plotting']:
         # Set model parameters to median values
         model.parameters = np.median(parameters,0)[:-1]
         PL.Plot(spectrum,model,path)
-        print("Figure saved:",name)
+        if params['Verbose']:
+            print("Figure saved:",name)
 
     print("HQUAILS finished running on:",name)
 

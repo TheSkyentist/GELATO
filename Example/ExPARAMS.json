@@ -10,6 +10,7 @@
     "Plotting": true,
     "PlotComp": true,
     "Concatenate": false,
+    "Verbose": false,
     "EmissionGroups": [
         {
             "Name":"NLR",
