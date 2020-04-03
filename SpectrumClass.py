@@ -40,42 +40,27 @@ class Spectrum:
 
         # Find regions and emission line lists
         self.regions = []
-        for group in self.p['EmissionGroups']:
+        eG = copy.deepcopy(self.p['EmissionGroups'])
+        for group in eG:
             for species in group['Species']:
                 for line in species['Lines']:
                     linewav = line['Wavelength']*(1+self.z)
 
                     # Ensure there is spectral coverage of the line
                     linewidth = linewav*self.p['LineDataWidth']/(2*C)
-                    
                     if (np.any(self.wav > linewav + linewidth) and np.any(self.wav < linewav - linewidth) and (np.sum(np.logical_and(self.wav < linewav + linewidth,self.wav > linewav - linewidth)) > 0)):
-
+                        
+                        # Add region
                         dellam = linewav*self.p['RegionWidth']/(2*C)
                         self.regions.append([np.max([linewav - dellam,self.wav[0]]), np.min([linewav + dellam,self.wav[-1]])])
 
-        # Remove emission lines not in regions
-        # For each emission line
-        eG = copy.deepcopy(self.p['EmissionGroups'])
-        for group in eG:
-            gname = group['Name']
-            for species in group['Species']:
-                sname = species['Name']
-                for line in species['Lines']:
-                    linewav = line['Wavelength']
-
-                    # Check for removal
-                    remove = True # Initialize as removing
-                    for region in self.regions: # Check if it is in any region
-                        if (region[0] < linewav*(1+self.z)) and (linewav*(1+self.z) < region[1]):
-                            remove = False # If it is, set as remove 
-                    
-                    # Remove if necessary
-                    if remove:
+                    # Else remove the line
+                    else: 
                         for g in self.p['EmissionGroups']:
                             for s in g['Species']:
                                 for l in s['Lines']:
                                     # Check if the same then remove
-                                    if ((g['Name'] == gname) and (s['Name'] == sname) and (l['Wavelength'] == linewav)):
+                                    if ((g['Name'] == group['Name']) and (s['Name'] == species['Name']) and (l['Wavelength'] == line['Wavelength'])):
                                         s['Lines'].remove(l)
                                 # If species is empty, delete it
                                 if (len(s['Lines']) == 0):
