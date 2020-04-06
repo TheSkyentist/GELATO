@@ -88,8 +88,8 @@ def plotfromresults(params,path,z):
 
         ## Load Results ##
         parameters = pyfits.getdata(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits'),1)
-        median = np.array([np.median(parameters[n]) for n in parameters.columns.names])
-
+        median = np.array([np.median(parameters[n]) for n in parameters.columns.names])[:-1]
+        
         ## Create model ##
         model = []
         # Add background

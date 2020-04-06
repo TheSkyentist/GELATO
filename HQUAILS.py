@@ -16,6 +16,11 @@ import SpectrumClass as SC
 # Get fit parameters for spectrum
 def HQUAILS(params,path,z):
 
+    ## Create Directory for Output
+    if not os.path.exists(params["OutFolder"]):
+        os.mkdir(params["OutFolder"])
+
+    # Get name of file
     name = path.split("/")[-1]
     if params["Verbose"]:
         print("HQUAILS running for",name)
@@ -59,10 +64,6 @@ def HQUAILS(params,path,z):
         parameters = []
         if params["Verbose"]:
             print("No lines with spectral coverage:",name)
-
-    ## Save Results
-    if not os.path.exists(params["OutFolder"]):
-        os.mkdir(params["OutFolder"])
 
     Table(data=parameters,names=param_names).write(params["OutFolder"]+name.replace(".fits","-results.fits"),overwrite=True)
     if params["Verbose"]:
