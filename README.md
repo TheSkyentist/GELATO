@@ -5,7 +5,7 @@ HQUAILS
 
 HQUAILS is a Python code designed to fit emission lines in the spectra of active galactic nuclei. In particular, it was built in order to fit AGN spectra where many of the parameters of the emission lines are tied with respect to one another. HQUAILS attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines).
 
-HQUAILS was also built in order to test the inclusion of additional fitting parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? HQUAILS builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test.
+HQUAILS was also built in order to test the inclusion of additional fitting parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? HQUAILS builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test and then comparisons of Akaike Information Criteria.
 
 HQUAILS was designed to be run on SDSS spectra using a LM non-linear least squares algorithm with Gaussian line profiles. However, it is written in such a way that these assumptions can be switched out as needed. Please read through the entire documentation to see how this can be done.
 
@@ -264,6 +264,10 @@ HQUAILS is an open-source software available under the GNU General Public Licens
 
 FAQ
 -------------
+**How can I load spectra from other sources?
+
+*By editing the SpectrumClass.py file, you can customize how spectra are loaded into HQUAILS.
+
 **Why is it spelled HQUAILS but pronounced Quails?**
 
 *The author of the code, R. E. Hviding (pronounced VEE-ding) thought it important to draw attention to names that start with an H where the H is not pronounced.*
@@ -274,7 +278,7 @@ FAQ
 
 **What are the units?**
 
-*As long as your RegionWidth, line Wavelengths, and spectrum wavelengths are all in the same units, the fitting will work. Dispersions are given in km/s. The units in plotting can be changed in the Plotting.py file.*
+*RegiondWidths and LineDataWidths are quoted velocity space and are given in km/s. The units in plotting can be changed in the Plotting.py file.*
 
 **Do you mean velocity offsets, not redshifts?**
 
