@@ -157,13 +157,13 @@ python ~/Documents/HQUAILS/Plotting.py ~/Example/PARAMS.json --Spectrum ~/Data/s
 For multiple plots:
 
 ```bash
-python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
+python ~/Documents/HQUAILS/Plotting.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
 ```
 
 The concatenated results for HQUAILS can also be created directly the results files in the following manners:
 
 ```bash
-python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
+python ~/Documents/HQUAILS/ConcatResults.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
 ```
 
 Running the Example
