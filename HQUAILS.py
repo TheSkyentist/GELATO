@@ -16,50 +16,59 @@ import SpectrumClass as SC
 # Get fit parameters for spectrum
 def HQUAILS(params,path,z):
 
-    name = path.split('/')[-1]
-    if params['Verbose']:
+    name = path.split("/")[-1]
+    if params["Verbose"]:
         print("HQUAILS running for",name)
 
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(path,z,params)
-    if params['Verbose']:
+    if params["Verbose"]:
         print("Loaded spectrum:",name)
 
     ## Create Base Model ##
     model,param_names = BM.BuildModel(spectrum)
-    if params['Verbose']:
+    if params["Verbose"]:
         print("Base model created:",name)
 
-    ## Fit Additional Components ##
-    model,param_names = FM.FitComponents(spectrum,model,param_names)
-    param_names = np.concatenate([param_names,['rChi2']])
-    if params['Verbose']:
-        print("Additional components added:",name)
+    # Check if any of the lines can be fit
+    if param_names != []:
 
-    # Bootstrap
-    if params['Verbose']:
-        print("Beginning bootstrap (this may take a while):",name)
-    parameters = np.array([FM.FitBoot(spectrum,model) for i in range(params['NBoot'])])
-    if params['Verbose']:
-        print("Bootstrap iterations finished:",name)
+        ## Fit Additional Components ##
+        model,param_names = FM.FitComponents(spectrum,model,param_names)
+        param_names = np.concatenate([param_names,["rChi2"]])
+        if params["Verbose"]:
+            print("Additional components added:",name)
+
+        # Bootstrap
+        if params["Verbose"]:
+            print("Beginning bootstrap (this may take a while):",name)
+        parameters = np.array([FM.FitBoot(spectrum,model) for i in range(params["NBoot"])])
+        if params["Verbose"]:
+            print("Bootstrap iterations finished:",name)
+
+        ## Plotting ##
+        if params["Plotting"]:
+            model.parameters = np.median(parameters,0)[:-1]
+            # Set model parameters to median values
+            PL.Plot(spectrum,model,path)
+            if params["Verbose"]:
+                print("Figure saved:",name)
+
+    # Otherwise:
+    else:
+        parameters = []
+        if params["Verbose"]:
+            print("No lines with spectral coverage:",name)
 
     ## Save Results
-    if not os.path.exists(params['OutFolder']):
-        os.mkdir(params['OutFolder'])
+    if not os.path.exists(params["OutFolder"]):
+        os.mkdir(params["OutFolder"])
 
-    Table(data=parameters,names=param_names).write(params['OutFolder']+name.replace('.fits','-results.fits'),overwrite=True)
-    if params['Verbose']:
+    Table(data=parameters,names=param_names).write(params["OutFolder"]+name.replace(".fits","-results.fits"),overwrite=True)
+    if params["Verbose"]:
         print("Results saved:",name)
 
-    ## Plotting ##
-    if params['Plotting']:
-        # Set model parameters to median values
-        model.parameters = np.median(parameters,0)[:-1]
-        PL.Plot(spectrum,model,path)
-        if params['Verbose']:
-            print("Figure saved:",name)
-
-    if params['Verbose']:
+    if params["Verbose"]:
         print("HQUAILS finished running on:",name)
 
 def header():

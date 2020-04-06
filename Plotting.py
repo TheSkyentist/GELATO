@@ -84,27 +84,29 @@ def plotfromresults(params,path,z):
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(path,z,params)
 
-    ## Load Results ##
-    parameters = pyfits.getdata(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits'),1)
-    median = np.array([np.median(parameters[n]) for n in parameters.columns.names])
+    if spectrum.regions != []:
 
-    ## Create model ##
-    model = []
-    # Add background
-    for region in spectrum.regions:
-        model.append(CM.ContinuumBackground(params['BackgroundDeg'],region))
-    # Add spectral lines
-    ind = (params['BackgroundDeg']+1)*len(spectrum.regions) # index where emission lines begin
-    for i in range(int((median.size - ind)/3)):
-        center = float(parameters.columns.names[3*i+ind].split('-')[-2])
-        model.append(CM.SpectralFeature(center,spectrum))
-    
-    # Finish model and add parameters
-    model = np.sum(model)
-    model.parameters = median
+        ## Load Results ##
+        parameters = pyfits.getdata(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits'),1)
+        median = np.array([np.median(parameters[n]) for n in parameters.columns.names])
 
-    # Plot
-    Plot(spectrum,model,path)
+        ## Create model ##
+        model = []
+        # Add background
+        for region in spectrum.regions:
+            model.append(CM.ContinuumBackground(params['BackgroundDeg'],region))
+        # Add spectral lines
+        ind = (params['BackgroundDeg']+1)*len(spectrum.regions) # index where emission lines begin
+        for i in range(int((median.size - ind)/3)):
+            center = float(parameters.columns.names[3*i+ind].split('-')[-2])
+            model.append(CM.SpectralFeature(center,spectrum))
+        
+        # Finish model and add parameters
+        model = np.sum(model)
+        model.parameters = median
+
+        # Plot
+        Plot(spectrum,model,path)
 
 # Plot from results
 if __name__ == "__main__":
