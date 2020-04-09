@@ -23,8 +23,8 @@ def Plot(spectrum,model,path):
     fig     = plt.figure(figsize = (5*ncols,7))
     gs      = fig.add_gridspec(ncols=ncols,nrows=2,height_ratios=[4,1],hspace=0)
 
-    # Background
-    background = np.sum([model[i] for i in range(ncols)])
+    # Continuum
+    continuum = np.sum([model[i] for i in range(ncols)])
 
     for i,region in enumerate(spectrum.regions):
 
@@ -45,7 +45,7 @@ def Plot(spectrum,model,path):
         if spectrum.p['PlotComp']:
             # Plot components
             for j in range(ncols,model.n_submodels()):
-                fax.step(wav,background(wav)+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
+                fax.step(wav,continuum(wav)+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
         else:
             fax.step(wav,model(wav),'r')
 
@@ -53,8 +53,8 @@ def Plot(spectrum,model,path):
         ylim = list(fax.get_ylim())
         ylim[0] = np.max((0,ylim[0]))
         ylim[1] += (ylim[1] - ylim[0])/8
-        fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
         fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+        fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
 
         # Plot Line Names
         text_height = (np.max(flux) + ylim[1])/2
@@ -88,17 +88,17 @@ def plotfromresults(params,path,z):
     if spectrum.regions != []:
 
         ## Load Results ##
-        parameters = pyfits.getdata(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits'),1)
+        parameters = fits.getdata(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits'))
         median = np.array([np.median(parameters[n]) for n in parameters.columns.names])[:-1]
         
         ## Create model ##
         model = []
-        # Add background
+        # Add continuum
         for region in spectrum.regions:
-            model.append(CM.ContinuumBackground(params['BackgroundDeg'],region))
+            model.append(CM.Continuum(params['ContinuumDeg'],region))
         # Add spectral lines
-        ind = (params['BackgroundDeg']+1)*len(spectrum.regions) # index where emission lines begin
-        for i in range(int((median.size - ind)/3)):
+        ind = (params['ContinuumDeg']+1)*len(spectrum.regions) # index where emission lines begin
+        for i in range(0,median.size - ind,3):
             center = float(parameters.columns.names[3*i+ind].split('-')[-2])
             model.append(CM.SpectralFeature(center,spectrum))
         
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     import sys
     import copy
     import argparse
-    import astropy.io.fits as pyfits
+    from astropy.io import fits
     import CustomModels as CM
     import SpectrumClass as SC
     import ConstructParams as CP

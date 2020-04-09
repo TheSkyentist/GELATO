@@ -18,21 +18,21 @@ def BuildModel(spectrum, EmissionGroups=None):
     # Model
     model_components = []
         
-    # Add background regions
+    # Add continuum regions
     for i,region in enumerate(spectrum.regions):
         
         # Name of region
-        name = 'Background-' + str(i) +'-'
+        name = 'Continuum-' + str(i) +'-'
         
         # Generate model
-        background = CM.ContinuumBackground(spectrum.p['BackgroundDeg'],region)
+        continuum = CM.Continuum(spectrum.p['ContinuumDeg'],region)
 
         # Add starting parameters
         inregion = np.logical_and(spectrum.wav > region[0],spectrum.wav < region[1])
-        background.c0 = np.median(spectrum.flux[inregion])
+        continuum.c0 = np.median(spectrum.flux[inregion])
         
         # Add model
-        model_components.append(background)
+        model_components.append(continuum)
         
         # Collect param names
         for pname in model_components[-1].param_names:

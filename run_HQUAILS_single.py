@@ -13,8 +13,6 @@ import ConstructParams as CP
 # Main Function
 if __name__ == "__main__":
 
-    HQUAILS.header()
-
     ## Parse Arguements to find Parameter File ##
     parser = argparse.ArgumentParser()
     parser.add_argument('Parameters', type=str, help='Path to parameters file')
@@ -24,7 +22,11 @@ if __name__ == "__main__":
     p = CP.construct(args.Parameters)
     ## Parse Arguements to find Parameter File ##
 
+    if p['Verbose']:
+        HQUAILS.header()
+
     ## Run HQUAILS ##
     HQUAILS.HQUAILS(p, args.Spectrum, args.Redshift)
 
-    HQUAILS.footer()
+    if p['Verbose']:
+        HQUAILS.foooter()

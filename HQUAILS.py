@@ -5,13 +5,13 @@ import os
 import numpy as np
 from datetime import datetime
 from astropy.table import Table
-import astropy.io.fits as pyfits
 
 # HQUAILS supporting files
 import Plotting as PL
 import BuildModel as BM
 import FittingModel as FM
 import SpectrumClass as SC
+import EquivalentWidth as EW
 
 # Get fit parameters for spectrum
 def HQUAILS(params,path,z):
@@ -68,6 +68,9 @@ def HQUAILS(params,path,z):
     Table(data=parameters,names=param_names).write(params["OutFolder"]+name.replace(".fits","-results.fits"),overwrite=True)
     if params["Verbose"]:
         print("Results saved:",name)
+
+    if params["CalcEW"]:
+        EW.EWfromresults(params,path,z)
 
     if params["Verbose"]:
         print("HQUAILS finished running on:",name)

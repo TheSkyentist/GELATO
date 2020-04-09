@@ -48,7 +48,7 @@ How it works
 
 4. In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again. This process is repeated as many times as required by the user.
 
-5. The full set of bootstrapped parameters is then saved to disk. Finally, a figure of the final fit is produced and saved. There exists a convenience function for finding the median values of each spectrum model fit and collecting them into one final table.
+5. The full set of bootstrapped parameters is then saved to disk. Finally, a figure of the final fit is produced and saved. The equivalent width of each line can optionally then be calculated. There exists a convenience function for finding the median values of each spectrum model fit and collecting them into one final table.
 
 6. The median of each parameter is then found for each object, and the results from each object are then joined into one final results file.
 
@@ -58,15 +58,16 @@ Parameter File
 The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And example parameter file is included in the repository.
 
 * Outfolder: This parameter is the path to the output directory. 
-* RegionWidth: The border around emission lines in velocity space that is fit (km/s).
-* LineDataWidth: The border around an emission line that must be contained within the spectrum in order to be fit, also where the flux is calculate to assign an initial value.
-* BackgroundDeg: Degree of polynomial for continuum background.
+* ContinuumRegion: The border around emission lines in velocity space that is fit (km/s).
+* LineRegion: The border around an emission line that must be contained within the spectrum in order to be fit, also where the flux is calculate to assign an initial value.
+* ContinuumDeg: Degree of polynomial for continuum continuum.
 * MaxIter: Maximum number of minimization algorithm iterations.
 * NBoot: Number of bootstrap iterations to constrain error on parameters.
 * FThresh: F-test threshold to incorporate additional model parameters.
 * NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
 * Plotting: Produce plots or not.
 * PlotComp: To plot only the components of the fit or the total fit.
+* CalcEW: To calculate equivalent widths or not.
 * Concatenate: To concatenate the results of a multiple HQUAILS run or not.
 * Verbose: To print output for each object or not.
 * EmissionGroups: Dictionary of emission lines to be fit by HQUAILS. The structure of this dictionary is crucial to the operation of HQUAILS. The following section details the format of this dictionary.
@@ -128,6 +129,8 @@ In order to run HQUAILS you need:
 * The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 100. A basic estimate from the apparent position of any identified emission line should suffice.
 * (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified. 
 
+All of the following scripts can be made into executables and simply called directly. 
+
 The two wrappers for HQUAILS are:
 
 1. "run_HQUAILS_single.py"
@@ -160,6 +163,16 @@ For multiple plots:
 python ~/Documents/HQUAILS/Plotting.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
 ```
 
+To generate equivalent widths and append them to the results file is similar to plotting:
+
+```bash
+python ~/Documents/HQUAILS/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
+```
+
+```bash
+python ~/Documents/HQUAILS/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
+```
+
 The concatenated results for HQUAILS can also be created directly the results files in the following manners:
 
 ```bash
@@ -168,7 +181,7 @@ python ~/Documents/HQUAILS/ConcatResults.py ~/Example/PARAMS.json ~/Data/spectra
 
 Running the Example
 -------------
-Here are the following instructions to run HQUAILS. This tutorial assumes you start in the Example directory. First we need to activate our astroconda environment.
+Here are the following instructions to run HQUAILS. This tutorial assumes you start in the Example directory. First we need to activate our HQUAILS environment.
 
 ```bash
 conda activate HQUAILS
@@ -180,7 +193,13 @@ We can then run the code over the whole data set.
 python ../run_HQUAILS_multi.py ExPARAMS.json ExObjList.csv
 ```
 
-In order to produce a concatenated table of all of the results, we can run the following code. (We could have achieved the same result by changing the Concatenate parameter to true)
+In order to produce equivalent widths for the whole sample we can run the following.
+
+```bash
+python ../EquivalentWidth.py ExPARAMS.json --ObjectList ExObjList.csv
+```
+
+In order to produce a concatenated table of all of the results, we can run the following code. (We could have achieved the same result by changing the Concatenate and CalcEW parameters to true)
 
 ```bash
 python ../ConcatResults.py ExPARAMS.json ExObjList.csv
@@ -191,6 +210,8 @@ This will produce result tables and some plots in the Results folder. We can the
 ```bash
 python ../Plotting.py ExPARAMS.json --ObjectList ExObjList.csv
 ```
+
+The output from running the example will be put into 'Results/' and can be compared to the results in the 'Comparison/' directory.
 
 HQUAILS cast (in order of appearance)
 ------------
@@ -228,7 +249,7 @@ HQUAILS cast (in order of appearance)
 
 * CustomModels.py
 
-  Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum background. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can bs set. 
+  Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can bs set. 
 
 * AdditionalComponents.py
 
@@ -245,6 +266,11 @@ HQUAILS cast (in order of appearance)
 * Plotting.py
 
   Here are the scripts for creating and saving figures of the fits. Can also be run directly on HQUAILS results in order to create figures after the fact. The plots can either be plotted as the components or the final result only.
+
+* EquivalentWidth.py
+
+  Here are the scripts for creating and saving emission line EW. Can also be run directly on HQUAILS results in order to generate EW after the fact. Equivalent widths are generated by assuming a flat continuum at the height of the continuum at the emission line center.
+
 
 * ConcatenateResults.py
 
@@ -278,7 +304,7 @@ FAQ
 
 **What are the units?**
 
-*RegiondWidths and LineDataWidths are quoted velocity space and are given in km/s. The units in plotting can be changed in the Plotting.py file.*
+*ContinuumRegion and LineRegion are quoted velocity space and are given in km/s. The units in plotting can be changed in the Plotting.py fiile.*
 
 **Do you mean velocity offsets, not redshifts?**
 

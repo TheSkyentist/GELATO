@@ -33,7 +33,7 @@ class SpectralFeature(Fittable1DModel):
 
         # Find region associated with emission line
         linewav = center*(1+spectrum.z)
-        linewidth = linewav*spectrum.p['LineDataWidth']/(2*C)
+        linewidth = linewav*spectrum.p['LineRegion']/(2*C)
 
         inline = np.logical_and(spectrum.wav > linewav - linewidth,spectrum.wav < linewav + linewidth)
 
@@ -104,7 +104,7 @@ class SpectralFeature(Fittable1DModel):
         return [d_Redshift, d_Flux, d_Dispersion]
 
 # Spectral Feature Class (Gaussian)
-class ContinuumBackground(PolynomialModel):
+class Continuum(PolynomialModel):
 
     r"""
     Copy of 1D Polynomial model with modification.

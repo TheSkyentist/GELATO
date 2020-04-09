@@ -19,7 +19,7 @@ class Spectrum:
         self.z = z
 
         # Load Spectrum
-        spectrum = fits.getdata(path,1)
+        spectrum = fits.getdata(path)
 
         # Only take good values
         weight = spectrum['ivar']
@@ -47,11 +47,11 @@ class Spectrum:
                     linewav = line['Wavelength']*(1+self.z)
 
                     # Ensure there is spectral coverage of the line
-                    linewidth = linewav*self.p['LineDataWidth']/(2*C)
+                    linewidth = linewav*self.p['LineRegion']/(2*C)
                     if (np.any(self.wav > linewav + linewidth) and np.any(self.wav < linewav - linewidth) and (np.sum(np.logical_and(self.wav < linewav + linewidth,self.wav > linewav - linewidth)) > 0)):
                         
                         # Add region
-                        dellam = linewav*self.p['RegionWidth']/(2*C)
+                        dellam = linewav*self.p['ContinuumRegion']/(2*C)
                         self.regions.append([np.max([linewav - dellam,self.wav[0]]), np.min([linewav + dellam,self.wav[-1]])])
 
                     # Else remove the line

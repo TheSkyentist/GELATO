@@ -4,13 +4,14 @@
 
 # Import packages
 import numpy as np
-import astropy.io.fits as pyfits
+from astropy.io import fits
 from astropy.table import Table,vstack
 
 # Concatenate results
 def concatfromresults(p,objects):
-    
-    print("Concatenating Results...")
+
+    if p["Verbose"]:
+        print("Concatenating Results...")
 
     # Initalize list of tables
     tables = []
@@ -18,7 +19,7 @@ def concatfromresults(p,objects):
 
         # Load name and parameters
         name = path.split('/')[-1].replace('.fits','')
-        parameters = pyfits.getdata(p['OutFolder']+name+'-results.fits',1)
+        parameters = fits.getdata(p['OutFolder']+name+'-results.fits')
 
         # Initalize Lists
         data = [name]

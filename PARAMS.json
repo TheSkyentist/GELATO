@@ -1,16 +1,17 @@
 {
     "OutFolder": "./Results/",
-    "RegionWidth": 10000,
-    "LineDataWidth": 300,
-    "BackgroundDeg": 1,
+    "ContinuumRegion": 10000,
+    "LineRegion": 300,
+    "ContinuumDeg": 1,
     "MaxIter": 1000,
     "NBoot": 500,
     "FThresh": 0.95,
     "NProcess": 1,
     "Plotting": true,
     "PlotComp": true,
+    "CalcEW": true,
     "Concatenate": true,
-    "Verbose:": false,
+    "Verbose": false,
     "EmissionGroups": [
         {
             "Name":"NLR",

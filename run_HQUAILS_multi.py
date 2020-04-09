@@ -14,8 +14,6 @@ import ConstructParams as CP
 # Main Function
 if __name__ == "__main__":
 
-    HQUAILS.header()
-
     ## Parse Arguements to find Parameter File ##
     parser = argparse.ArgumentParser()
     parser.add_argument('Parameters', type=str, help='Path to parameters file')
@@ -23,6 +21,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     p = CP.construct(args.Parameters)
     ## Parse Arguements to find Parameter File ##
+
+    if p['Verbose']:
+        HQUAILS.header()
+
 
     ## Assemble Objects
     objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['File','z'])
@@ -46,4 +48,5 @@ if __name__ == "__main__":
         CR.concatfromresults(p,objects)
     ## Concatenate Results ##
 
-    HQUAILS.footer()
+    if p['Verbose']:
+        HQUAILS.footer()
