@@ -1,6 +1,6 @@
 {
     "OutFolder": "./Results/",
-    "ContinuumRegion": 10000,
+    "ContinuumRegion": 15000,
     "LineRegion": 300,
     "ContinuumDeg": 1,
     "MaxIter": 1000,

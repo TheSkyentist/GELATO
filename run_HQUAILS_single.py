@@ -29,4 +29,4 @@ if __name__ == "__main__":
     HQUAILS.HQUAILS(p, args.Spectrum, args.Redshift)
 
     if p['Verbose']:
-        HQUAILS.foooter()
+        HQUAILS.footer()
