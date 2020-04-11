@@ -47,11 +47,29 @@ How it works
 
 2. The base model is then constructed based on the emission line dictionary. The starting values are generated based on the spectrum. The model is then fit to the spectrum.
 
-3. The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing an F-test. The combinations of all accepted additional components are then then tested by measuring their Akaike Information Criteria (AICs) AICs. The model set with the lowest AIC is the final model.
+3. The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing an F-test. The combinations of all accepted additional components are then then tested by measuring their Akaike Information Criteria (AICs). The model set with the lowest AIC is the final model.
 
 4. In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again.
 
 5. The full set of bootstrapped parameters is then saved to disk. Optionally, a figure of the final fit is produced and saved. The equivalent width of each line can optionally then be calculated. There exists a convenience function for finding the median values and standard deviations of each spectrum model fit and collecting them into one final table.
+
+Models
+-------------
+
+* Emission Line Model: Emission lines are modeled as Gaussians. They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 150 km/s, while it is bounded between 60 km/s and 500 km/s. This default can be adjusted in the "CustomModels.py" file.
+
+* Continuum Model: The continuum is modeled as a polynomial with the degree specified by the parameters file.
+
+Additional Components
+-------------
+
+The current supported additional components are:
+
+1. Broad Component: The broad components are modeled as Gaussians. They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 1000 km/s, while it is bounded between 750 km/s and 10000 km/s.
+2. Outflow Component: They are forced to have a positive flux. The outflow components are modeled as Gaussians. The default value of the velocity dispersion of the line is set to 500 km/s, while it is bounded between 500 km/s and 1000 km/s.
+3. Absorption Component: The outflow components are modeled as Gaussians. They are forced to have a negative flux. The default value of the velocity dispersion of the line is set to 600 km/s, while it is bounded between 350 km/s and 3000 km/s.
+
+In order to have HQUAILS attempt to fit an emission line with an additional component, the line must be flagged in the parameters file, described in the section below. The flag is an integer, whose bitwise digits describe if a specific additional component should be tried. Examples for all possible combinations are given in the figure following the description of the EmissionGroups parameter.
 
 Parameter File
 -------------
@@ -88,7 +106,7 @@ Here we describe the format of the emission line dictionary.
 2. Each Group contains a list of Species. All spectral features in the same Species will share a redshift velocity and dispersion. This means, during fitting, their velocity dispersions and redshifts will be forcibly tied to be equal.
 
       * Each species has a name, which controls how its parameters appear in the output.
-      * Each species has a Flag. The integer flag controls will additional parameters HQUAILS will attempt to add to the spectral features of this species. The value in each bit, from right to left (increasing order of magnitude), is a boolean flag for each kind of additional component, which can be found in the "AdditionalComponents.py" file.
+      * Each species has a Flag. The integer flag controls will additional parameters HQUAILS will attempt to add to the spectral features of this species. The value in each bit, from right to left (increasing order of magnitude), is a boolean flag for each kind of additional component, which can be found in the Additional Components section of the README and the "AdditionalComponents.py" file.
       * Each species has a FlagGroup. Each additional component must be associated with a Group, which may or may not be the same Group as the original species. An additional list is passed to each species, specifying where each additional component that will attempt to be added must go. The group must exist, even if empty, as it needs to be created with the flags. (Note: This means the sum of the bits of the flag must be equal to the length of the FlagGroups list.)
 
 3. Each Species contains a list of lines. Lines can be set to have relative fluxes.  This means, during fitting, their fluxes will be tied to have the given relative values.
@@ -98,27 +116,31 @@ Here we describe the format of the emission line dictionary.
 
 The "PARAMS.json" file in the directory gives a good example of how to take advantage of these features. It consists of five groups:
 
-1. Name: NLR. Here these features have not been set to share redshifts nor dispersions. It has a list of species:
+1. Name: NarrowLine. Here these features have not been set to share redshifts nor dispersions. It has a list of species:
    1. Name: SII. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
       * A line with a rest wavelength of 6716.31 and a relative flux of null.
       * A line with a rest wavelength of 6730.68 and a relative flux of null. This means the line fluxes are completely independent.
    2. Name: NII. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
       * A line with a rest wavelength of 6583.34 and a relative flux of 1.
       * A line with a rest wavelength of 6547.96 and a relative flux of 0.34. This means this line will always have 0.34/1 times the flux of the first line.
-   3. OIII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an outflowing velocity component. This additional component will be placed in its own new group, which will be labelled "Outflow". It is made out of two lines.
+   3. OIII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "BlueOIII". It is made out of two lines.
       * A line with a rest wavelength of 5006.77 and a relative flux of 1.
       * A line with a rest wavelength of 4958.83 and a relative flux of 0.35. This means this line will always have 0.35/1 times the flux of the first line.
    4. Name: [NeIII]. Singlet line with no flags.
    5. Name: [OII]. Singlet line with no flags.
    6. Name: [NeV]. Singlet line with no flags.
-2. Name: Stars. Here these features are set to share redshifts and dispersions. It has a list of species:
-   1. Halpha. A singlet line flagged with a 1, which corresponds to an larger velocity component. This additional component will be placed the group named "Broad". It is made out of one line.
+2. Name: Balmer. Here these features are set to share redshifts and dispersions. It has a list of species:
+   1. Halpha. A singlet line flagged with a 1, which corresponds to a "Broad" component. This additional component will be placed the group named "BroadBalmer". It is made out of one line.
       * A line with a rest wavelength of 6562.80 and a relative flux of null.
-   2. Hbeta. These have been flagged with a 5, or in binary, 101. This corresponds to both a larger velocity component and an absorption component. These will be placed in the "Broad" and "Absorption" groups respectively. It is made out of one line.
+   2. Hbeta. These have been flagged with a 5, or in binary, 101. This corresponds to both a "Broad" component and an "Absorption" component. These will be placed in the "BroadBalmer" and "Abs" groups respectively. It is made out of one line.
       * A line with a rest wavelength of 4861.32 and a relative flux of 1. Since there is only one line, the relative flux value does not matter.
-3. Name: Outflow. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will not share redshifts and dispersions.
-4. Name: Broad. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will share redshifts and dispersions. E.g. if both "Broad" lines are accepted (from Hbeta and Halpha), they will share the same redshift and dispersion by design.
-5. Name: Absorption. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will not share redshifts and dispersions.
+3. Name: BlueOIII. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will not share redshifts and dispersions.
+4. Name: BroadBalmer. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will share redshifts and dispersions. E.g. if both "Broad" lines are accepted (from Hbeta and Halpha), they will share the same redshift and dispersion by design.
+5. Name: Abs. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will not share redshifts and dispersions.
+
+Here is figure showing the hierarchy of the Emission Groups Parameter for the "PARAMS.json" file.
+
+![Image of PARAMS](./EGFig.jpg)
 
 Running HQUAILS
 -------------
@@ -303,10 +325,6 @@ FAQ
 **Why is it spelled HQUAILS but pronounced Quails?**
 
 *The author of the code, R. E. Hviding (pronounced VEE-ding) thought it important to draw attention to names that start with an H where the H is not pronounced.*
-
-**How can I fit my spectra with Voight or Lorentzian profiles?**
-
-*In order to fit with with other functions, you can simply add them to the "CustomModels.py" file. However, you'll have to make sure they are built in the same framework as the other models there.*
 
 **What are the units?**
 
