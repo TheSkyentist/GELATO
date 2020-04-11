@@ -8,13 +8,13 @@
     "FThresh": 0.95,
     "NProcess": 5,
     "Plotting": true,
-    "PlotComp": true,
-    "CalcEW": false,
-    "Concatenate": false,
+    "PlotComp": false,
+    "CalcEW": true,
+    "Concatenate": true,
     "Verbose": true,
     "EmissionGroups": [
         {
-            "Name":"NLR",
+            "Name":"NarrowLine",
             "TieRedshift": false,
             "TieSigma": false,
             "Species": [
@@ -61,7 +61,7 @@
                         }
                     ],
                     "Flag": 2,
-                    "FlagGroups": ["Outflow"]
+                    "FlagGroups": ["BlueOIII"]
                 },
                 {
                     "Name":"[NeIII]",
@@ -99,7 +99,7 @@
             ]
         },
         {
-            "Name":"Stars",
+            "Name":"Balmer",
             "TieRedshift": true,
             "TieSigma": true,
             "Species": [
@@ -112,7 +112,7 @@
                         }
                     ],
                     "Flag": 1,
-                    "FlagGroups": ["Broad"]
+                    "FlagGroups": ["BroadBalmer"]
                 },
                 {
                     "Name":"Hbeta",
@@ -123,24 +123,24 @@
                         }
                     ],
                     "Flag": 5,
-                    "FlagGroups": ["Broad","Absorption"]
+                    "FlagGroups": ["BroadBalmer","Abs"]
                 }
             ]
         },
         {
-            "Name":"Outflow",
+            "Name":"BlueOIII",
             "TieRedshift": false,
             "TieSigma": false,
             "Species": []
         },
         {
-            "Name":"Broad",
+            "Name":"BroadBalmer",
             "TieRedshift": true,
             "TieSigma": true,
             "Species": []
         },
         {
-            "Name":"Absorption",
+            "Name":"Abs",
             "TieRedshift": false,
             "TieSigma": false,
             "Species": []
