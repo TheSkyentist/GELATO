@@ -28,6 +28,8 @@ def EWfromresults(params,path,z):
         # Dont add if already has EWs
         for n in names:
             if 'EW' in n:
+                if params["Verbose"]:
+                    print("Equivalent Widths Already Generated:",path.split('/')[-1])
                 return
 
         # Index where emission lines begin
