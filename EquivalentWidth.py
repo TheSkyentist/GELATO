@@ -96,9 +96,9 @@ if __name__ == "__main__":
     if single == multi:
         print('Specify either Object List XOR Spectrum and Redshift.')
         print('Both or neither were entered.')
-    elif single: # One Plot
+    elif single: # One EW
         EWfromresults(p, args.Spectrum, args.Redshift)
-    elif multi: # Many plots
+    elif multi: # Many EW
         # Load Obkects
         objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype='U100,f8',names=['File','z'])
         if p['NProcess'] > 1: # Mutlithread
