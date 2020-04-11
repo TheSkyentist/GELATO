@@ -97,7 +97,7 @@ def TieParams(spectrum,model,param_names,EmissionGroups):
                     if group['TieRedshift']:
                         model.tied[model.param_names[param_names.index(name+'Redshift')]] = TieGroupRedshift
                     # Otherwise tie dispersion (check if we should)
-                    if group['TieSigma']:
+                    if group['TieDispersion']:
                         model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieGroupDispersion
                     
                 ## Tie Species Components

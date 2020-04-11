@@ -70,7 +70,7 @@ def verify(params):
             return False
         
         # Check if all keys are in there
-        for g in ['Name', 'TieRedshift', 'TieSigma', 'Species']:
+        for g in ['Name', 'TieRedshift', 'TieDispersion', 'Species']:
             if not g in group.keys():
                 print('A group does not contain parameter:',g)
                 return False
@@ -81,7 +81,7 @@ def verify(params):
                 if not (type(group[g]) == str):
                     print('Group parameter',g,'must be a string.')
                     return False
-            elif g in ['TieRedshift','TieSigma']:
+            elif g in ['TieRedshift','TieDispersion']:
                 if not (type(group[g]) == bool):
                     print('Group parameter',g,'must be a booolean.')
                     return False

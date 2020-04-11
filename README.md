@@ -100,7 +100,7 @@ Here we describe the format of the emission line dictionary.
 
       * Each group has a Name, which controls how its parameters appear in the output.
       * Each group has TieRedshift flag, which controls if the redshifts of all the group elements are tied or not.
-      * Each group has TieSigma flag, which controls if the dispersions of all the group elements are tied or not.
+      * Each group has TieDispersion flag, which controls if the dispersions of all the group elements are tied or not.
       * Finally, each group is made out of a list of species.
 
 2. Each Group contains a list of Species. All spectral features in the same Species will share a redshift velocity and dispersion. This means, during fitting, their velocity dispersions and redshifts will be forcibly tied to be equal.
