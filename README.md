@@ -322,10 +322,6 @@ FAQ
 
 *By editing the SpectrumClass.py file, you can customize how spectra are loaded into HQUAILS.*
 
-**Why is it spelled HQUAILS but pronounced Quails?**
-
-*The author of the code, R. E. Hviding (pronounced VEE-ding) thought it important to draw attention to names that start with an H where the H is not pronounced.*
-
 **What are the units?**
 
 *ContinuumRegion and LineRegion are quoted velocity space and are given in km/s. The units in plotting can be changed in the Plotting.py fiile. The wavelength units for line centers must be given in the same units as the spectrum.*
@@ -333,3 +329,7 @@ FAQ
 **Do you mean velocity offsets, not redshifts?**
 
 *Each emission line is characterized by a redshift, which is trivial to convert to a velocity offset once a reference line is chosen. However this requires the user to choose a reference line. HQUAILS remains agnostic to this procedure and simply returns the redshift of each line.*
+
+**Why is it spelled HQUAILS but pronounced Quails?**
+
+*The author of the code, R. E. Hviding (pronounced VEE-ding) thought it important to draw attention to names that start with an H where the H is not pronounced.*
