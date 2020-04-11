@@ -1,7 +1,6 @@
 """ Main Function """
 
 # Packages
-import os
 import numpy as np
 from datetime import datetime
 from astropy.table import Table
@@ -15,10 +14,6 @@ import EquivalentWidth as EW
 
 # Get fit parameters for spectrum
 def HQUAILS(params,path,z):
-
-    ## Create Directory for Output
-    if not os.path.exists(params["OutFolder"]):
-        os.mkdir(params["OutFolder"])
 
     # Get name of file
     name = path.split("/")[-1]

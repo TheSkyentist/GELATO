@@ -14,7 +14,7 @@
     "Verbose": false,
     "EmissionGroups": [
         {
-            "Name":"NLR",
+            "Name":"NarrowLine",
             "TieRedshift": false,
             "TieSigma": false,
             "Species": [
@@ -51,7 +51,7 @@
                 {
                     "Name":"[OIII]",
                     "Flag": 2,
-                    "FlagGroups": ["Outflow"],
+                    "FlagGroups": ["BlueOIII"],
                     "Lines": [
                         {
                             "Wavelength": 5006.77,
@@ -99,14 +99,14 @@
             ]
         },
         {
-            "Name":"Stars",
+            "Name":"Balmer",
             "TieRedshift": true,
             "TieSigma": true,
             "Species": [
                 {
                     "Name":"Halpha",
                     "Flag": 1,
-                    "FlagGroups": ["Broad"],
+                    "FlagGroups": ["BroadBalmer"],
                     "Lines": [
                         {
                             "Wavelength": 6562.80,
@@ -117,7 +117,7 @@
                 {
                     "Name":"Hbeta",
                     "Flag": 5,
-                    "FlagGroups": ["Broad","Absorption"],
+                    "FlagGroups": ["Broad","Abs"],
                     "Lines": [
                         {
                             "Wavelength": 4861.32,
@@ -128,7 +128,7 @@
             ]
         },
         {
-            "Name":"Outflow",
+            "Name":"BlueOIII",
             "TieRedshift": false,
             "TieSigma": false,
             "Species": []
@@ -140,7 +140,7 @@
             "Species": []
         },
         {
-            "Name":"Absorption",
+            "Name":"Abs",
             "TieRedshift": false,
             "TieSigma": false,
             "Species": []

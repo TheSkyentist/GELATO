@@ -13,7 +13,7 @@ from astropy.table import Table,hstack
 def EWfromresults(params,path,z):
 
     if params["Verbose"]:
-        print("Generating Equivalent Widths: ",path.split('/')[-1])
+        print("Generating Equivalent Widths:",path.split('/')[-1])
 
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(path,z,params)

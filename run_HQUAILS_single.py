@@ -3,6 +3,7 @@
 """ Wrapper for single HQUAILS run """
 
 # Packages
+import os
 import sys
 import argparse
 
@@ -21,6 +22,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     p = CP.construct(args.Parameters)
     ## Parse Arguements to find Parameter File ##
+
+    ## Create Directory for Output
+    if not os.path.exists(p["OutFolder"]):
+        os.mkdir(p["OutFolder"])
 
     if p['Verbose']:
         HQUAILS.header()

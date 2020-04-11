@@ -1,5 +1,6 @@
 HQUAILS
 ========
+
 *Handy QUAsar emissIon Line fitS (pronounced Quails) by Raphael Hviding*
 -------------
 
@@ -7,7 +8,9 @@ HQUAILS is a Python code designed to fit emission lines in the spectra of active
 
 HQUAILS was also built in order to test the inclusion of additional fitting parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? HQUAILS builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test and then comparisons of Akaike Information Criteria.
 
-HQUAILS was designed to be run on SDSS spectra using a LM non-linear least squares algorithm with Gaussian line profiles. However, it is written in such a way that these assumptions can be switched out as needed. Please read through the entire documentation to see how this can be done.
+The spectra are fit using a Levenberg–Marquardt non-linear least squares algorithm with Gaussian line profiles.
+
+HQUAILS was designed to be run on SDSS spectra, but the code can be adapted to run on other spectra.
 
 Requirements
 -------------
@@ -28,7 +31,7 @@ The environment will then be installed under the name HQUAILS and can then be ac
 conda activate HQUAILS
 ```
 
-Whenever running HQUAILS scripts, it must be run from this environment.
+Whenever running HQUAILS scripts, they must be run from this environment.
 
 Installation
 -------------
@@ -40,17 +43,15 @@ In your working directory, **you need to copy the "matplotlibrc" file** to contr
 How it works
 -------------
 
-1. First, the spectrum is loaded. Here, based on the emission group dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. It then constructs regions around these emission lines based on the region width provided. If regions overlap, they are merged.
+1. First, the spectrum is loaded. Here, based on the emission group dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. It then constructs regions around these emission lines based on the region width provided. If regions overlap, the emission lines will share a continuum.
 
-2. The base model is then constructed based on the emission line dictionary. The starting values are generated based on the spectrum. The model is then fit to the spectrum. The default fitting minimization is the Levenberg–Marquardt non-linear least squares algorithm. This can be adjusted.
+2. The base model is then constructed based on the emission line dictionary. The starting values are generated based on the spectrum. The model is then fit to the spectrum.
 
-3. The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing and F-test. The combinations of all accepted additional components are then then tested by measuring their AICs. The model set with the lowest AIC is the final model.
+3. The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing an F-test. The combinations of all accepted additional components are then then tested by measuring their Akaike Information Criteria (AICs) AICs. The model set with the lowest AIC is the final model.
 
-4. In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again. This process is repeated as many times as required by the user.
+4. In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again.
 
-5. The full set of bootstrapped parameters is then saved to disk. Finally, a figure of the final fit is produced and saved. The equivalent width of each line can optionally then be calculated. There exists a convenience function for finding the median values of each spectrum model fit and collecting them into one final table.
-
-6. The median of each parameter is then found for each object, and the results from each object are then joined into one final results file.
+5. The full set of bootstrapped parameters is then saved to disk. Optionally, a figure of the final fit is produced and saved. The equivalent width of each line can optionally then be calculated. There exists a convenience function for finding the median values and standard deviations of each spectrum model fit and collecting them into one final table.
 
 Parameter File
 -------------
@@ -58,9 +59,9 @@ Parameter File
 The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And example parameter file is included in the repository.
 
 * Outfolder: This parameter is the path to the output directory. 
-* ContinuumRegion: The border around emission lines in velocity space that is fit (km/s).
-* LineRegion: The border around an emission line that must be contained within the spectrum in order to be fit, also where the flux is calculate to assign an initial value.
-* ContinuumDeg: Degree of polynomial for continuum continuum.
+* ContinuumRegion: The border around emission lines in velocity space that where the continuum is fit (km/s). If the regions around two emission lines overlap, the two regions are merged and the lines share a continuum.
+* LineRegion: The border around an emission line in velocity that must be contained within the spectrum in order to be fit (km/s). This region is also used to estimate the initial height of the line.
+* ContinuumDeg: Degree of polynomial for continuum background.
 * MaxIter: Maximum number of minimization algorithm iterations.
 * NBoot: Number of bootstrap iterations to constrain error on parameters.
 * FThresh: F-test threshold to incorporate additional model parameters.
@@ -69,7 +70,7 @@ The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And e
 * PlotComp: To plot only the components of the fit or the total fit.
 * CalcEW: To calculate equivalent widths or not.
 * Concatenate: To concatenate the results of a multiple HQUAILS run or not.
-* Verbose: To print output for each object or not.
+* Verbose: To print HQUAILS output.
 * EmissionGroups: Dictionary of emission lines to be fit by HQUAILS. The structure of this dictionary is crucial to the operation of HQUAILS. The following section details the format of this dictionary.
 
 Emission Line Dictionary
@@ -77,7 +78,7 @@ Emission Line Dictionary
 
 Here we describe the format of the emission line dictionary.
 
-1. The emission groups dictionary is made up of Groups. All spectral features in the same group can share a common redshift, a common dispersion, or neither.  This means, during fitting, their redshifts or dispersions can be forcibly tied to be equal.
+1. The emission groups dictionary is made up of Groups. All spectral features in the same group can be set to share a common redshift, a common dispersion, or neither.  This means, during fitting, their redshifts or dispersions can be forcibly tied to be equal.
 
       * Each group has a Name, which controls how its parameters appear in the output.
       * Each group has TieRedshift flag, which controls if the redshifts of all the group elements are tied or not.
@@ -87,8 +88,8 @@ Here we describe the format of the emission line dictionary.
 2. Each Group contains a list of Species. All spectral features in the same Species will share a redshift velocity and dispersion. This means, during fitting, their velocity dispersions and redshifts will be forcibly tied to be equal.
 
       * Each species has a name, which controls how its parameters appear in the output.
-      * Each species has a Flag. The integer flag controls will additional parameters HQUAILS will attempt to add to the spectral features of this species. The value in each bit, from right to left (increasing order of magnitude), is a boolean flag for each kind of additional component, which can be found in the "AdditionalComponents.py" file. 
-      * Each species has a FlagGroup. Each additional component must be associated with a Group, which may or may not be the same Group as the original species. An additional list is passed to each species, specifying where each additional component that will attempt to be added must go. The group must exist, even if empty, as it needs to be created with the flags. (Note: This means the sum of the binary integer flag must be equal to the length of the FlagGroups list.)
+      * Each species has a Flag. The integer flag controls will additional parameters HQUAILS will attempt to add to the spectral features of this species. The value in each bit, from right to left (increasing order of magnitude), is a boolean flag for each kind of additional component, which can be found in the "AdditionalComponents.py" file.
+      * Each species has a FlagGroup. Each additional component must be associated with a Group, which may or may not be the same Group as the original species. An additional list is passed to each species, specifying where each additional component that will attempt to be added must go. The group must exist, even if empty, as it needs to be created with the flags. (Note: This means the sum of the bits of the flag must be equal to the length of the FlagGroups list.)
 
 3. Each Species contains a list of lines. Lines can be set to have relative fluxes.  This means, during fitting, their fluxes will be tied to have the given relative values.
 
@@ -124,16 +125,17 @@ Running HQUAILS
 
 In order to run HQUAILS you need:
 
-* The PARAMS.json file. 
+* The PARAMS.json file.
 * The spectrum or spectra.
 * The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 100. A basic estimate from the apparent position of any identified emission line should suffice.
-* (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified. 
+* If running on a list of spectra, HQUAILS takes in a comma delimited file, where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
+* (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified.
 
-All of the following scripts can be made into executables and simply called directly. 
+All of the following scripts can be made into executables and simply called directly.
 
 The two wrappers for HQUAILS are:
 
-1. "run_HQUAILS_single.py"
+* "run_HQUAILS_single.py"
 
    This script is designed to run HQUAILS over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object.
 
@@ -141,9 +143,9 @@ The two wrappers for HQUAILS are:
   python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectrum.fits 1.122
   ```
 
-2. "run_HQUAILS_multi.py"
+* "run_HQUAILS_multi.py"
 
-   This script is designed to run HQUAILS over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. 
+   This script is designed to run HQUAILS over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects.
 
 ```bash
 python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
@@ -180,6 +182,7 @@ python ~/Documents/HQUAILS/ConcatResults.py ~/Example/PARAMS.json ~/Data/spectra
 ```
 
 Running the Example
+
 -------------
 Here are the following instructions to run HQUAILS. This tutorial assumes you start in the Example directory. First we need to activate our HQUAILS environment.
 
@@ -214,14 +217,16 @@ python ../Plotting.py ExPARAMS.json --ObjectList ExObjList.csv
 The output from running the example will be put into 'Results/' and can be compared to the results in the 'Comparison/' directory.
 
 HQUAILS cast (in order of appearance)
-------------
+
+-------------
+
 * README.md
   
   Here you are! The documentation for HQUAILS.
 
 * run_HQUAILS_single.py
   
-  Wrapper for running HQUAILS on a single object. 
+  Wrapper for running HQUAILS on a single object.
   
 * run_HQUAILS_multi.py
   
@@ -233,7 +238,7 @@ HQUAILS cast (in order of appearance)
 
 * ConstructParams.py
 
-  Routines for turning the PARAMS.json file into a python dictionary, and verifying that it is in the correct format. 
+  Routines for turning the PARAMS.json file into a python dictionary, and verifying that it is in the correct format.
 
 * HQUAILS.py
 
@@ -249,7 +254,7 @@ HQUAILS cast (in order of appearance)
 
 * CustomModels.py
 
-  Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can bs set. 
+  Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can bs set.
 
 * AdditionalComponents.py
 
@@ -271,7 +276,6 @@ HQUAILS cast (in order of appearance)
 
   Here are the scripts for creating and saving emission line EW. Can also be run directly on HQUAILS results in order to generate EW after the fact. Equivalent widths are generated by assuming a flat continuum at the height of the continuum at the emission line center.
 
-
 * ConcatenateResults.py
 
   Scripts for concatenating results from a multi HQUAILS run. Can also be run independently on results after the fact.
@@ -285,14 +289,16 @@ HQUAILS cast (in order of appearance)
   Code license, HQUAILS is distributed under the GNU General Public License 3.
 
 License
+
 -------------
 HQUAILS is an open-source software available under the GNU General Public License 3. In a nutshell, this code can be used and distributed by anyone, but any code that includes HQUAILS must also be distributed freely and openly (see LICENSE file for details).
 
 FAQ
--------------
-**How can I load spectra from other sources?
 
-*By editing the SpectrumClass.py file, you can customize how spectra are loaded into HQUAILS.
+-------------
+**How can I load spectra from other sources?**
+
+*By editing the SpectrumClass.py file, you can customize how spectra are loaded into HQUAILS.*
 
 **Why is it spelled HQUAILS but pronounced Quails?**
 
@@ -304,7 +310,7 @@ FAQ
 
 **What are the units?**
 
-*ContinuumRegion and LineRegion are quoted velocity space and are given in km/s. The units in plotting can be changed in the Plotting.py fiile.*
+*ContinuumRegion and LineRegion are quoted velocity space and are given in km/s. The units in plotting can be changed in the Plotting.py fiile. The wavelength units for line centers must be given in the same units as the spectrum.*
 
 **Do you mean velocity offsets, not redshifts?**
 

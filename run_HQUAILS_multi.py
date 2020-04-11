@@ -3,6 +3,7 @@
 """ Wrapper for mulitple HQUAILS runs """
 
 # Packages
+import os
 import copy
 import argparse
 import numpy as np
@@ -22,9 +23,12 @@ if __name__ == "__main__":
     p = CP.construct(args.Parameters)
     ## Parse Arguements to find Parameter File ##
 
+    ## Create Directory for Output
+    if not os.path.exists(p["OutFolder"]):
+        os.mkdir(p["OutFolder"])
+
     if p['Verbose']:
         HQUAILS.header()
-
 
     ## Assemble Objects
     objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['File','z'])
