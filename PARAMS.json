@@ -16,7 +16,7 @@
         {
             "Name":"NarrowLine",
             "TieRedshift": false,
-            "TieSigma": false,
+            "TieDispersion": false,
             "Species": [
                 {
                     "Name":"[SII]",
@@ -101,7 +101,7 @@
         {
             "Name":"Balmer",
             "TieRedshift": true,
-            "TieSigma": true,
+            "TieDispersion": true,
             "Species": [
                 {
                     "Name":"Halpha",
@@ -130,19 +130,19 @@
         {
             "Name":"BlueOIII",
             "TieRedshift": false,
-            "TieSigma": false,
+            "TieDispersion": false,
             "Species": []
         },
         {
             "Name":"Broad",
             "TieRedshift": true,
-            "TieSigma": true,
+            "TieDispersion": true,
             "Species": []
         },
         {
             "Name":"Abs",
             "TieRedshift": false,
-            "TieSigma": false,
+            "TieDispersion": false,
             "Species": []
         }
     ]
