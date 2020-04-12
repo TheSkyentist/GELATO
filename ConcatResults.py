@@ -14,7 +14,7 @@ def concatfromresults(p,objects):
         print("Concatenating Results...")
 
     # Initalize list of tables
-    tables = []
+    first = True
     for path in objects['File']:
 
         # Load name and parameters
@@ -37,11 +37,17 @@ def concatfromresults(p,objects):
             data.append(np.std(parameters[n]))
             names.append(n+'_err')
 
+        # Make table
+        table = Table(data = np.array(data), names = names,dtype=dtype)
 
-        tables.append(Table(data = np.array(data), names = names,dtype=dtype))
-
-    vstack(tables,join_type = 'outer').write(p['OutFolder']+'HQUAILS-results.fits',overwrite=True)
-
+        # If first entry, initialized table
+        if first:
+            table.write(p['OutFolder']+'HQUAILS-results.fits',overwrite=True)
+            first = False
+        # Otherise load table and append to it
+        else:
+            results = Table.read(p['OutFolder']+'HQUAILS-results.fits')
+            vstack([results,table],join_type = 'outer').write(p['OutFolder']+'HQUAILS-results.fits',overwrite=True)
 
 # Main Function
 if __name__ == "__main__":
