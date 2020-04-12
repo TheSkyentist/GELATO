@@ -89,7 +89,7 @@ def plotfromresults(params,path,z):
 
         ## Load Results ##
         parameters = fits.getdata(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits'))
-        median = np.array([np.median(parameters[n]) for n in parameters.columns.names])[:-1]
+        median = np.array([np.median(parameters[n]) for n in parameters.columns.names if 'EW' not in n])[:-1]
         
         ## Create model ##
         model = []
@@ -98,8 +98,8 @@ def plotfromresults(params,path,z):
             model.append(CM.Continuum(params['ContinuumDeg'],region))
         # Add spectral lines
         ind = (params['ContinuumDeg']+1)*len(spectrum.regions) # index where emission lines begin
-        for i in range(0,median.size - ind,3):
-            center = float(parameters.columns.names[3*i+ind].split('-')[-2])
+        for i in range(ind,median.size,3):
+            center = float(parameters.columns.names[i].split('-')[-2])
             model.append(CM.SpectralFeature(center,spectrum))
         
         # Finish model and add parameters
