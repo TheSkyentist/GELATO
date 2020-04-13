@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-""" Generate Equivalent Widths """
+""" Generate Rest Equivalent Widths """
 
 # Import packages
 import numpy as np
