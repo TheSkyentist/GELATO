@@ -57,7 +57,7 @@ def EWfromresults(params,path,z):
 
             # Get line flux/redshift
             lineflux = parameters[names[i+1]]
-            oneplusz = parameters[names[i]]
+            oneplusz = 1+parameters[names[i]]
 
             # Initialize continuum fluxes
             contflux = np.ones(len(parameters))
@@ -71,7 +71,7 @@ def EWfromresults(params,path,z):
 
             # Get EW
             EWs.append(np.abs(lineflux/(contflux*oneplusz)))
-        
+
         # Save
         hstack([Table(parameters),Table(data=EWs,names=EWnames)]).write(fname,overwrite=True)
     

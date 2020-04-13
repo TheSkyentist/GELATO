@@ -8,9 +8,9 @@
     "FThresh": 0.95,
     "NProcess": 5,
     "Plotting": true,
-    "PlotComp": true,
-    "CalcEW": false,
-    "Concatenate": false,
+    "PlotComp": false,
+    "CalcEW": true,
+    "Concatenate": true,
     "Verbose": true,
     "EmissionGroups": [
         {
