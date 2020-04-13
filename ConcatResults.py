@@ -13,41 +13,53 @@ def concatfromresults(p,objects):
     if p["Verbose"]:
         print("Concatenating Results...")
 
-    # Initalize list of tables
+    # Initalize loop
     first = True
-    for path in objects['File']:
+    N = 10000 # Number of objects we will concatenate at once
+    i = 0 # Index
+    while i*N < len(objects):
+        
+        tables = [] # Initilize tables list
+        paths = objects['File'][i*N:(i+1)*N] # Get subsample
 
-        # Load name and parameters
-        name = path.split('/')[-1].replace('.fits','')
-        parameters = fits.getdata(p['OutFolder']+name+'-results.fits')
-
-        # Initalize Lists
-        data = [name]
-        names = ['Name']
-        dtype = [np.unicode_] + [np.float_ for i in range(2*len(parameters.columns.names))]
-
-        # Iterate over columns and add
-        for n in parameters.columns.names:
+        # Iterate over results
+        for path in paths:
             
-            # Add medians
-            data.append(np.median(parameters[n]))
-            names.append(n)
+            # Load name and parameters
+            name = path.split('/')[-1].replace('.fits','')
+            parameters = fits.getdata(p['OutFolder']+name+'-results.fits')
+            
+            # Initalize Lists
+            data = [name]
+            names = ['Name']
+            dtype = [np.unicode_] + [np.float_ for i in range(2*len(parameters.columns.names))]
+            
+            # Iterate over columns and add
+            for n in parameters.columns.names:
+                
+                # Add medians
+                data.append(np.median(parameters[n]))
+                names.append(n)
 
-            # Add errors
-            data.append(np.std(parameters[n]))
-            names.append(n+'_err')
+                # Add errors
+                data.append(np.std(parameters[n]))
+                names.append(n+'_err')
 
-        # Make table
-        table = Table(data = np.array(data), names = names,dtype=dtype)
+            tables.append(Table(data = np.array(data), names = names,dtype=dtype))
 
-        # If first entry, initialized table
+        table = vstack(tables,join_type = 'outer')
+
+        # If first entry, save to disk directly
         if first:
             table.write(p['OutFolder']+'HQUAILS-results.fits',overwrite=True)
             first = False
+
         # Otherise load table and append to it
         else:
             results = Table.read(p['OutFolder']+'HQUAILS-results.fits')
             vstack([results,table],join_type = 'outer').write(p['OutFolder']+'HQUAILS-results.fits',overwrite=True)
+
+        i += 1
 
 # Main Function
 if __name__ == "__main__":
