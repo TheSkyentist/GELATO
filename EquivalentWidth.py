@@ -49,11 +49,15 @@ def EWfromresults(params,path,z):
 
             # Split name
             namesplit = names[i].split('-')
-            namesplit[-1] = 'EW'
+            namesplit[-1] = 'REW'
             EWnames.append('-'.join(namesplit))
             
             # Get line center
             center = float(namesplit[-2])
+
+            # Get line flux/redshift
+            lineflux = parameters[names[i+1]]
+            oneplusz = parameters[names[i]]
 
             # Initialize continuum fluxes
             contflux = np.ones(len(parameters))
@@ -63,10 +67,10 @@ def EWfromresults(params,path,z):
 
                 # Load in continuum
                 continuum.parameters = params[:ind]
-                contflux[j] = continuum(center*(1+params[names[i]]))
+                contflux[j] = continuum(center*oneplusz[j])
 
             # Get EW
-            EWs.append(np.abs(parameters[names[i+1]]/contflux))
+            EWs.append(np.abs(lineflux/(contflux*oneplusz)))
         
         # Save
         hstack([Table(parameters),Table(data=EWs,names=EWnames)]).write(fname,overwrite=True)
