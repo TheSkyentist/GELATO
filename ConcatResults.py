@@ -37,12 +37,15 @@ def concatfromresults(p,objects):
             # Iterate over columns and add
             for n in parameters.columns.names:
                 
+                ps = parameters[n]
+                ps = ps[np.invert(np.isinf(ps))]
+
                 # Add medians
-                data.append(np.median(parameters[n]))
+                data.append(np.median(ps))
                 names.append(n)
 
                 # Add errors
-                data.append(np.std(parameters[n]))
+                data.append(np.std(ps))
                 names.append(n+'_err')
 
             tables.append(Table(data = np.array(data), names = names,dtype=dtype))
