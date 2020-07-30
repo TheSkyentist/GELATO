@@ -106,7 +106,7 @@
                 {
                     "Name":"Halpha",
                     "Flag": 1,
-                    "FlagGroups": ["BroadBalmer"],
+                    "FlagGroups": ["Broad"],
                     "Lines": [
                         {
                             "Wavelength": 6562.80,
