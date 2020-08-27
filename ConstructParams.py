@@ -25,7 +25,7 @@ def verify(params):
         return False
 
     # Check that all parameters are specified
-    for p in ['OutFolder', 'ContinuumRegion', 'LineRegion', 'ContinuumDeg', 'MaxIter', 'NBoot', 'FThresh', 'NProcess', 'Plotting', 'PlotComp', 'CalcEW', 'Concatenate', 'Verbose', 'EmissionGroups']:
+    for p in ['OutFolder', 'ContinuumRegion', 'LineRegion', 'ContinuumDeg', 'MaxIter', 'NBoot', 'FThresh', 'NProcess', 'Plotting', 'PlotComp', 'CalcEW', 'Overwrite', 'Concatenate', 'Verbose', 'EmissionGroups']:
         if not p in params.keys():
             print('Parameters does not contain parameter:',p)
             return False
@@ -49,7 +49,7 @@ def verify(params):
             if not (((type(params[p]) == float) or (type(params[p]) == int)) and ((params[p] >= 0) and (params[p] <= 1))):
                 print('Parameter',p,'must be an int or a float between 0 and 1 (inclusive).')
                 return False
-        elif p in ['Plotting', 'PlotComp','CalcEW','Concatenate','Verbose']:
+        elif p in ['Plotting', 'PlotComp','CalcEW','Concatenate','Overwrite','Verbose']:
             if not (type(params[p]) == bool):
                 print('Parameter',p,'must be a boolean.')
                 return False

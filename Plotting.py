@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 """ Plotting for Fit """
+import os
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -18,6 +19,10 @@ def Plot(spectrum,model,path):
         figname += '-comp'
     else:
         figname += '-fit'
+    if os.path.exists(spectrum.p['OutFolder'] + figname + '.pdf') and not spectrum.p['Overwrite']:
+        if spectrum.p['Verbose']:
+            print('Figure Already Plotted:',figname)
+        return
     if spectrum.p['Verbose']:
         print('Plotting Figure:',figname)
     fig     = plt.figure(figsize = (5*ncols,7))

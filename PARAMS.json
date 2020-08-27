@@ -11,6 +11,7 @@
     "PlotComp": true,
     "CalcEW": true,
     "Concatenate": true,
+    "Overwrite": true,
     "Verbose": false,
     "EmissionGroups": [
         {

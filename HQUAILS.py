@@ -1,6 +1,7 @@
 """ Main Function """
 
 # Packages
+import os
 import numpy as np
 from datetime import datetime
 from astropy.table import Table
@@ -17,6 +18,12 @@ def HQUAILS(params,path,z):
 
     # Get name of file
     name = path.split("/")[-1]
+
+    # If it exits, skip
+    if os.path.exists(params["OutFolder"]+name.replace(".fits","-results.fits")) and not params["Overwrite"]:
+        if params["Verbose"]:
+            print('Spectrum Results Already Exist:',name)
+        return
     if params["Verbose"]:
         print("HQUAILS running for",name)
 

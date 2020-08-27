@@ -88,6 +88,7 @@ The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And e
 * PlotComp: To plot only the components of the fit or the total fit.
 * CalcEW: To calculate equivalent widths or not.
 * Concatenate: To concatenate the results of a multiple HQUAILS run or not.
+* Overwrite: Overwrite the results of a previous HQUAILS run.
 * Verbose: To print HQUAILS output.
 * EmissionGroups: Dictionary of emission lines to be fit by HQUAILS. The structure of this dictionary is crucial to the operation of HQUAILS. The following section details the format of this dictionary.
 
