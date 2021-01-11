@@ -1,0 +1,150 @@
+{
+    "OutFolder": "Results/",
+    "ContinuumRegion": 15000,
+    "LineRegion": 300,
+    "ContinuumDeg": 1,
+    "MaxIter": 1000,
+    "NBoot": 500,
+    "FThresh": 0.95,
+    "NProcess": 1,
+    "Plotting": false,
+    "PlotComp": false,
+    "CalcEW": false,
+    "Concatenate": false,
+    "Overwrite": true,
+    "Verbose": true,
+    "EmissionGroups": [
+        {
+            "Name":"NLR",
+            "TieRedshift": false,
+            "TieDispersion": false,
+            "Species": [
+                {
+                    "Name":"[SII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 6716.31,
+                            "RelStrength": null
+                        },
+                        {
+                            "Wavelength": 6730.68,
+                            "RelStrength": null
+                        }
+                    ]
+                },
+                {
+                    "Name":"[NII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 6583.34,
+                            "RelStrength": 1
+                        },
+                        { 
+                            "Wavelength": 6547.96,
+                            "RelStrength": 0.34
+                        }
+                    ]
+                },
+                {
+                    "Name":"[OIII]",
+                    "Flag": 2,
+                    "FlagGroups": ["Outflow"],
+                    "Lines": [
+                        {
+                            "Wavelength": 5006.77,
+                            "RelStrength": 1
+                        },
+                        { 
+                            "Wavelength": 4958.83,
+                            "RelStrength": 0.35
+                        }
+                    ]
+                },
+                {
+                    "Name":"[NeIII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 3868.69,
+                            "RelStrength": null
+                        }
+                    ]
+                },
+                {
+                    "Name":"[OII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 3727.38,
+                            "RelStrength": null
+                        }
+                    ]
+                },
+                {
+                    "Name":"[NeV]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 3426.85,
+                            "RelStrength": null
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Name":"Stars",
+            "TieRedshift": true,
+            "TieDispersion": true,
+            "Species": [
+                {
+                    "Name":"Halpha",
+                    "Flag": 1,
+                    "FlagGroups": ["Broad"],
+                    "Lines": [
+                        {
+                            "Wavelength": 6562.80,
+                            "RelStrength": null
+                        }
+                    ]
+                },
+                {
+                    "Name":"Hbeta",
+                    "Flag": 5,
+                    "FlagGroups": ["Broad","Absorption"],
+                    "Lines": [
+                        {
+                            "Wavelength": 4861.32,
+                            "RelStrength": null
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Name":"Outflow",
+            "TieRedshift": false,
+            "TieDispersion": false,
+            "Species": []
+        },
+        {
+            "Name":"Broad",
+            "TieRedshift": true,
+            "TieDispersion": true,
+            "Species": []
+        },
+        {
+            "Name":"Absorption",
+            "TieRedshift": false,
+            "TieDispersion": false,
+            "Species": []
+        }
+    ]
+}
