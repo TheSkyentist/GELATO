@@ -1,14 +1,14 @@
 #! /usr/bin/env python
 
-""" Wrapper for single HQUAILS run """
+""" Wrapper for single GELATO run """
 
 # Packages
 import os
 import sys
 import argparse
 
-# HQUAILS supporting files
-import HQUAILS
+# GELATO supporting files
+import GELATO
 import ConstructParams as CP
 
 # Main Function
@@ -28,10 +28,10 @@ if __name__ == "__main__":
         os.mkdir(p["OutFolder"])
 
     if p['Verbose']:
-        HQUAILS.header()
+        GELATO.header()
 
-    ## Run HQUAILS ##
-    HQUAILS.HQUAILS(p, args.Spectrum, args.Redshift)
+    ## Run GELATO ##
+    GELATO.GELATO(p, args.Spectrum, args.Redshift)
 
     if p['Verbose']:
-        HQUAILS.footer()
+        GELATO.footer()

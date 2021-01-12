@@ -54,13 +54,13 @@ def concatfromresults(p,objects):
 
         # If first entry, save to disk directly
         if first:
-            table.write(p['OutFolder']+'HQUAILS-results.fits',overwrite=True)
+            table.write(p['OutFolder']+'GELATO-results.fits',overwrite=True)
             first = False
 
         # Otherise load table and append to it
         else:
-            results = Table.read(p['OutFolder']+'HQUAILS-results.fits')
-            vstack([results,table],join_type = 'outer').write(p['OutFolder']+'HQUAILS-results.fits',overwrite=True)
+            results = Table.read(p['OutFolder']+'GELATO-results.fits')
+            vstack([results,table],join_type = 'outer').write(p['OutFolder']+'GELATO-results.fits',overwrite=True)
 
         i += 1
 

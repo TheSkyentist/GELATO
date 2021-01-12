@@ -1,21 +1,21 @@
-HQUAILS
+GELATO
 ========
 
 *Handy QUAsar emissIon Line fitS (pronounced Quails) by Raphael Hviding*
 -------------
 
-HQUAILS is a Python code designed to fit emission lines in the spectra of active galactic nuclei. In particular, it was built in order to fit AGN spectra where many of the parameters of the emission lines are tied with respect to one another. HQUAILS attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines).
+GELATO is a Python code designed to fit emission lines in the spectra of active galactic nuclei. In particular, it was built in order to fit AGN spectra where many of the parameters of the emission lines are tied with respect to one another. GELATO attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines).
 
-HQUAILS was also built in order to test the inclusion of additional fitting parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? HQUAILS builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test and then comparisons of Akaike Information Criteria.
+GELATO was also built in order to test the inclusion of additional fitting parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? GELATO builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test and then comparisons of Akaike Information Criteria.
 
 The spectra are fit using a Levenberg–Marquardt non-linear least squares algorithm with Gaussian line profiles.
 
-HQUAILS was designed to be run on SDSS spectra, but the code can be adapted to run on other spectra.
+GELATO was designed to be run on SDSS spectra, but the code can be adapted to run on other spectra.
 
 Requirements
 -------------
 
-HQUAILS was developed using Astropy 3.2.3 and Python 3.6.10.
+GELATO was developed using Astropy 3.2.3 and Python 3.6.10.
 
 To install the dependancies, I recommend installing conda (through [Miniconda](https://docs.conda.io/en/latest/miniconda.html)).
 
@@ -25,20 +25,20 @@ The environment can be installed from the provided "environment.yml" file.
 conda env create -f environment.yml
 ```
 
-The environment will then be installed under the name HQUAILS and can then be activated.
+The environment will then be installed under the name GELATO and can then be activated.
 
 ```bash
-conda activate HQUAILS
+conda activate GELATO
 ```
 
-Whenever running HQUAILS scripts, they must be run from this environment.
+Whenever running GELATO scripts, they must be run from this environment.
 
 Installation
 -------------
 
-HQUAILS can be installed by cloning this git repository.
+GELATO can be installed by cloning this git repository.
 
-In your working directory, **you need to copy the "matplotlibrc" file** to control the plotting settings. This is most important if you are running HQUAILS with multiprocessing as this file sets the matplotlib backed to "Agg", a non-interactive backend, required for generating and saving figures on multiple threads.
+In your working directory, **you need to copy the "matplotlibrc" file** to control the plotting settings. This is most important if you are running GELATO with multiprocessing as this file sets the matplotlib backed to "Agg", a non-interactive backend, required for generating and saving figures on multiple threads.
 
 How it works
 -------------
@@ -69,12 +69,12 @@ The current supported additional components are:
 2. Outflow Component: They are forced to have a positive flux. The outflow components are modeled as Gaussians. The default value of the velocity dispersion of the line is set to 500 km/s, while it is bounded between 500 km/s and 1000 km/s.
 3. Absorption Component: The outflow components are modeled as Gaussians. They are forced to have a negative flux. The default value of the velocity dispersion of the line is set to 600 km/s, while it is bounded between 350 km/s and 3000 km/s.
 
-In order to have HQUAILS attempt to fit an emission line with an additional component, the line must be flagged in the parameters file, described in the section below. The flag is an integer, whose bitwise digits describe if a specific additional component should be tried. Examples for all possible combinations are given in the figure following the description of the EmissionGroups parameter.
+In order to have GELATO attempt to fit an emission line with an additional component, the line must be flagged in the parameters file, described in the section below. The flag is an integer, whose bitwise digits describe if a specific additional component should be tried. Examples for all possible combinations are given in the figure following the description of the EmissionGroups parameter.
 
 Parameter File
 -------------
 
-The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And example parameter file is included in the repository.
+The behaviour of GELATO is controlled entirely by the "PARAMS.json" file. And example parameter file is included in the repository.
 
 * Outfolder: This parameter is the path to the output directory. 
 * ContinuumRegion: The border around emission lines in velocity space that where the continuum is fit (km/s). If the regions around two emission lines overlap, the two regions are merged and the lines share a continuum.
@@ -87,10 +87,10 @@ The behaviour of HQUAILS is controlled entirely by the "PARAMS.json" file. And e
 * Plotting: Produce plots or not.
 * PlotComp: To plot only the components of the fit or the total fit.
 * CalcEW: To calculate equivalent widths or not.
-* Concatenate: To concatenate the results of a multiple HQUAILS run or not.
-* Overwrite: Overwrite the results of a previous HQUAILS run.
-* Verbose: To print HQUAILS output.
-* EmissionGroups: Dictionary of emission lines to be fit by HQUAILS. The structure of this dictionary is crucial to the operation of HQUAILS. The following section details the format of this dictionary.
+* Concatenate: To concatenate the results of a multiple GELATO run or not.
+* Overwrite: Overwrite the results of a previous GELATO run.
+* Verbose: To print GELATO output.
+* EmissionGroups: Dictionary of emission lines to be fit by GELATO. The structure of this dictionary is crucial to the operation of GELATO. The following section details the format of this dictionary.
 
 Emission Line Dictionary
 -------------
@@ -107,7 +107,7 @@ Here we describe the format of the emission line dictionary.
 2. Each Group contains a list of Species. All spectral features in the same Species will share a redshift velocity and dispersion. This means, during fitting, their velocity dispersions and redshifts will be forcibly tied to be equal.
 
       * Each species has a name, which controls how its parameters appear in the output.
-      * Each species has a Flag. The integer flag controls will additional parameters HQUAILS will attempt to add to the spectral features of this species. The value in each bit, from right to left (increasing order of magnitude), is a boolean flag for each kind of additional component, which can be found in the Additional Components section of the README and the "AdditionalComponents.py" file.
+      * Each species has a Flag. The integer flag controls will additional parameters GELATO will attempt to add to the spectral features of this species. The value in each bit, from right to left (increasing order of magnitude), is a boolean flag for each kind of additional component, which can be found in the Additional Components section of the README and the "AdditionalComponents.py" file.
       * Each species has a FlagGroup. Each additional component must be associated with a Group, which may or may not be the same Group as the original species. An additional list is passed to each species, specifying where each additional component that will attempt to be added must go. The group must exist, even if empty, as it needs to be created with the flags. (Note: This means the sum of the bits of the flag must be equal to the length of the FlagGroups list.)
 
 3. Each Species contains a list of lines. Lines can be set to have relative fluxes.  This means, during fitting, their fluxes will be tied to have the given relative values.
@@ -143,80 +143,80 @@ Here is figure showing the hierarchy of the Emission Groups Parameter for the "P
 
 ![Image of PARAMS](./EGFig.jpg)
 
-Running HQUAILS
+Running GELATO
 -------------
 
-In order to run HQUAILS you need:
+In order to run GELATO you need:
 
 * The PARAMS.json file.
 * The spectrum or spectra.
 * The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 100. A basic estimate from the apparent position of any identified emission line should suffice.
-* If running on a list of spectra, HQUAILS takes in a comma delimited file, where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
+* If running on a list of spectra, GELATO takes in a comma delimited file, where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
 * (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified.
 
 All of the following scripts can be made into executables and simply called directly.
 
-The two wrappers for HQUAILS are:
+The two wrappers for GELATO are:
 
-* "run_HQUAILS_single.py"
+* "run_GELATO_single.py"
 
-   This script is designed to run HQUAILS over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object.
+   This script is designed to run GELATO over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object.
 
   ```bash
-  python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectrum.fits 1.122
+  python ~/Documents/GELATO/run_GELATO_multi.py ~/Example/PARAMS.json ~/Data/spectrum.fits 1.122
   ```
 
-* "run_HQUAILS_multi.py"
+* "run_GELATO_multi.py"
 
-   This script is designed to run HQUAILS over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects.
+   This script is designed to run GELATO over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects.
 
 ```bash
-python ~/Documents/HQUAILS/run_HQUAILS_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
+python ~/Documents/GELATO/run_GELATO_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
 ```
 
-The plots for HQUAILS can also be created directly from the spectra and the results file in the following manners:
+The plots for GELATO can also be created directly from the spectra and the results file in the following manners:
 
 For a single plot:
 
 ```bash
-python ~/Documents/HQUAILS/Plotting.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
+python ~/Documents/GELATO/Plotting.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
 ```
 
 For multiple plots:
 
 ```bash
-python ~/Documents/HQUAILS/Plotting.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
+python ~/Documents/GELATO/Plotting.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
 ```
 
 To generate equivalent widths and append them to the results file is similar to plotting:
 
 ```bash
-python ~/Documents/HQUAILS/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
+python ~/Documents/GELATO/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
 ```
 
 ```bash
-python ~/Documents/HQUAILS/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
+python ~/Documents/GELATO/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
 ```
 
-The concatenated results for HQUAILS can also be created directly the results files in the following manners:
+The concatenated results for GELATO can also be created directly the results files in the following manners:
 
 ```bash
-python ~/Documents/HQUAILS/ConcatResults.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
+python ~/Documents/GELATO/ConcatResults.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
 ```
 
 Running the Example
 
 -------------
-Here are the following instructions to run HQUAILS. This tutorial assumes you start in the Example directory. First we need to activate our HQUAILS environment.
+Here are the following instructions to run GELATO. This tutorial assumes you start in the Example directory. First we need to activate our GELATO environment.
 
 ```bash
-conda activate HQUAILS
+conda activate GELATO
 ```
 
 We can then run the code over the whole data set.
 
 ```bash
-python ../run_HQUAILS_multi.py ExPARAMS.json ExObjList.csv
+python ../run_GELATO_multi.py ExPARAMS.json ExObjList.csv
 ```
 
 In order to produce rest equivalent widths for the whole sample we can run the following.
@@ -239,37 +239,37 @@ python ../Plotting.py ExPARAMS.json --ObjectList ExObjList.csv
 
 The output from running the example will be put into 'Results/' and can be compared to the results in the 'Comparison/' directory.
 
-HQUAILS cast (in order of appearance)
+GELATO cast (in order of appearance)
 
 -------------
 
 * README.md
   
-  Here you are! The documentation for HQUAILS.
+  Here you are! The documentation for GELATO.
 
-* run_HQUAILS_single.py
+* run_GELATO_single.py
   
-  Wrapper for running HQUAILS on a single object.
+  Wrapper for running GELATO on a single object.
   
-* run_HQUAILS_multi.py
+* run_GELATO_multi.py
   
-  Wrapper for running HQUAILS on multiple objects. If specifying multiple processes, each object will be run on an independent thread. To load an object file differently, this file should be edited.
+  Wrapper for running GELATO on multiple objects. If specifying multiple processes, each object will be run on an independent thread. To load an object file differently, this file should be edited.
 
 * PARAMS.json
   
-  Paramter file that controls HQUAILS behavior.
+  Paramter file that controls GELATO behavior.
 
 * ConstructParams.py
 
   Routines for turning the PARAMS.json file into a python dictionary, and verifying that it is in the correct format.
 
-* HQUAILS.py
+* GELATO.py
 
-  Main HQUAILS function that calls and coordinates the whole operation.
+  Main GELATO function that calls and coordinates the whole operation.
 
 * SpectrumClass.py
 
-  A class the defines how a spectrum is loaded. HQUAILS was designed for SDSS spectra. To load in any other kind of spectrum, you can edit the way this class is initialized.
+  A class the defines how a spectrum is loaded. GELATO was designed for SDSS spectra. To load in any other kind of spectrum, you can edit the way this class is initialized.
 
 * BuildModel.py
 
@@ -277,7 +277,7 @@ HQUAILS cast (in order of appearance)
 
 * CustomModels.py
 
-  Here are where the custom models used in HQUAILS are defined. Here exists a gaussian emission line model and a polynomial continuum continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can bs set.
+  Here are where the custom models used in GELATO are defined. Here exists a gaussian emission line model and a polynomial continuum continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can bs set.
 
 * AdditionalComponents.py
 
@@ -285,7 +285,7 @@ HQUAILS cast (in order of appearance)
 
 * FittingModel.py
 
-  Here are the scripts for fitting HQUAILS generated models and for testing the inclusion of additional parameters. To change the fitting algorithm, this file can be edited.
+  Here are the scripts for fitting GELATO generated models and for testing the inclusion of additional parameters. To change the fitting algorithm, this file can be edited.
 
 * ModelComparison.py
 
@@ -293,35 +293,35 @@ HQUAILS cast (in order of appearance)
 
 * Plotting.py
 
-  Here are the scripts for creating and saving figures of the fits. Can also be run directly on HQUAILS results in order to create figures after the fact. The plots can either be plotted as the components or the final result only.
+  Here are the scripts for creating and saving figures of the fits. Can also be run directly on GELATO results in order to create figures after the fact. The plots can either be plotted as the components or the final result only.
 
 * EquivalentWidth.py
 
-  Here are the scripts for creating and saving emission line EW. Can also be run directly on HQUAILS results in order to generate EW after the fact. Rest equivalent widths are generated by assuming a flat continuum at the height of the continuum at the emission line center.
+  Here are the scripts for creating and saving emission line EW. Can also be run directly on GELATO results in order to generate EW after the fact. Rest equivalent widths are generated by assuming a flat continuum at the height of the continuum at the emission line center.
 
 * ConcatenateResults.py
 
-  Scripts for concatenating results from a multi HQUAILS run. Can also be run independently on results after the fact.
+  Scripts for concatenating results from a multi GELATO run. Can also be run independently on results after the fact.
 
 * matplotlibrc
 
-  A matplotlib settings file that controls the output of figures. Can be changed to the user's liking. However, for running HQUAILS on multiple threads, the backend must be set to a non-interactive backend, e.g. "Agg".
+  A matplotlib settings file that controls the output of figures. Can be changed to the user's liking. However, for running GELATO on multiple threads, the backend must be set to a non-interactive backend, e.g. "Agg".
 
 * LICENSE
 
-  Code license, HQUAILS is distributed under the GNU General Public License 3.
+  Code license, GELATO is distributed under the GNU General Public License 3.
 
 License
 
 -------------
-HQUAILS is an open-source software available under the GNU General Public License 3. In a nutshell, this code can be used and distributed by anyone, but any code that includes HQUAILS must also be distributed freely and openly (see LICENSE file for details).
+GELATO is an open-source software available under the GNU General Public License 3. In a nutshell, this code can be used and distributed by anyone, but any code that includes GELATO must also be distributed freely and openly (see LICENSE file for details).
 
 FAQ
 
 -------------
 **How can I load spectra from other sources?**
 
-*By editing the SpectrumClass.py file, you can customize how spectra are loaded into HQUAILS.*
+*By editing the SpectrumClass.py file, you can customize how spectra are loaded into GELATO.*
 
 **What are the units?**
 
@@ -329,8 +329,8 @@ FAQ
 
 **Do you mean velocity offsets, not redshifts?**
 
-*Each emission line is characterized by a redshift, which is trivial to convert to a velocity offset once a reference line is chosen. However this requires the user to choose a reference line. HQUAILS remains agnostic to this procedure and simply returns the redshift of each line.*
+*Each emission line is characterized by a redshift, which is trivial to convert to a velocity offset once a reference line is chosen. However this requires the user to choose a reference line. GELATO remains agnostic to this procedure and simply returns the redshift of each line.*
 
-**Why is it spelled HQUAILS but pronounced Quails?**
+**Why is it spelled GELATO but pronounced Quails?**
 
 *The author of the code, R. E. Hviding (pronounced VEE-ding) thought it important to draw attention to names that start with an H where the H is not pronounced.*

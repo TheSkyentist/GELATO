@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 from astropy.table import Table
 
-# HQUAILS supporting files
+# GELATOILS supporting files
 import Plotting as PL
 import BuildModel as BM
 import FittingModel as FM
@@ -14,7 +14,7 @@ import SpectrumClass as SC
 import EquivalentWidth as EW
 
 # Get fit parameters for spectrum
-def HQUAILS(params,path,z):
+def GELATOILS(params,path,z):
 
     # Get name of file
     name = path.split("/")[-1]
@@ -25,7 +25,7 @@ def HQUAILS(params,path,z):
             print('Spectrum Results Already Exist:',name)
         return
     if params["Verbose"]:
-        print("HQUAILS running for",name)
+        print("GELATOILS running for",name)
 
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(path,z,params)
@@ -75,10 +75,10 @@ def HQUAILS(params,path,z):
         EW.EWfromresults(params,path,z)
 
     if params["Verbose"]:
-        print("HQUAILS finished running on:",name)
+        print("GELATOILS finished running on:",name)
 
 def header():
-    print("Welcome to HQUAILS")
+    print("Welcome to GELATOILS")
     print("Handy QUAsar emIssion Line fitS (pronounced like 'quails')")
     print("Developed by R. E. Hviding")
     print("Started run at:",datetime.now())

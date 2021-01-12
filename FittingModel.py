@@ -7,7 +7,7 @@ from itertools import combinations
 from astropy.modeling import fitting
 fit = fitting.LevMarLSQFitter()
 
-# HQUAILS supporting files
+# GELATOILS supporting files
 import BuildModel as BD
 import ModelComparison as MC
 import AdditionalComponents as AC

@@ -3,7 +3,7 @@
 # Packages
 import numpy as np
 
-# HQUAILS supporting files
+# GELATO supporting files
 import CustomModels as CM
 import AdditionalComponents as AC
 from astropy.modeling.models import Polynomial1D

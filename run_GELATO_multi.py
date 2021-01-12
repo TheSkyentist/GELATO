@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-""" Wrapper for mulitple HQUAILS runs """
+""" Wrapper for mulitple GELATO runs """
 
 # Packages
 import os
@@ -8,8 +8,8 @@ import copy
 import argparse
 import numpy as np
 
-# HQUAILS supporting files
-import HQUAILS
+# GELATO supporting files
+import GELATO
 import ConstructParams as CP
 
 # Main Function
@@ -28,23 +28,23 @@ if __name__ == "__main__":
         os.mkdir(p["OutFolder"])
 
     if p['Verbose']:
-        HQUAILS.header()
+        GELATO.header()
 
     ## Assemble Objects
     objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['File','z'])
     ## Assemble Objects
 
-    ## Run HQUAILS ##
+    ## Run GELATO ##
     if p['NProcess'] > 1: # Mutlithread
         import multiprocessing as mp
         pool = mp.Pool(processes=p['NProcess'])
         inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
-        pool.starmap(HQUAILS.HQUAILS, inputs)
+        pool.starmap(GELATO.GELATO, inputs)
         pool.close()
         pool.join()
     else: # Single Thread
-        for o in objects: HQUAILS.HQUAILS(copy.deepcopy(p),o['File'],o['z'])
-    ## Run HQUAILS ##
+        for o in objects: GELATO.GELATO(copy.deepcopy(p),o['File'],o['z'])
+    ## Run GELATO ##
 
     ## Concatenate Results ##
     if p['Concatenate']:
@@ -53,4 +53,4 @@ if __name__ == "__main__":
     ## Concatenate Results ##
 
     if p['Verbose']:
-        HQUAILS.footer()
+        GELATO.footer()
