@@ -7,13 +7,19 @@ from itertools import combinations
 from astropy.modeling import fitting
 fit = fitting.LevMarLSQFitter()
 
-# GELATOILS supporting files
+# GELATO supporting files
 import BuildModel as BD
 import ModelComparison as MC
 import AdditionalComponents as AC
 
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,base_model,base_param_names):
+
+    # Initial fit to continuum
+    # print(type(base_model[0]))
+    # base_model[0].set_region(np.invert(spectrum.emission_region))
+    # base_model[0] = FitModel(spectrum,base_model[0],np.invert(spectrum.emission_region))
+    # base_model[0].set_region(spectrum.emission_region)
 
     # Fit first model
     base_model = FitModel(spectrum,base_model)
@@ -86,12 +92,17 @@ def FitComponents(spectrum,base_model,base_param_names):
 
     return model,param_names
 
-# Fit Model
-def FitModel(spectrum,model):
+# Fit Model, must specify region
+def FitModel(spectrum,model,region = None):
+
+    if type(region) == None:
+        region = np.invert(spectrum.emission_region)
     
     # Fit model
-    fit_model = fit(model,spectrum.wav,spectrum.flux,weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
+    fit_model = fit(model,spectrum.wav[region],spectrum.flux[region],weights=spectrum.sqrtweight[region],maxiter=spectrum.p['MaxIter'])
     return fit_model
+
+
 
 # Fit (Bootstrapped) Model
 def FitBoot(spectrum,model):

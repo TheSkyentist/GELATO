@@ -29,11 +29,14 @@ class Spectrum:
         self.wav = 10**spectrum['loglam'][good]
         self.flux = spectrum['flux'][good]
         self.weight = weight[good]
+        self.sqrtweight = np.sqrt(self.weight)
+        self.sigma = 1/self.sqrtweight
 
         # Create regions and lines
         self.regionAndLines()
         self.reduceRegions()
-        self.LimitSpectrum()
+        self.emission_region = np.logical_or.reduce([np.logical_and(r[0]<self.wav,self.wav<r[1]) for r in self.regions])
+        # self.LimitSpectrum()
     
     # Return reduced regions and emission lines based on spectrum wavelength
     def regionAndLines(self):
@@ -91,8 +94,8 @@ class Spectrum:
         self.wav = self.wav[inregion]
         self.flux = self.flux[inregion]
         self.weight = self.weight[inregion]
-        self.sqrtweight = np.sqrt(self.weight)
-        self.sigma = 1/self.sqrtweight
+        self.sqrtweight = self.sqrtweight[inregion]
+        self.sigma = self.sigma[inregion]
 
     # Boostrap the Flux
     def Boostrap(self):

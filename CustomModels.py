@@ -1,8 +1,11 @@
 """ Custom Astropy Models """
 
+import os
+import numpy as np
+from spectres import spectres
+from astropy.io import fits
 from astropy.modeling import Fittable1DModel,Parameter
 from astropy.modeling.polynomial import PolynomialModel
-import numpy as np
 
 # Constants
 FLOAT_EPSILON = float(np.finfo(np.float32).tiny)
@@ -19,9 +22,9 @@ class SpectralFeature(Fittable1DModel):
     """
 
     # Parameters
-    Redshift     = Parameter(default=0)
-    Flux         = Parameter(default=0) # Must be non-negative for emission
-    Dispersion    = Parameter(default=150,bounds=(60,500)) # Reasonable range
+    Redshift   = Parameter(default=0)
+    Flux       = Parameter(default=0,bounds=(0,None)) # Must be non-negative for emission
+    Dispersion = Parameter(default=150,bounds=(60,500)) # Reasonable range
 
     def __init__(self, center, spectrum, Dispersion = Dispersion.default, **kwargs):
         
@@ -103,8 +106,66 @@ class SpectralFeature(Fittable1DModel):
         
         return [d_Redshift, d_Flux, d_Dispersion]
 
-# Spectral Feature Class (Gaussian)
-class Continuum(PolynomialModel):
+# SSP Continuum
+class SSPContinuum(PolynomialModel):
+
+    """
+    Continuum from SSPs
+    """
+
+    inputs = ('x',)
+    outputs = ('y',)
+    _separable = False
+
+    def __init__(self, spectrum, n_models=None,
+                 model_set_axis=None, name=None, meta=None, **params):
+
+        # Keep track of spectrum
+        self.spectrum = spectrum
+        self.region = np.ones(spectrum.wav.shape,dtype=bool)
+
+        # List SSPs
+        self.ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
+        self.ssp_names = [x for x in os.listdir(self.ssp_dir) if '.fits' in x]
+
+        # Get SSPs
+        self.ssps = []
+        for ssp_name in self.ssp_names:
+            with fits.open(self.ssp_dir+ssp_name) as f:
+                h = f[0].header
+                flux = f[0].data
+                self.ssps.append(flux)
+        self.ssp_wav = (np.arange(flux.size) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
+        self.ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+self.spectrum.z),np.array(self.ssps))
+
+        # Call Polynomial Class
+        super().__init__(
+            len(self.ssp_names)-1, n_models=n_models, model_set_axis=model_set_axis,
+            name=name, meta=meta, **params)
+
+        # Set initial parameters
+        self.parameters = np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*np.median(self.ssps,1))
+
+        # Set bounds
+        for pname in self.param_names: self.bounds[pname] = (0,None)
+
+    def prepare_inputs(self, x, **kwargs):
+        inputs, format_info = super().prepare_inputs(x, **kwargs)
+
+        x = inputs[0]
+        return (x,), format_info
+
+    def evaluate(self, x, *coeffs):
+        return np.dot(np.array(coeffs).T,self.ssps[:,self.region])[0]
+
+    def get_names(self):
+        return ['Continuum_Redshift']+[x.replace('.fits','') for x in self.ssp_names]
+
+    def set_region(self,region):
+        self.region = region
+
+# Polynomail Continuum
+class PolyContinuum(PolynomialModel):
 
     r"""
     Copy of 1D Polynomial model with modification.

@@ -17,26 +17,10 @@ def BuildModel(spectrum, EmissionGroups=None):
     
     # Model
     model_components = []
-        
-    # Add continuum regions
-    for i,region in enumerate(spectrum.regions):
-        
-        # Name of region
-        name = 'Continuum-' + str(i) +'-'
-        
-        # Generate model
-        continuum = CM.Continuum(spectrum.p['ContinuumDeg'],region)
 
-        # Add starting parameters
-        inregion = np.logical_and(spectrum.wav > region[0],spectrum.wav < region[1])
-        continuum.c0 = np.median(spectrum.flux[inregion])
-        
-        # Add model
-        model_components.append(continuum)
-        
-        # Collect param names
-        for pname in model_components[-1].param_names:
-            param_names.append(name+pname)
+    # Add in continuum
+    model_components.append(CM.SSPContinuum(spectrum))
+    param_names.append(model_components[-1].get_names())
 
     # Check if we were passed an emission lines
     if EmissionGroups == None:

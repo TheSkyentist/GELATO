@@ -1,7 +1,7 @@
 GELATO
 ========
 
-*Handy QUAsar emissIon Line fitS (pronounced Quails) by Raphael Hviding*
+*Galaxy/AGN Emission Line Analysis TOol by Raphael Hviding*
 -------------
 
 GELATO is a Python code designed to fit emission lines in the spectra of active galactic nuclei. In particular, it was built in order to fit AGN spectra where many of the parameters of the emission lines are tied with respect to one another. GELATO attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines).
