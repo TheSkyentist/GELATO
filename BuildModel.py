@@ -5,21 +5,21 @@ import numpy as np
 
 # GELATO supporting files
 import CustomModels as CM
+import FittingModel as FM
 import AdditionalComponents as AC
-from astropy.modeling.models import Polynomial1D
 
 # Build the model from the EmissionGroups and spectrum with initial guess
 def BuildModel(spectrum, EmissionGroups=None):
     
     ## Build Base Model
-    # True param names
+    # Keep track of parameter names and model components
     param_names    = []
-    
-    # Model
     model_components = []
 
-    # Add in continuum
-    model_components.append(CM.SSPContinuum(spectrum))
+    # Add in continuum (with initial masked fit)
+    continuum = FM.FitModel(spectrum,CM.SSPContinuum(spectrum),np.invert(spectrum.emission_region))
+    continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+    model_components.append(continuum)
     param_names.append(model_components[-1].get_names())
 
     # Check if we were passed an emission lines
