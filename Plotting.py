@@ -12,6 +12,10 @@ colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,
 # Plot figure
 def Plot(spectrum,model,path):
 
+    plt.plot(spectrum.wav,model(spectrum.wav))
+    plt.savefig(spectrum.p['OutFolder'] + figname + '.pdf')
+    return 
+    
     # Initialize Figure
     ncols   = len(spectrum.regions)
     figname = path.split('/')[-1].replace('.fits','')

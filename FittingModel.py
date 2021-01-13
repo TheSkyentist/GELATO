@@ -15,12 +15,6 @@ import AdditionalComponents as AC
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,base_model,base_param_names):
 
-    # Initial fit to continuum
-    # print(type(base_model[0]))
-    # base_model[0].set_region(np.invert(spectrum.emission_region))
-    # base_model[0] = FitModel(spectrum,base_model[0],np.invert(spectrum.emission_region))
-    # base_model[0].set_region(spectrum.emission_region)
-
     # Fit first model
     base_model = FitModel(spectrum,base_model)
 
