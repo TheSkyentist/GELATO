@@ -50,7 +50,7 @@ class SpectralFeature(Fittable1DModel):
         super().__init__(Redshift = spectrum.z, Flux=Flux, Dispersion=Dispersion, **kwargs)
         self.Redshift.bounds = (spectrum.z - 0.005,spectrum.z + 0.005)
         self.Flux.bounds = (0,1.5*Flux*self.Dispersion.bounds[1]/self.Dispersion) # Set positive bounds
-        
+
     @property
     def sigma(self):
         """Gaussian full Sigma at half maximum."""
@@ -74,7 +74,6 @@ class SpectralFeature(Fittable1DModel):
         
         # Assign values
         y = np.zeros(x.shape)
-        print(Dispersion == 0)
         exponand = (C / Dispersion) * (x[indomain] / lam_obs - 1) 
         y[indomain] = C * Flux * np.exp(-0.5 * exponand * exponand) / (lam_obs * Dispersion * SQRT_2_PI)
         
@@ -160,7 +159,7 @@ class SSPContinuum(PolynomialModel):
         return np.dot(np.array(coeffs).T,self.ssps[:,self.region])[0]
 
     def get_names(self):
-        return ['Continuum_Redshift']+[x.replace('.fits','') for x in self.ssp_names]
+        return [x.replace('.fits','') for x in self.ssp_names]
 
     def set_region(self,region):
         self.region = region

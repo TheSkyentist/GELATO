@@ -12,15 +12,11 @@ import AdditionalComponents as AC
 def BuildModel(spectrum, EmissionGroups=None):
     
     ## Build Base Model
-    # Keep track of parameter names and model components
-    param_names    = []
-    model_components = []
-
-    # Add in continuum (with initial masked fit)
+    # Create continuum (with initial masked fit)
     continuum = FM.FitModel(spectrum,CM.SSPContinuum(spectrum),np.invert(spectrum.emission_region))
     continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
-    model_components.append(continuum)
-    param_names.append(model_components[-1].get_names())
+    model_components = [continuum]
+    param_names = model_components[-1].get_names()
 
     # Check if we were passed an emission lines
     if EmissionGroups == None:

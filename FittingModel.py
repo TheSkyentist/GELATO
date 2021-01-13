@@ -15,11 +15,9 @@ import AdditionalComponents as AC
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,base_model,base_param_names):
 
-<<<<<<< HEAD
+
+
     # Initial fit to continuum
-=======
-    # Fit first model
->>>>>>> 29ba087b81c36c63aaccea70d626a250967ad260
     base_model = FitModel(spectrum,base_model)
 
     # Find number of flags
@@ -94,8 +92,8 @@ def FitComponents(spectrum,base_model,base_param_names):
 def FitModel(spectrum,model,region = None):
 
     if type(region) == None:
-        region = np.invert(spectrum.emission_region)
-    
+        region = np.ones(spectrum.wav.shape,dtype=bool)
+
     # Fit model
     fit_model = fit(model,spectrum.wav[region],spectrum.flux[region],weights=spectrum.sqrtweight[region],maxiter=spectrum.p['MaxIter'])
     return fit_model

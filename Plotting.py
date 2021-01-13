@@ -12,17 +12,9 @@ colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,
 # Plot figure
 def Plot(spectrum,model,path):
 
-    plt.plot(spectrum.wav,model(spectrum.wav))
-    plt.savefig(spectrum.p['OutFolder'] + figname + '.pdf')
-    return 
-    
     # Initialize Figure
     ncols   = len(spectrum.regions)
     figname = path.split('/')[-1].replace('.fits','')
-    if spectrum.p['PlotComp']:
-        figname += '-comp'
-    else:
-        figname += '-fit'
     if os.path.exists(spectrum.p['OutFolder'] + figname + '.pdf') and not spectrum.p['Overwrite']:
         if spectrum.p['Verbose']:
             print('Figure Already Plotted:',figname)
@@ -33,8 +25,7 @@ def Plot(spectrum,model,path):
     gs      = fig.add_gridspec(ncols=ncols,nrows=2,height_ratios=[4,1],hspace=0)
 
     # Continuum
-    continuum = np.sum([model[i] for i in range(ncols)])
-
+    continuum = model[0]
     for i,region in enumerate(spectrum.regions):
 
         # Choose inside wavelength
@@ -53,10 +44,10 @@ def Plot(spectrum,model,path):
         # Are we plotting components?
         if spectrum.p['PlotComp']:
             # Plot components
-            for j in range(ncols,model.n_submodels()):
-                fax.step(wav,continuum(wav)+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
+            for j in range(1,model.n_submodels()):
+                fax.step(wav,continuum(spectrum.wav)[good]+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
         else:
-            fax.step(wav,model(wav),'r')
+            fax.step(wav,model(spectrum.wav)[good],'r')
 
         # Axis set
         ylim = list(fax.get_ylim())
@@ -78,14 +69,14 @@ def Plot(spectrum,model,path):
 
         # Residual Axis
         rax = fig.add_subplot(gs[1,i])
-        rax.step(wav,(flux - model(wav))*isig,'gray')
+        rax.step(wav,(flux - model(spectrum.wav)[good])*isig,'gray')
         ymax = np.max(np.abs(rax.get_ylim()))
         rax.set(xlim=region,xlabel=r'Wavelength [\AA]',ylim=[-ymax,ymax])
         rax.set_ylabel('Deviation',fontsize=15)
 
     # Add title and save figure
-    fig.suptitle(figname.replace('_','\_'))
-    fig.tight_layout(rect = [0, 0, 1, 0.96])
+    fig.suptitle(figname.replace('_','\_')+', $z='+str(np.round(spectrum.z,3))+'$')
+    fig.tight_layout()
     fig.savefig(spectrum.p['OutFolder'] + figname + '.pdf')
     plt.close(fig)
 
