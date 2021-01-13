@@ -15,7 +15,11 @@ import AdditionalComponents as AC
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,base_model,base_param_names):
 
+<<<<<<< HEAD
     # Initial fit to continuum
+=======
+    # Fit first model
+>>>>>>> 29ba087b81c36c63aaccea70d626a250967ad260
     base_model = FitModel(spectrum,base_model)
 
     # Find number of flags
