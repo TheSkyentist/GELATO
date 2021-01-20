@@ -1,7 +1,7 @@
 """ Additional components """
 
 import numpy as np
-import CustomModels as CM
+import gelato.CustomModels as CM
 
 SQRT_2_PI = np.sqrt(2*np.pi)
 

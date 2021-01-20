@@ -1,15 +1,15 @@
 #! /usr/bin/env python
 
-""" Wrapper for single GELATO run """
+""" Wrapper for single gelato run """
 
 # Packages
 import os
 import sys
 import argparse
 
-# GELATO supporting files
-import GELATO
-import ConstructParams as CP
+# gelato supporting files
+import gelato
+import gelato.ConstructParams as CP
 
 # Main Function
 if __name__ == "__main__":
@@ -28,10 +28,10 @@ if __name__ == "__main__":
         os.mkdir(p["OutFolder"])
 
     if p['Verbose']:
-        GELATO.header()
+        gelato.header()
 
-    ## Run GELATO ##
-    GELATO.GELATO(p, args.Spectrum, args.Redshift)
+    ## Run gelato ##
+    gelato.gelato(args.Parameters, args.Spectrum, args.Redshift)
 
     if p['Verbose']:
-        GELATO.footer()
+        gelato.footer()

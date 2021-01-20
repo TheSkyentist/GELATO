@@ -4,10 +4,13 @@
 
 # Import packages
 import numpy as np
-import CustomModels as CM
-import SpectrumClass as SC
 from astropy.io import fits
 from astropy.table import Table,hstack
+
+# gelato supporting files
+import gelato.CustomModels as CM
+import gelato.SpectrumClass as SC
+
 
 # Plot from results
 def EWfromresults(params,path,z):

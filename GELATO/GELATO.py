@@ -6,15 +6,19 @@ import numpy as np
 from datetime import datetime
 from astropy.table import Table
 
-# GELATO supporting files
-import Plotting as PL
-import BuildModel as BM
-import FittingModel as FM
-import SpectrumClass as SC
-import EquivalentWidth as EW
+# gelato supporting files
+import gelato.Plotting as PL
+import gelato.BuildModel as BM
+import gelato.FittingModel as FM
+import gelato.SpectrumClass as SC
+import gelato.EquivalentWidth as EW
+import gelato.ConstructParams as CP
 
 # Get fit parameters for spectrum
-def GELATO(params,path,z):
+def gelato(params,path,z):
+
+    # Load Params
+    params = CP.construct(params)
 
     # Get name of file
     name = path.split("/")[-1]
@@ -22,10 +26,10 @@ def GELATO(params,path,z):
     # If it exits, skip
     if os.path.exists(params["OutFolder"]+name.replace(".fits","-results.fits")) and not params["Overwrite"]:
         if params["Verbose"]:
-            print('GELATO already exists:',name)
+            print('gelato already exists:',name)
         return
     if params["Verbose"]:
-        print("Making GELATO for",name)
+        print("Making gelato for",name)
 
     ## Load in Spectrum ##
     if params["Verbose"]:
@@ -38,6 +42,7 @@ def GELATO(params,path,z):
     if params["Verbose"]:
         print("Making the base:",name)
     continuum,cont_pnames = BM.BuildContinuum(spectrum)
+    continuum = FM.FitContinuum(spectrum,continuum)
     emission,emiss_pnames = BM.BuildEmission(spectrum)
     if params["Verbose"]:
         print("Base created:",name)
@@ -63,12 +68,12 @@ def GELATO(params,path,z):
         ## Plotting ##
         if params["Plotting"]:
             if params["Verbose"]:
-                print("Presenting GELATO:",name)
+                print("Presenting gelato:",name)
             model.parameters = np.median(parameters,0)[:-1]
             # Set model parameters to median values
             PL.Plot(spectrum,model,path)
             if params["Verbose"]:
-                print("GELATO presented:",name)
+                print("gelato presented:",name)
 
     # Otherwise:
     else:
@@ -80,10 +85,10 @@ def GELATO(params,path,z):
         ## Plotting ##
         if params["Plotting"]:
             if params["Verbose"]:
-                print("Presenting GELATO:",name)
+                print("Presenting gelato:",name)
             PL.PlotFig(spectrum,continuum,path)
             if params["Verbose"]:
-                print("GELATO presented:",name)
+                print("gelato presented:",name)
 
     if params["Verbose"]:
         print("Freezing results:",name)
@@ -98,10 +103,10 @@ def GELATO(params,path,z):
         print("GELATO finished for",name)
 
 def header():
-    print("Welcome to GELATO")
+    print("Welcome to gelato")
     print("Galaxy/AGN Emission Line Analysis TOol")
     print("Developed by R. E. Hviding")
-    print("Started making GELATO at",datetime.now())
+    print("Started making gelato at",datetime.now())
 
 def footer():
-    print("Finished making GELATO at",datetime.now())
+    print("Finished making gelato at",datetime.now())

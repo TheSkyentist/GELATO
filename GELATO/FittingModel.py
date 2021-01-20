@@ -7,10 +7,10 @@ from itertools import combinations
 from astropy.modeling import fitting
 fit = fitting.LevMarLSQFitter()
 
-# GELATO supporting files
-import BuildModel as BD
-import ModelComparison as MC
-import AdditionalComponents as AC
+# gelato supporting files
+import gelato.BuildModel as BD
+import gelato.ModelComparison as MC
+import gelato.AdditionalComponents as AC
 
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames):
@@ -95,6 +95,15 @@ def FitModel(spectrum,model,region = None):
     # Fit model
     fit_model = fit(model,spectrum.wav[region],spectrum.flux[region],weights=spectrum.sqrtweight[region],maxiter=spectrum.p['MaxIter'])
     return fit_model
+
+# Perform initial fit of continuum
+def FitContinuum(spectrum,continuum):
+
+    continuum = FitModel(spectrum,continuum,np.invert(spectrum.emission_region))
+    continuum.fix_params()
+    continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+
+    return continuum
 
 # Fit (Bootstrapped) Model
 def FitBoot(spectrum,model):

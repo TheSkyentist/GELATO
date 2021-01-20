@@ -3,21 +3,14 @@
 # Packages
 import numpy as np
 
-# GELATO supporting files
-import CustomModels as CM
-import FittingModel as FM
-import AdditionalComponents as AC
-
+# gelato supporting files
+import gelato.CustomModels as CM
+import gelato.AdditionalComponents as AC
 
 # Build Continuum Components
 def BuildContinuum(spectrum):
-
-    # Create continuum (with initial masked fit)
-    model = FM.FitModel(spectrum,CM.SSPContinuum(spectrum),np.invert(spectrum.emission_region))
-    model.fix_params()
-    model.set_region(np.ones(spectrum.wav.shape,dtype=bool))
-
-    return model, model.get_names()
+    continuum = CM.SSPContinuum(spectrum)
+    return continuum, continuum.get_names()
 
 # Build the emission lines from the EmissionGroups and spectrum with initial guess
 def BuildEmission(spectrum, EmissionGroups=None):

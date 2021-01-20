@@ -1,10 +1,14 @@
-import AdditionalComponents
-import BuildModel
-import ConstructParams
-import CustomModels
-import EquivalentWidth
-import FittingModel
-import GELATO
-import ModelComparison
-import Plotting
-import SpectrumClass
+# No dependencies
+import gelato.Plotting
+import gelato.CustomModels
+import gelato.SpectrumClass
+import gelato.ConstructParams
+import gelato.ModelComparison
+
+# Multiple Dependencies
+import gelato.AdditionalComponents
+import gelato.EquivalentWidth
+import gelato.BuildModel
+import gelato.FittingModel
+
+from gelato.gelato import header,footer,gelato

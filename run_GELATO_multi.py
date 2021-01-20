@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-""" Wrapper for mulitple GELATO runs """
+""" Wrapper for mulitple gelato runs """
 
 # Packages
 import os
@@ -8,9 +8,9 @@ import copy
 import argparse
 import numpy as np
 
-# GELATO supporting files
-import GELATO
-import ConstructParams as CP
+# gelato supporting files
+import gelato
+import gelato.ConstructParams as CP
 
 # Main Function
 if __name__ == "__main__":
@@ -28,29 +28,29 @@ if __name__ == "__main__":
         os.mkdir(p["OutFolder"])
 
     if p['Verbose']:
-        GELATO.header()
+        gelato.header()
 
     ## Assemble Objects
     objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['File','z'])
     ## Assemble Objects
 
-    ## Run GELATO ##
+    ## Run gelato ##
     if p['NProcess'] > 1: # Mutlithread
         import multiprocessing as mp
         pool = mp.Pool(processes=p['NProcess'])
-        inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
-        pool.starmap(GELATO.GELATO, inputs)
+        inputs = [(copy.deepcopy(args.Parameters),o['File'],o['z']) for o in objects]
+        pool.starmap(gelato.gelato, inputs)
         pool.close()
         pool.join()
     else: # Single Thread
-        for o in objects: GELATO.GELATO(copy.deepcopy(p),o['File'],o['z'])
-    ## Run GELATO ##
+        for o in objects: gelato.gelato(copy.deepcopy(args.Parameters),o['File'],o['z'])
+    ## Run gelato ##
 
     ## Concatenate Results ##
     if p['Concatenate']:
-        import ConcatResults as CR
+        import gelato.ConcatResults as CR
         CR.concatfromresults(p,objects)
     ## Concatenate Results ##
 
     if p['Verbose']:
-        GELATO.footer()
+        gelato.footer()
