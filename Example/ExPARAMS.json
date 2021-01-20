@@ -7,9 +7,8 @@
     "FThresh": 0.95,
     "NProcess": 1,
     "Plotting": true,
-    "PlotComp": true,
     "CalcEW": false,
-    "Concatenate": false,
+    "Concatenate": true,
     "Overwrite": true,
     "Verbose": true,
     "EmissionGroups": [
@@ -20,6 +19,8 @@
             "Species": [
                 {
                     "Name":"[SII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 6716.31,
@@ -29,12 +30,12 @@
                             "Wavelength": 6730.68,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 0,
-                    "FlagGroups": []
+                    ]
                 },
                 {
                     "Name":"[NII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 6583.34,
@@ -44,12 +45,38 @@
                             "Wavelength": 6547.96,
                             "RelStrength": 0.34
                         }
-                    ],
+                    ]
+                },
+                {
+                    "Name":"[OI]",
                     "Flag": 0,
-                    "FlagGroups": []
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 6300.20,
+                            "RelStrength": 1
+                        },
+                        { 
+                            "Wavelength": 6363.67,
+                            "RelStrength": 0.34
+                        }
+                    ]
+                },
+                {
+                    "Name":"[HeI]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 5875.60,
+                            "RelStrength": null
+                        }
+                    ]
                 },
                 {
                     "Name":"[OIII]",
+                    "Flag": 2,
+                    "FlagGroups": ["BlueOIII"],
                     "Lines": [
                         {
                             "Wavelength": 5006.77,
@@ -59,42 +86,40 @@
                             "Wavelength": 4958.83,
                             "RelStrength": 0.35
                         }
-                    ],
-                    "Flag": 2,
-                    "FlagGroups": ["BlueOIII"]
+                    ]
                 },
                 {
                     "Name":"[NeIII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 3868.69,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 0,
-                    "FlagGroups": []
+                    ]
                 },
                 {
                     "Name":"[OII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 3727.38,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 0,
-                    "FlagGroups": []
+                    ]
                 },
                 {
                     "Name":"[NeV]",
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 3426.85,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 0,
-                    "FlagGroups": []
+                    ]
                 }
             ]
         },
@@ -104,37 +129,48 @@
             "TieDispersion": true,
             "Species": [
                 {
-                    "Name":"Halpha",
+                    "Name":"Ha",
+                    "Flag": 1,
+                    "FlagGroups": ["Broad"],
                     "Lines": [
                         {
                             "Wavelength": 6562.80,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 1,
-                    "FlagGroups": ["BroadBalmer"]
+                    ]
                 },
                 {
-                    "Name":"Hbeta",
+                    "Name":"Hb",
+                    "Flag": 1,
+                    "FlagGroups": ["Broad"],
                     "Lines": [
                         {
                             "Wavelength": 4861.32,
                             "RelStrength": null
                         }
-                    ],
-                    "Flag": 5,
-                    "FlagGroups": ["BroadBalmer","Abs"]
+                    ]
+                },
+                {
+                    "Name":"Hg",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 4340.46,
+                            "RelStrength": null
+                        }
+                    ]
                 }
             ]
         },
         {
-            "Name":"BlueOIII",
+            "Name":"Outflow",
             "TieRedshift": false,
             "TieDispersion": false,
             "Species": []
         },
         {
-            "Name":"BroadBalmer",
+            "Name":"Broad",
             "TieRedshift": true,
             "TieDispersion": true,
             "Species": []

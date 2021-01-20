@@ -7,7 +7,6 @@
     "FThresh": 0.95,
     "NProcess": 1,
     "Plotting": true,
-    "PlotComp": true,
     "CalcEW": true,
     "Concatenate": true,
     "Overwrite": true,
@@ -45,6 +44,32 @@
                         { 
                             "Wavelength": 6547.96,
                             "RelStrength": 0.34
+                        }
+                    ]
+                },
+                {
+                    "Name":"[OI]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 6300.20,
+                            "RelStrength": 1
+                        },
+                        { 
+                            "Wavelength": 6363.67,
+                            "RelStrength": 0.34
+                        }
+                    ]
+                },
+                {
+                    "Name":"[HeI]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 5875.60,
+                            "RelStrength": null
                         }
                     ]
                 },
@@ -104,7 +129,7 @@
             "TieDispersion": true,
             "Species": [
                 {
-                    "Name":"Halpha",
+                    "Name":"Ha",
                     "Flag": 1,
                     "FlagGroups": ["Broad"],
                     "Lines": [
@@ -115,12 +140,23 @@
                     ]
                 },
                 {
-                    "Name":"Hbeta",
-                    "Flag": 5,
-                    "FlagGroups": ["Broad","Abs"],
+                    "Name":"Hb",
+                    "Flag": 1,
+                    "FlagGroups": ["Broad"],
                     "Lines": [
                         {
                             "Wavelength": 4861.32,
+                            "RelStrength": null
+                        }
+                    ]
+                },
+                {
+                    "Name":"Hg",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 4340.46,
                             "RelStrength": null
                         }
                     ]
@@ -128,7 +164,7 @@
             ]
         },
         {
-            "Name":"BlueOIII",
+            "Name":"Outflow",
             "TieRedshift": false,
             "TieDispersion": false,
             "Species": []
