@@ -75,7 +75,7 @@ def FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames):
         accepted = []
 
     # Construct Final Model
-    spectrum.p['EmissionGroups'] = AddComplexity(spectrum.p['EmissionGroups'],accepted)
+    EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],accepted)
     emission,emiss_pnames = BD.BuildEmission(spectrum,EmissionGroups)
 
     # Split Flux

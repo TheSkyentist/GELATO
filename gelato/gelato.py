@@ -60,7 +60,7 @@ def gelato(params,path,z):
 
         # Bootstrap
         if params["Verbose"]:
-            print("Scooping portions:",name)
+            print("Scooping portions (this may take a while):",name)
         parameters = np.array([FM.FitBoot(spectrum,model) for i in range(params["NBoot"])])
         if params["Verbose"]:
             print("Portions scooped:",name)
@@ -103,7 +103,7 @@ def gelato(params,path,z):
         print("GELATO finished for",name)
 
 def header():
-    print("Welcome to gelato")
+    print("Welcome to GELATO")
     print("Galaxy/AGN Emission Line Analysis TOol")
     print("Developed by R. E. Hviding")
     print("Started making gelato at",datetime.now())
