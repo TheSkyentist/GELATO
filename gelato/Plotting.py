@@ -143,8 +143,9 @@ def plotfromresults(params,path,z):
         ## Create model ##
         model = []
         # Add continuum
-        for region in spectrum.regions:
-            model.append(CM.SSPContinuum(spectrum))
+        continuum = CM.SSPContinuum(spectrum)
+        continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+        model.append(continuum)        
         # Add spectral lines
         ind = len(model[0].get_names()) # index where emission lines begin
         for i in range(ind,median.size,3):

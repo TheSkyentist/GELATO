@@ -9,7 +9,7 @@
     "Plotting": true,
     "CalcEW": false,
     "Concatenate": true,
-    "Overwrite": true,
+    "Overwrite": false,
     "Verbose": true,
     "EmissionGroups": [
         {
