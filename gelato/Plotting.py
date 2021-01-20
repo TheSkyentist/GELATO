@@ -144,9 +144,9 @@ def plotfromresults(params,path,z):
         model = []
         # Add continuum
         for region in spectrum.regions:
-            model.append(CM.Continuum(params['ContinuumDeg'],region))
+            model.append(CM.SSPContinuum(spectrum))
         # Add spectral lines
-        ind = (params['ContinuumDeg']+1)*len(spectrum.regions) # index where emission lines begin
+        ind = len(model[0].get_names()) # index where emission lines begin
         for i in range(ind,median.size,3):
             center = float(parameters.columns.names[i].split('-')[-2])
             model.append(CM.SpectralFeature(center,spectrum))
