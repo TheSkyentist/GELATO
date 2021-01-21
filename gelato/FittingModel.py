@@ -83,14 +83,13 @@ def FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames):
     
     # Fit model
     model = FitModel(spectrum,model)
-    model[0].set_region(spectrum.emission_region)
 
     return model,cont_pnames+emiss_pnames
 
 # Fit Model, must specify region
 def FitModel(spectrum,model,region = None):
 
-    if type(region) == None:
+    if type(region) == type(None):
         region = np.ones(spectrum.wav.shape,dtype=bool)
 
     # Fit model
@@ -109,7 +108,7 @@ def FitContinuum(spectrum,continuum):
 # Fit (Bootstrapped) Model
 def FitBoot(spectrum,model):
     
-    fit_model = fit(model,spectrum.wav[spectrum.emission_region],spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
+    fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
     return np.concatenate([fit_model.parameters,[MC.rChi2(spectrum,fit_model)]])
 
 # Split flux between emission lines

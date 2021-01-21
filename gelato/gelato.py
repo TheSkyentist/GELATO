@@ -47,16 +47,20 @@ def gelato(params,path,z):
     if params["Verbose"]:
         print("Base created:",name)
 
+    spectrum.LimitSpectrum()
+
     # Check if any of the lines can be fit
     if len(spectrum.regions) > 0:
 
         ## Fit Additional Components ##
         if params["Verbose"]:
             print("Adding flavor:",name)
+        
         model,param_names = FM.FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames)
         param_names = param_names + ["rChi2"]
         if params["Verbose"]:
             print("Flavor added:",name)
+        print(model[0].region)
 
         # Bootstrap
         if params["Verbose"]:
@@ -69,6 +73,8 @@ def gelato(params,path,z):
         if params["Plotting"]:
             if params["Verbose"]:
                 print("Presenting gelato:",name)
+            # continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+            model = continuum + emission
             model.parameters = np.median(parameters,0)[:-1]
             # Set model parameters to median values
             PL.Plot(spectrum,model,path)

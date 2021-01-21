@@ -90,15 +90,11 @@ class Spectrum:
     def LimitSpectrum(self):
 
         # Only take data in regions
-        inregion = []
-        for region in self.regions:
-            inregion.append(np.logical_and(region[0]<self.wav,self.wav<region[1]))
-        inregion = np.logical_or.reduce(inregion)
-        self.wav = self.wav[inregion]
-        self.flux = self.flux[inregion]
-        self.weight = self.weight[inregion]
-        self.sqrtweight = self.sqrtweight[inregion]
-        self.sigma = self.sigma[inregion]
+        self.wav = self.wav[self.emission_region]
+        self.flux = self.flux[self.emission_region]
+        self.weight = self.weight[self.emission_region]
+        self.sqrtweight = self.sqrtweight[self.emission_region]
+        self.sigma = self.sigma[self.emission_region]
 
     # Boostrap the Flux
     def Boostrap(self):
