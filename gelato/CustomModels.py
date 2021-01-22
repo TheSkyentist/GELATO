@@ -127,7 +127,7 @@ class SSPContinuum(PolynomialModel):
 
         # List SSPs
         self.ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
-        self.ssp_names = [x for x in os.listdir(self.ssp_dir) if '.fits' in x]
+        self.ssp_names = np.sort([x for x in os.listdir(self.ssp_dir) if '.fits' in x])
 
         # Get SSPs
         self.ssps = []
