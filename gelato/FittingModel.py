@@ -84,7 +84,7 @@ def FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames):
     # Fit model
     model = FitModel(spectrum,model)
 
-    return model,cont_pnames+emiss_pnames
+    return model,cont_pnames+emiss_pnames,emission,continuum
 
 # Fit Model, must specify region
 def FitModel(spectrum,model,region = None):
@@ -101,7 +101,8 @@ def FitContinuum(spectrum,continuum):
 
     continuum = FitModel(spectrum,continuum,np.invert(spectrum.emission_region))
     continuum.fix_params()
-    continuum.set_region(spectrum.emission_region)
+    # continuum.set_region(spectrum.emission_region)
+    continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
 
     return continuum
 

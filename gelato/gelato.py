@@ -43,11 +43,19 @@ def gelato(params,path,z):
         print("Making the base:",name)
     continuum,cont_pnames = BM.BuildContinuum(spectrum)
     continuum = FM.FitContinuum(spectrum,continuum)
+
+    # import matplotlib.pyplot as plt
+    # plt.plot(spectrum.wav,continuum(spectrum.wav))
+    # plt.plot(spectrum.wav,spectrum.flux)
+    # plt.savefig('test.pdf')
+    # return
+
+
     emission,emiss_pnames = BM.BuildEmission(spectrum)
     if params["Verbose"]:
         print("Base created:",name)
 
-    spectrum.LimitSpectrum()
+    # spectrum.LimitSpectrum()
 
     # Check if any of the lines can be fit
     if len(spectrum.regions) > 0:
@@ -56,11 +64,10 @@ def gelato(params,path,z):
         if params["Verbose"]:
             print("Adding flavor:",name)
         
-        model,param_names = FM.FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames)
+        model,param_names,emission,continuum = FM.FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames)
         param_names = param_names + ["rChi2"]
         if params["Verbose"]:
             print("Flavor added:",name)
-        print(model[0].region)
 
         # Bootstrap
         if params["Verbose"]:

@@ -69,14 +69,16 @@ class SpectralFeature(Fittable1DModel):
         
         # (1 + z) * lambda
         lam_obs = (1 + Redshift) * self.center
+        exponand = (C / Dispersion) * (x / lam_obs - 1) 
+        y = C * Flux * np.exp(-0.5 * exponand * exponand) / (lam_obs * Dispersion * SQRT_2_PI)    
+
+        # # Zero outside region
+        # indomain = np.logical_and(x > self.domain[0],x < self.domain[1])        
         
-        # Zero outside region
-        indomain = np.logical_and(x > self.domain[0],x < self.domain[1])        
-        
-        # Assign values
-        y = np.zeros(x.shape)
-        exponand = (C / Dispersion) * (x[indomain] / lam_obs - 1) 
-        y[indomain] = C * Flux * np.exp(-0.5 * exponand * exponand) / (lam_obs * Dispersion * SQRT_2_PI)
+        # # Assign values
+        # y = np.zeros(x.shape)
+        # exponand = (C / Dispersion) * (x[indomain] / lam_obs - 1) 
+        # y[indomain] = C * Flux * np.exp(-0.5 * exponand * exponand) / (lam_obs * Dispersion * SQRT_2_PI)
         
         return y
         
@@ -89,13 +91,19 @@ class SpectralFeature(Fittable1DModel):
         C2 = C*C
         DDll = lam_obs*lam_obs*Dispersion*Dispersion
 
-        # Zero outside region
-        indomain = np.logical_and(x > self.domain[0],x < self.domain[1])        
+        # # Zero outside region
+        # indomain = np.logical_and(x > self.domain[0],x < self.domain[1])        
         
-        exponand = ( C / Dispersion ) * ( x[indomain] / lam_obs - 1) 
+        # exponand = ( C / Dispersion ) * ( x[indomain] / lam_obs - 1) 
+
+        # d_Flux = np.zeros(x.shape)    
+        # d_Flux[indomain] = np.exp(-0.5 * exponand * exponand) * C / (SQRT_2_PI * Dispersion * lam_obs)
+        
+        exponand = ( C / Dispersion ) * ( x / lam_obs - 1) 
 
         d_Flux = np.zeros(x.shape)    
-        d_Flux[indomain] = np.exp(-0.5 * exponand * exponand) * C / (SQRT_2_PI * Dispersion * lam_obs)
+        d_Flux = np.exp(-0.5 * exponand * exponand) * C / (SQRT_2_PI * Dispersion * lam_obs)
+
 
         d_Redshift = Flux * d_Flux * \
                      (C2*x*x - C2*x*lam_obs + DDll) / \
