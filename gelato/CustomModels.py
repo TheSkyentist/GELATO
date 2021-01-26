@@ -176,7 +176,7 @@ class SSPContinuum(PolynomialModel):
         pli = coeffs[2]
         plc = coeffs[3]
         coeffs = coeffs[4:]
-        pl = plc*((x/(3000*(1+z))**(pli))
+        pl = plc*((x/(3000*(1+z)))**(pli))
         ssps = self.ssps
 
         if not self.fixed[self.param_names[0]]:
