@@ -159,7 +159,7 @@ class SSPContinuum(PolynomialModel):
             self.bounds[pname] = (0,None)
 
         # Set initial parameters
-        medians = np.array([np.median(s[s>0]) for s in self.ssps])
+        medians = np.array([np.median(s[s>0]) for s in self.ssps]+[np.nanmedian(self.spectrum.flux)])
         self.parameters = np.append([self.spectrum.z,8.4/SIGMA_TO_FWHM,1.5],np.nanmedian(self.spectrum.flux)/((len(self.ssp_names)+1)*medians))
 
     def prepare_inputs(self, x, **kwargs):
