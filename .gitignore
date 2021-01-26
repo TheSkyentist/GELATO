@@ -5,4 +5,4 @@ __pycache__
 EGFig.pdf
 build/
 dist/
-GELATO.egg-info
+GELATO.egg-info/
