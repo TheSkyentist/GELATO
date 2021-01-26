@@ -66,7 +66,7 @@ class SpectralFeature(Fittable1DModel):
         """
         Gaussian1D model function.
         """
-        
+
         # (1 + z) * lambda
         lam_obs = (1 + Redshift) * self.center
         exponand = (C / Dispersion) * (x / lam_obs - 1) 
@@ -149,7 +149,7 @@ class SSPContinuum(PolynomialModel):
 
         # Call Polynomial Class
         super().__init__(
-            len(self.ssp_names)+1, n_models=n_models, model_set_axis=model_set_axis,
+            len(self.ssp_names)+3, n_models=n_models, model_set_axis=model_set_axis,
             name=name, meta=meta, **params)
 
         # Set bounds
@@ -160,7 +160,7 @@ class SSPContinuum(PolynomialModel):
 
         # Set initial parameters
         medians = np.array([np.median(s[s>0]) for s in self.ssps])
-        self.parameters = np.append([self.spectrum.z,8.4/SIGMA_TO_FWHM],np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*medians))
+        self.parameters = np.append([self.spectrum.z,8.4/SIGMA_TO_FWHM,1.5],np.nanmedian(self.spectrum.flux)/((len(self.ssp_names)+1)*medians))
 
     def prepare_inputs(self, x, **kwargs):
         inputs, format_info = super().prepare_inputs(x, **kwargs)
@@ -173,7 +173,10 @@ class SSPContinuum(PolynomialModel):
         coeffs = np.array(coeffs)
         z = coeffs[0]
         sigma = coeffs[1]
-        coeffs = coeffs[2:]
+        pli = coeffs[2]
+        plc = coeffs[3]
+        coeffs = coeffs[4:]
+        pl = plc*((x/(3000*(1+z))**(pli))
         ssps = self.ssps
 
         if not self.fixed[self.param_names[0]]:
@@ -184,10 +187,10 @@ class SSPContinuum(PolynomialModel):
             ssps = np.array([fftconvolve(ssp,kernel[kernel>0]/kernel.sum(),'same') for ssp in ssps])
             ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+z),ssps)
 
-        return np.dot(coeffs.T,ssps[:,self.region])[0]
+        return pl + np.dot(coeffs.T,ssps[:,self.region])[0]
         
     def get_names(self):
-        return ['Continuum_Redshift','Continuum_Dispersion']+[x.replace('.fits','') for x in self.ssp_names]
+        return ['Continuum_Redshift','Continuum_Dispersion','Power_Law_Index','Power_Law_Coefficient']+[x.replace('.fits','') for x in self.ssp_names]
 
     def fix_params(self):
 
