@@ -8,15 +8,47 @@ from astropy.modeling import fitting
 fit = fitting.LevMarLSQFitter()
 
 # gelato supporting files
-import gelato.BuildModel as BD
+import gelato.BuildModel as BM
+import gelato.CustomModels as CM
 import gelato.ModelComparison as MC
 import gelato.AdditionalComponents as AC
 
-# Construct Full Model with F-tests for additional parameters
-def FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames):
+# Perform initial fit of continuum with F-test
+def FitContinuum(spectrum):
 
-    # Base Models
-    base_model = FitModel(spectrum,emission + continuum)
+    # SSP Continuum
+    sspcontinuum = CM.SSPContinuum(spectrum)
+    ssp_names = sspcontinuum.get_names()
+
+    # Power Law Continuum
+    plcontinuum = CM.PowerLawContinuum(spectrum)
+    pl_names = plcontinuum.get_names()
+
+    # Fit initial continuuum
+    ssp_fit = FitModel(spectrum,sspcontinuum,np.invert(spectrum.emission_region))
+    
+    # Try power law fit
+    continuum = BM.TieContinuum(sspcontinuum+plcontinuum,ssp_names+pl_names)
+    cont_fit = FitModel(spectrum,continuum,np.invert(spectrum.emission_region))
+
+    # Perform F-test
+    if MC.FTest(spectrum,ssp_fit,cont_fit,np.invert(spectrum.emission_region)):
+        sspcontinuum.fix_params()
+        sspcontinuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+        cont = sspcontinuum+plcontinuum
+        cont.parameters = cont_fit.parameters
+        return cont,ssp_names+pl_names
+    ssp_fit.fix_params()
+    ssp_fit.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+    return ssp_fit,ssp_names
+
+# Construct Full Model with F-tests for additional parameters
+def FitComponents(spectrum,continuum,cont_pnames,emission,emiss_pnames):
+
+    # Base Model
+    base_model = BM.BuildModel(continuum,emission)
+    base_model = BM.TieParams(spectrum,base_model,cont_pnames+emiss_pnames)
+    base_model = FitModel(spectrum,base_model)
 
     # Find number of flags
     flags = 0
@@ -33,17 +65,19 @@ def FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames):
         
         # Add new component
         EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],i)
-        emission,emiss_pnames = BD.BuildEmission(spectrum,EmissionGroups)
+        emission,emiss_pnames = BM.BuildEmission(spectrum,EmissionGroups)
 
-        # Split Flux
-        model = SplitFlux(continuum+emission,cont_pnames+emiss_pnames)
-
+        # Split FLux
+        model = BM.BuildModel(continuum,emission)
+        model = SplitFlux(model,cont_pnames+emiss_pnames)
+        
         # Fit model
+        model = BM.TieParams(spectrum,model,cont_pnames+emiss_pnames,EmissionGroups)
         model = FitModel(spectrum,model)
 
         # Perform F-test
         if MC.FTest(spectrum,base_model,model):
-                accepted.append(i)
+            accepted.append(i)
 
     ## Check all combinations of accepted components with AICs
     # All combinations
@@ -57,12 +91,14 @@ def FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames):
 
         # Add new components
         EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],c)
-        emission,emiss_pnames = BD.BuildEmission(spectrum,EmissionGroups)
+        emission,emiss_pnames = BM.BuildEmission(spectrum,EmissionGroups)
 
         # Split Flux
-        model = SplitFlux(continuum+emission,cont_pnames+emiss_pnames)
+        model = BM.BuildModel(continuum,emission)
+        model = SplitFlux(model,cont_pnames+emiss_pnames)
 
         # Fit model
+        model = BM.TieParams(spectrum,model,cont_pnames+emiss_pnames,EmissionGroups)
         model = FitModel(spectrum,model)
 
         # Calcualte AIC
@@ -76,15 +112,16 @@ def FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames):
 
     # Construct Final Model
     EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],accepted)
-    emission,emiss_pnames = BD.BuildEmission(spectrum,EmissionGroups)
+    emission,emiss_pnames = BM.BuildEmission(spectrum,EmissionGroups)
 
     # Split Flux
-    model = SplitFlux(continuum+emission,cont_pnames+emiss_pnames)
-    
+    model = BM.BuildModel(continuum,emission)
+    model = SplitFlux(model,cont_pnames+emiss_pnames)
     # Fit model
+    model = BM.TieParams(spectrum,model,cont_pnames+emiss_pnames,EmissionGroups)
     model = FitModel(spectrum,model)
 
-    return model,cont_pnames+emiss_pnames,emission,continuum
+    return model,cont_pnames+emiss_pnames
 
 # Fit Model, must specify region
 def FitModel(spectrum,model,region = None):
@@ -95,16 +132,6 @@ def FitModel(spectrum,model,region = None):
     # Fit model
     fit_model = fit(model,spectrum.wav[region],spectrum.flux[region],weights=spectrum.sqrtweight[region],maxiter=spectrum.p['MaxIter'])
     return fit_model
-
-# Perform initial fit of continuum
-def FitContinuum(spectrum,continuum):
-
-    continuum = FitModel(spectrum,continuum,np.invert(spectrum.emission_region))
-    continuum.fix_params()
-    # continuum.set_region(spectrum.emission_region)
-    continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
-
-    return continuum
 
 # Fit (Bootstrapped) Model
 def FitBoot(spectrum,model):

@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,0),(36,255,36),(219,109,0)])/255
 
 # Plot all Figures
-def Plot(spectrum,model,path):
+def Plot(spectrum,model,path,param_names):
 
-    for i in range(3): PlotFig(spectrum,model,path,plottype=i)
+    for i in range(3): PlotFig(spectrum,model,path,param_names,plottype=i)
 
 # Plot figure
-def PlotFig(spectrum,model,path,plottype=0):
+def PlotFig(spectrum,model,path,param_names,plottype=0):
 
     # Make figure name
     figname = path.split('/')[-1].replace('.fits','')+'-'
@@ -73,7 +73,8 @@ def PlotFig(spectrum,model,path,plottype=0):
         gs = fig.add_gridspec(ncols=ncols,nrows=2,height_ratios=[4,1],hspace=0)
 
         # Continuum
-        continuum = model[0]
+        if 'PL_Continuum_Coefficient' in param_names:
+            continuum = model[0:2]
         for i,region in enumerate(spectrum.regions):
 
             # Get Spectrum
@@ -93,8 +94,11 @@ def PlotFig(spectrum,model,path,plottype=0):
             if plottype == 1:
                 fax.step(wav,model(spectrum.wav)[good],'r')
             elif plottype == 2:
+                init = 1
+                if 'PL_Continuum_Coefficient' in param_names:
+                    init = 2
                 # Plot components
-                for j in range(1,model.n_submodels()):
+                for j in range(init,model.n_submodels()):
                     fax.step(wav,continuum(spectrum.wav)[good]+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
 
             # Axis set
@@ -141,23 +145,26 @@ def plotfromresults(params,path,z):
         median = np.array([np.median(parameters[n]) for n in parameters.columns.names if 'EW' not in n])[:-1]
         
         ## Create model ##
-        model = []
         # Add continuum
-        continuum = CM.SSPContinuum(spectrum)
-        continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
-        model.append(continuum)        
+        model = CM.SSPContinuum(spectrum)
+        model.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+        if 'PL_Continuum_Coefficient' in parameters.columns.names:
+            model += CM.PowerLawContinuum(spectrum)
+
         # Add spectral lines
-        ind = len(model[0].get_names()) # index where emission lines begin
+        if 'PL_Continuum_Coefficient' in parameters.columns.names:
+            ind = len(model[0:2].parameters) # index where emission lines begin
+        else:   
+            ind = len(model[0].parameters) # index where emission lines begin
         for i in range(ind,median.size,3):
             center = float(parameters.columns.names[i].split('-')[-2])
-            model.append(CM.SpectralFeature(center,spectrum))
+            model += CM.SpectralFeature(center,spectrum)
         
         # Finish model and add parameters
-        model = np.sum(model)
         model.parameters = median
 
         # Plot
-        Plot(spectrum,model,path)
+        Plot(spectrum,model,path,parameters.columns.names)
 
 # Plot from results
 if __name__ == "__main__":

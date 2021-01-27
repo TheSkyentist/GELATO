@@ -7,10 +7,14 @@ import numpy as np
 import gelato.CustomModels as CM
 import gelato.AdditionalComponents as AC
 
-# Build Continuum Components
-def BuildContinuum(spectrum):
-    continuum = CM.SSPContinuum(spectrum)
-    return continuum, continuum.get_names()
+# Build the model from continuum and emission
+def BuildModel(continuum,emission):
+
+    model = continuum+emission
+    model.parameters[0:continuum.parameters.size] = continuum.parameters
+    model.parameters[continuum.parameters.size:] = emission.parameters
+
+    return model
 
 # Build the emission lines from the EmissionGroups and spectrum with initial guess
 def BuildEmission(spectrum, EmissionGroups=None):
@@ -51,8 +55,36 @@ def BuildEmission(spectrum, EmissionGroups=None):
 
     return model,param_names
 
-# Tied all model parameters
-def TieParams(spectrum,model,param_names,EmissionGroups):
+# Tie Model Parameters:
+def TieParams(spectrum,model,param_names,EmissionGroups=None):
+
+    if type(EmissionGroups) == type(None):
+        EmissionGroups = spectrum.p['EmissionGroups']
+
+    # Tie Continuum
+    model = TieContinuum(model,param_names)
+
+    # Tie Emission
+    model = TieEmission(spectrum,model,param_names,EmissionGroups)
+
+    return model
+
+# Tie Continuum Redshift
+def TieContinuum(cont,cont_pnames):
+
+    first_redshift = True
+    for pname in cont_pnames:
+        if (('Redshift' in pname) and ('Continuum' in pname)):
+            if first_redshift:
+                TieRedshift = GenTieFunc(cont_pnames.index(pname))
+                first_redshift = False
+            else:
+                cont.tied[cont.param_names[cont_pnames.index(pname)]] = TieRedshift
+
+    return cont
+
+# Tied Emission model parameters
+def TieEmission(spectrum,model,param_names,EmissionGroups):
 
     ## Tie parameters ##
     for group in EmissionGroups:

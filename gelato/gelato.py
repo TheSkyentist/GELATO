@@ -41,16 +41,7 @@ def gelato(params,path,z):
     ## Create Base Model ##
     if params["Verbose"]:
         print("Making the base:",name)
-    continuum,cont_pnames = BM.BuildContinuum(spectrum)
-    continuum = FM.FitContinuum(spectrum,continuum)
-
-    # import matplotlib.pyplot as plt
-    # plt.plot(spectrum.wav,continuum(spectrum.wav))
-    # plt.plot(spectrum.wav,spectrum.flux)
-    # plt.savefig('test.pdf')
-    # return
-
-
+    continuum,cont_pnames = FM.FitContinuum(spectrum)
     emission,emiss_pnames = BM.BuildEmission(spectrum)
     if params["Verbose"]:
         print("Base created:",name)
@@ -64,7 +55,7 @@ def gelato(params,path,z):
         if params["Verbose"]:
             print("Adding flavor:",name)
         
-        model,param_names,emission,continuum = FM.FitComponents(spectrum,emission,emiss_pnames,continuum,cont_pnames)
+        model,param_names = FM.FitComponents(spectrum,continuum,cont_pnames,emission,emiss_pnames)
         param_names = param_names + ["rChi2"]
         if params["Verbose"]:
             print("Flavor added:",name)
@@ -81,10 +72,9 @@ def gelato(params,path,z):
             if params["Verbose"]:
                 print("Presenting gelato:",name)
             # continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
-            model = continuum + emission
             model.parameters = np.median(parameters,0)[:-1]
             # Set model parameters to median values
-            PL.Plot(spectrum,model,path)
+            PL.Plot(spectrum,model,path,param_names)
             if params["Verbose"]:
                 print("gelato presented:",name)
 
@@ -99,7 +89,7 @@ def gelato(params,path,z):
         if params["Plotting"]:
             if params["Verbose"]:
                 print("Presenting gelato:",name)
-            PL.PlotFig(spectrum,continuum,path)
+            PL.PlotFig(spectrum,continuum,path,param_names)
             if params["Verbose"]:
                 print("gelato presented:",name)
 

@@ -71,14 +71,6 @@ class SpectralFeature(Fittable1DModel):
         lam_obs = (1 + Redshift) * self.center
         exponand = (C / Dispersion) * (x / lam_obs - 1) 
         y = C * Flux * np.exp(-0.5 * exponand * exponand) / (lam_obs * Dispersion * SQRT_2_PI)    
-
-        # # Zero outside region
-        # indomain = np.logical_and(x > self.domain[0],x < self.domain[1])        
-        
-        # # Assign values
-        # y = np.zeros(x.shape)
-        # exponand = (C / Dispersion) * (x[indomain] / lam_obs - 1) 
-        # y[indomain] = C * Flux * np.exp(-0.5 * exponand * exponand) / (lam_obs * Dispersion * SQRT_2_PI)
         
         return y
         
@@ -91,14 +83,6 @@ class SpectralFeature(Fittable1DModel):
         C2 = C*C
         DDll = lam_obs*lam_obs*Dispersion*Dispersion
 
-        # # Zero outside region
-        # indomain = np.logical_and(x > self.domain[0],x < self.domain[1])        
-        
-        # exponand = ( C / Dispersion ) * ( x[indomain] / lam_obs - 1) 
-
-        # d_Flux = np.zeros(x.shape)    
-        # d_Flux[indomain] = np.exp(-0.5 * exponand * exponand) * C / (SQRT_2_PI * Dispersion * lam_obs)
-        
         exponand = ( C / Dispersion ) * ( x / lam_obs - 1) 
 
         d_Flux = np.zeros(x.shape)    
@@ -114,6 +98,49 @@ class SpectralFeature(Fittable1DModel):
                         (DDll*Dispersion)
         
         return [d_Redshift, d_Flux, d_Dispersion]
+
+## Custom Astropy Modeling Models
+# Spectral Feature Class (Gaussian)
+class PowerLawContinuum(Fittable1DModel):
+
+    """
+    Very similar to the 1D Gaussian but parametrized differently. 
+    """
+
+    # Parameters
+    Coefficient = Parameter(default=0,bounds=(0,None))
+    Index = Parameter(default=1.5,bounds=(0,None)) 
+    Redshift = Parameter(default=0)
+
+    def __init__(self, spectrum, **kwargs):
+
+        # Set parameters
+        super().__init__(Redshift = spectrum.z, Coefficient=np.nanmedian(spectrum.flux), **kwargs)
+        self.Redshift.bounds = (spectrum.z - 0.005,spectrum.z + 0.005)
+
+    def evaluate(self, x, Coefficient, Index, Redshift):
+        """
+        Gaussian1D model function.
+        """
+        
+        return Coefficient*((x/(3000*(1+Redshift)))**(-Index))
+        
+    # Derivative with respect to every parameter
+    def fit_deriv(self, x, Coefficient, Index, Redshift):
+        
+        # 1 + z
+        oooneplusz = 1/(1 + Redshift)
+        # observed center
+        X = x*oooneplusz/3000
+
+        d_Coefficient = (X)**(-Index)
+        d_Index = -Coefficient*d_Coefficient*np.log(X)
+        d_Redshift = Index*Coefficient*d_Coefficient*oooneplusz
+
+        return [d_Coefficient, d_Index, d_Redshift]
+
+    def get_names(self):
+        return ['PL_Continuum_Coefficient','PL_Continuum_Index','PL_Continuum_Redshift']
 
 # SSP Continuum
 class SSPContinuum(PolynomialModel):
@@ -149,7 +176,7 @@ class SSPContinuum(PolynomialModel):
 
         # Call Polynomial Class
         super().__init__(
-            len(self.ssp_names)+3, n_models=n_models, model_set_axis=model_set_axis,
+            len(self.ssp_names)+1, n_models=n_models, model_set_axis=model_set_axis,
             name=name, meta=meta, **params)
 
         # Set bounds
@@ -158,13 +185,12 @@ class SSPContinuum(PolynomialModel):
         for pname in self.param_names[2:]: 
             self.bounds[pname] = (0,None)
 
-        # Set initial parameters
-        medians = np.array([np.median(s[s>0]) for s in self.ssps]+[np.nanmedian(self.spectrum.flux)])
-        self.parameters = np.append([self.spectrum.z,8.4/SIGMA_TO_FWHM,1.5],np.nanmedian(self.spectrum.flux)/((len(self.ssp_names)+1)*medians))
+        # Set initial parameters      
+        medians = np.array([np.median(s[np.logical_and.reduce([self.ssp_wav*(1+self.spectrum.z) > self.spectrum.wav.min(),self.ssp_wav*(1+self.spectrum.z) < self.spectrum.wav.max(),s>0])]) for s in self.ssps])
+        self.parameters = np.append([self.spectrum.z,8.4/SIGMA_TO_FWHM],np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*medians))
 
     def prepare_inputs(self, x, **kwargs):
         inputs, format_info = super().prepare_inputs(x, **kwargs)
-
         x = inputs[0]
         return (x,), format_info
 
@@ -173,10 +199,7 @@ class SSPContinuum(PolynomialModel):
         coeffs = np.array(coeffs)
         z = coeffs[0]
         sigma = coeffs[1]
-        pli = coeffs[2]
-        plc = coeffs[3]
-        coeffs = coeffs[4:]
-        pl = plc*((x/(3000*(1+z)))**(pli))
+        coeffs = coeffs[2:]
         ssps = self.ssps
 
         if not self.fixed[self.param_names[0]]:
@@ -187,10 +210,10 @@ class SSPContinuum(PolynomialModel):
             ssps = np.array([fftconvolve(ssp,kernel[kernel>0]/kernel.sum(),'same') for ssp in ssps])
             ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+z),ssps)
 
-        return pl + np.dot(coeffs.T,ssps[:,self.region])[0]
+        return np.dot(coeffs.T,ssps[:,self.region])[0]
         
     def get_names(self):
-        return ['Continuum_Redshift','Continuum_Dispersion','Power_Law_Index','Power_Law_Coefficient']+[x.replace('.fits','') for x in self.ssp_names]
+        return ['SSP_Continuum_Redshift','SSP_Continuum_Dispersion']+[x.replace('.fits','') for x in self.ssp_names]
 
     def fix_params(self):
 
