@@ -189,6 +189,7 @@ class SSPContinuum(PolynomialModel):
         medians = np.array([np.median(s[np.logical_and.reduce([self.ssp_wav*(1+self.spectrum.z) > self.spectrum.wav.min(),self.ssp_wav*(1+self.spectrum.z) < self.spectrum.wav.max(),s>0])]) for s in self.ssps])
         self.parameters = np.append([self.spectrum.z,8.4/SIGMA_TO_FWHM],np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*medians))
 
+        self.ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+self.spectrum.z),self.ssps)
         self.fixed[self.param_names[0]] = True
         self.fixed[self.param_names[1]] = True
 
