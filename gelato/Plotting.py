@@ -75,6 +75,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
         # Continuum
         if 'PL_Continuum_Coefficient' in param_names:
             continuum = model[0:2]
+        else: continuum = model[0]
         for i,region in enumerate(spectrum.regions):
 
             # Get Spectrum
@@ -152,10 +153,7 @@ def plotfromresults(params,path,z):
             model += CM.PowerLawContinuum(spectrum)
 
         # Add spectral lines
-        if 'PL_Continuum_Coefficient' in parameters.columns.names:
-            ind = len(model[0:2].parameters) # index where emission lines begin
-        else:   
-            ind = len(model[0].parameters) # index where emission lines begin
+        ind = len(model.parameters) # index where emission lines begin
         for i in range(ind,median.size,3):
             center = float(parameters.columns.names[i].split('-')[-2])
             model += CM.SpectralFeature(center,spectrum)

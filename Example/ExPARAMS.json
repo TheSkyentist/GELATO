@@ -3,9 +3,9 @@
     "ContinuumRegion": 15000,
     "LineRegion": 300,
     "MaxIter": 1000,
-    "NBoot": 500,
-    "FThresh": 0.95,
-    "NProcess": 1,
+    "NBoot": 10,
+    "FThresh": 0,
+    "NProcess": 12,
     "Plotting": true,
     "CalcEW": false,
     "Concatenate": true,
@@ -13,7 +13,7 @@
     "Verbose": true,
     "EmissionGroups": [
         {
-            "Name":"NarrowLine",
+            "Name":"NLR",
             "TieRedshift": false,
             "TieDispersion": false,
             "Species": [
@@ -41,35 +41,9 @@
                             "Wavelength": 6583.34,
                             "RelStrength": 1
                         },
-                        { 
+                        {
                             "Wavelength": 6547.96,
                             "RelStrength": 0.34
-                        }
-                    ]
-                },
-                {
-                    "Name":"[OI]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 6300.20,
-                            "RelStrength": 1
-                        },
-                        { 
-                            "Wavelength": 6363.67,
-                            "RelStrength": 0.34
-                        }
-                    ]
-                },
-                {
-                    "Name":"[HeI]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 5875.60,
-                            "RelStrength": null
                         }
                     ]
                 },
@@ -82,7 +56,7 @@
                             "Wavelength": 5006.77,
                             "RelStrength": 1
                         },
-                        { 
+                        {
                             "Wavelength": 4958.83,
                             "RelStrength": 0.35
                         }
@@ -124,12 +98,12 @@
             ]
         },
         {
-            "Name":"Balmer",
+            "Name":"Stars",
             "TieRedshift": true,
             "TieDispersion": true,
             "Species": [
                 {
-                    "Name":"Ha",
+                    "Name":"Halpha",
                     "Flag": 1,
                     "FlagGroups": ["Broad"],
                     "Lines": [
@@ -140,23 +114,12 @@
                     ]
                 },
                 {
-                    "Name":"Hb",
+                    "Name":"Hbeta",
                     "Flag": 1,
                     "FlagGroups": ["Broad"],
                     "Lines": [
                         {
                             "Wavelength": 4861.32,
-                            "RelStrength": null
-                        }
-                    ]
-                },
-                {
-                    "Name":"Hg",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 4340.46,
                             "RelStrength": null
                         }
                     ]
@@ -176,7 +139,7 @@
             "Species": []
         },
         {
-            "Name":"Abs",
+            "Name":"Absorption",
             "TieRedshift": false,
             "TieDispersion": false,
             "Species": []
