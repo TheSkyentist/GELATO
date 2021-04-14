@@ -137,7 +137,9 @@ def FitModel(spectrum,model,region = None):
     return fit_model
 
 # Fit (Bootstrapped) Model
-def FitBoot(spectrum,model):
+def FitBoot(spectrum,model,i):
+
+    print(i)
     
     fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
     return np.concatenate([fit_model.parameters,[MC.rChi2(spectrum,fit_model)]])
