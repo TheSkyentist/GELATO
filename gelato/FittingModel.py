@@ -40,8 +40,8 @@ def FitContinuum(spectrum):
         return cont,ssp_names+pl_names
     
     # Comment for Fixed
-    ssp_fit.fix_params()
-    ssp_fit.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+    # ssp_fit.fix_params()
+    # ssp_fit.set_region(np.ones(spectrum.wav.shape,dtype=bool))
 
     return ssp_fit,ssp_names
 
@@ -139,7 +139,7 @@ def FitModel(spectrum,model,region = None):
 # Fit (Bootstrapped) Model
 def FitBoot(spectrum,model,i):
 
-    print(i)
+    # print(i)
     
     fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
     return np.concatenate([fit_model.parameters,[MC.rChi2(spectrum,fit_model)]])

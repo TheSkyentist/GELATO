@@ -190,9 +190,9 @@ class SSPContinuum(PolynomialModel):
         self.parameters = np.append([self.spectrum.z,8.4/SIGMA_TO_FWHM],np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*medians))
 
         # Uncomment for Fixed
-        # self.ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+self.spectrum.z),self.ssps)
-        # self.fixed[self.param_names[0]] = True
-        # self.fixed[self.param_names[1]] = True
+        self.ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+self.spectrum.z),self.ssps)
+        self.fixed[self.param_names[0]] = True
+        self.fixed[self.param_names[1]] = True
 
     def prepare_inputs(self, x, **kwargs):
         inputs, format_info = super().prepare_inputs(x, **kwargs)
