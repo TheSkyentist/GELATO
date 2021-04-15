@@ -33,8 +33,8 @@ def FitContinuum(spectrum):
 
     # Perform F-test
     if MC.FTest(spectrum,ssp_fit,cont_fit,np.invert(spectrum.emission_region)):
-        sspcontinuum.fix_params()
-        sspcontinuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+        # sspcontinuum.fix_params() # Comment for Fixed
+        # sspcontinuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
         cont = sspcontinuum+plcontinuum
         cont.parameters = cont_fit.parameters
         return cont,ssp_names+pl_names
