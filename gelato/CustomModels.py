@@ -162,7 +162,7 @@ class SSPContinuum(PolynomialModel):
 
         # List SSPs
         self.ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
-        self.ssp_names = np.sort([x for x in os.listdir(self.ssp_dir) if '.fits' in x])
+        self.ssp_names = np.sort([x for x in os.listdir(self.ssp_dir) if '_iPp0.00_baseFe_LIS5.0.fits' in x])
 
         # Get SSPs
         self.ssps = []
@@ -171,28 +171,25 @@ class SSPContinuum(PolynomialModel):
                 h = f[0].header
                 flux = f[0].data
                 self.ssps.append(flux)
-        self.ssp_wav = (np.arange(flux.size) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
+        self.ssp_wav = (np.arange(h['NAXIS1']) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
+        if self.spectrum.p['VacuumWav']: self.ssp_wav = fits.getdata(self.ssp_dir+'SSP_Wavelength_Vacuum.fits')
         self.ssps = np.array(self.ssps)
 
         # Call Polynomial Class
         super().__init__(
-            len(self.ssp_names)+1, n_models=n_models, model_set_axis=model_set_axis,
+            len(self.ssp_names)-1, n_models=n_models, model_set_axis=model_set_axis,
             name=name, meta=meta, **params)
 
         # Set bounds
-        self.bounds[self.param_names[0]] = (spectrum.z - 0.005,spectrum.z + 0.005)
-        self.bounds[self.param_names[1]] = (6/SIGMA_TO_FWHM,20/SIGMA_TO_FWHM)
-        for pname in self.param_names[2:]: 
+        for pname in self.param_names: 
             self.bounds[pname] = (0,None)
 
         # Set initial parameters      
         medians = np.array([np.median(s[np.logical_and.reduce([self.ssp_wav*(1+self.spectrum.z) > self.spectrum.wav.min(),self.ssp_wav*(1+self.spectrum.z) < self.spectrum.wav.max(),s>0])]) for s in self.ssps])
-        self.parameters = np.append([self.spectrum.z,8.4/SIGMA_TO_FWHM],np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*medians))
+        self.parameters = np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*medians)
 
         # Uncomment for Fixed
         self.ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+self.spectrum.z),self.ssps)
-        self.fixed[self.param_names[0]] = True
-        self.fixed[self.param_names[1]] = True
 
     def prepare_inputs(self, x, **kwargs):
         inputs, format_info = super().prepare_inputs(x, **kwargs)
@@ -202,34 +199,13 @@ class SSPContinuum(PolynomialModel):
     def evaluate(self, x, *coeffs):
 
         coeffs = np.array(coeffs)
-        z = coeffs[0]
-        sigma = coeffs[1]
-        coeffs = coeffs[2:]
         ssps = self.ssps
-
-        if not self.fixed[self.param_names[0]]:
-
-            # Final number is variance of E-MILES templates
-            var_conv = sigma*sigma - 10.616522503600239
-            kernel = np.exp(-np.square((self.ssp_wav - 4500))/(2*var_conv))
-            ssps = np.array([fftconvolve(ssp,kernel[kernel>0]/kernel.sum(),'same') for ssp in ssps])
-            ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+z),ssps)
 
         return np.dot(coeffs.T,ssps[:,self.region])[0]
         
     def get_names(self):
-        return ['SSP_Continuum_Redshift','SSP_Continuum_Dispersion']+[x.replace('.fits','') for x in self.ssp_names]
-
-    def fix_params(self):
-
-        # Fix params
-        for pn in self.param_names[0:2]: self.fixed[pn] = True
-
-        # Final number is variance of E-MILES templates
-        var_conv = self.parameters[1]*self.parameters[1] - 10.616522503600239
-        kernel = np.exp(-np.square((self.ssp_wav - 4500))/(2*var_conv))
-        self.ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+self.parameters[0]),np.array([fftconvolve(ssp,kernel[kernel>0]/kernel.sum(),'same') for ssp in self.ssps]))
-
+        return [x.replace('.fits','') for x in self.ssp_names]
+    
     def set_region(self,region):
         self.region = region
 
