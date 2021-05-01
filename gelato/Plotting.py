@@ -52,11 +52,24 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
         # Plot model
         fax.step(wav,model(spectrum.wav),'r')
 
-        # Axis set
-        ylim = list(fax.get_ylim())
-        ylim[0] = np.max((0,ylim[0]))
-        fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+        # Base Y axis on flux
+        ymin = np.max([0,flux.min()])
+        dy = flux.max() - ymin
+        ylim = [ymin,ymin+1.2*dy] # Increase Axis size by 20%
+
+        # Plot Line Names
+        text_height = ymin+1.1*dy # Put labels halfway
+        for group in spectrum.p['EmissionGroups']:
+            for species in group['Species']:
+                if species['Flag'] >= 0:
+                    for line in species['Lines']:
+                        x = line['Wavelength']*(1+spectrum.z)
+                        if ((x < wav[-1]) and (x > wav[0])):
+                            fax.text(x,text_height,species['Name'],rotation=90,fontsize=12,ha='center',va='center')
+
+        # Axis labels and limits
         fax.set(yticks=fax.get_yticks()[1:],xlim=[wav.min(),wav.max()],xticks=[])
+        fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
 
         # Residual Axis
         rax = fig.add_subplot(gs[1,0])
@@ -102,10 +115,10 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
                 for j in range(init,model.n_submodels()):
                     fax.step(wav,continuum(spectrum.wav)[good]+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
 
-            # Axis set
-            ylim = list(fax.get_ylim())
-            ylim[0] = np.max((0,ylim[0]))
-            ylim[1] += (ylim[1] - ylim[0])/8
+            # Base Y axis on flux
+            ymin = np.max([0,flux.min()])
+            dy = flux.max() - ymin
+            ylim = [ymin,ymin+1.2*dy] # Increase Axis size by 20%
 
             # Plot Line Names
             text_height = (np.max(flux) + ylim[1])/2
@@ -117,10 +130,11 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
                             if ((x < region[1]) and (x > region[0])):
                                 fax.text(x,text_height,species['Name'],rotation=90,fontsize=12,ha='center',va='center')
 
-            fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
             fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
+            fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
 
             # Residual Axis
+            text_height = ymin+1.1*dy # Put labels halfway
             rax = fig.add_subplot(gs[1,i])
             rax.step(wav,(flux - model(spectrum.wav)[good])*isig,'gray')
             ymax = np.max(np.abs(rax.get_ylim()))
