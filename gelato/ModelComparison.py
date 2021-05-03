@@ -53,6 +53,6 @@ def Chi2(model,x,y,weights):
 # Reduce Chi Squared of model
 def rChi2(spectrum,model):
     # Degrees of freedom
-    N = np.sum([np.sum(np.logical_and(region[0] < spectrum.wav,spectrum.wav < region[1])) for region in spectrum.regions])
+    N = spectrum.wav.size
     dof = N - np.sum([val == False for val in model.tied.values()])
     return Chi2(model,spectrum.wav,spectrum.flux,spectrum.weight)/dof

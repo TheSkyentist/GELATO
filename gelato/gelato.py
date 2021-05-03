@@ -71,9 +71,8 @@ def gelato(params,path,z):
         if params["Plotting"]:
             if params["Verbose"]:
                 print("Presenting gelato:",name)
-            # continuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
-            model.parameters = np.median(parameters,0)[:-1]
             # Set model parameters to median values
+            model.parameters = np.median(parameters,0)[:-1]
             PL.Plot(spectrum,model,path,param_names)
             if params["Verbose"]:
                 print("gelato presented:",name)
@@ -93,14 +92,25 @@ def gelato(params,path,z):
             if params["Verbose"]:
                 print("gelato presented:",name)
 
+    # Turn into FITS table
+    parameters = Table(data=parameters,names=param_names)
+
+    # Check if any of the lines can be fit
+    if len(spectrum.regions) > 0:
+        # Get equivalent wdiths
+        if params["CalcEW"]:
+            if params["Verbose"]:
+                print("Calculating REWs:",name)
+            parameters = EW.EquivalentWidth(spectrum,model,parameters)
+            if params["Verbose"]:
+                print("Calcuated REWs:",name)
+
+    # Save results
     if params["Verbose"]:
         print("Freezing results:",name)
-    Table(data=parameters,names=param_names).write(params["OutFolder"]+name.replace(".fits","-results.fits"),overwrite=True)
+    parameters.write(params["OutFolder"]+name.replace(".fits","-results.fits"),overwrite=True)
     if params["Verbose"]:
         print("Results freezed:",name)
-
-    if params["CalcEW"]:
-        EW.EWfromresults(params,path,z)
 
     if params["Verbose"]:
         print("GELATO finished for",name)

@@ -11,13 +11,48 @@ from astropy.table import Table,hstack
 import gelato.CustomModels as CM
 import gelato.SpectrumClass as SC
 
+# Constants
+C = 299792.458 # km/s
+
 # Calculate Equivalent Width
-def EquivalentWidth(spectrum,model,param_names,parameters):
+def EquivalentWidth(spectrum,model,parameters):
 
     # Continuum
-    if 'PL_Continuum_Coefficient' in param_names:
+    if 'PL_Continuum_Coefficient' in parameters.colnames:
         continuum = model[0:2]
     else: continuum = model[0]
+
+    # Index where emission lines start
+    ind = len(continuum.parameters)
+
+    # Get continuum 
+    continuum = continuum(spectrum.wav)
+
+    # Empty EW array
+    REWs = np.ones((int((len(parameters.colnames)-1-ind)/3),len(parameters)))
+    REWs_names = []
+
+    # Iterate over Emission lines
+    for i in range(ind,len(parameters.colnames)-1,3):
+
+        # Get line parameters
+        REWs_names.append(parameters.colnames[i].replace('-Redshift','-REW'))
+        center = float(REWs_names[-1].split('-')[-2]) 
+        opz = 1 + parameters[parameters.colnames[i]] # 1 + z
+        flux = parameters[parameters.colnames[i+1]] # Line flux
+
+        # Get line
+        linewav = center*opz
+        linewidth = linewav*spectrum.p['LineRegion']/(2*C)
+
+        # Continuum height
+        heights = np.array([np.median(continuum[np.logical_and(spectrum.wav > lwv - lwd,spectrum.wav < lwv + lwd)]) for lwv,lwd in zip(linewav,linewidth)])
+        
+        # Get REW
+        REWs[int((i-ind)/3)] = np.abs(flux/(heights*opz))
+
+    # Return combined Results
+    return hstack([parameters,Table(data=REWs.T,names=REWs_names)])
 
 # Plot from results
 def EWfromresults(params,path,z):
@@ -83,7 +118,7 @@ def EWfromresults(params,path,z):
             EWs.append(np.abs(lineflux/(contflux*oneplusz)))
 
         # Save
-        hstack([Table(parameters),Table(data=EWs,names=EWnames)]).write(fname,overwrite=True)
+        return hstack([Table(parameters),Table(data=EWs,names=EWnames)]).write(fname,overwrite=True)
     
 # EW from results
 # Plot from results
