@@ -11,6 +11,13 @@ from astropy.table import Table,hstack
 import gelato.CustomModels as CM
 import gelato.SpectrumClass as SC
 
+# Calculate Equivalent Width
+def EquivalentWidth(spectrum,model,param_names,parameters):
+
+    # Continuum
+    if 'PL_Continuum_Coefficient' in param_names:
+        continuum = model[0:2]
+    else: continuum = model[0]
 
 # Plot from results
 def EWfromresults(params,path,z):

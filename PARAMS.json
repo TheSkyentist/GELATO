@@ -1,6 +1,6 @@
 {
     "OutFolder": "./Results/",
-    "VacuumWav": true,
+    "VacuumWav": false,
     "ContinuumRegion": 15000,
     "LineRegion": 300,
     "MaxIter": 1000,
@@ -24,11 +24,11 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 6718.29,
+                            "Wavelength": 6716.44,
                             "RelStrength": null
                         },
                         {
-                            "Wavelength":  6732.67,
+                            "Wavelength":  6730.82,
                             "RelStrength": null
                         }
                     ]
@@ -39,11 +39,11 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 6585.27,
+                            "Wavelength": 6583.45,
                             "RelStrength": 1
                         },
                         { 
-                            "Wavelength":  6549.86,
+                            "Wavelength":  6548.05,
                             "RelStrength": 0.34
                         }
                     ]
@@ -54,11 +54,11 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 6302.05,
+                            "Wavelength": 6300.30,
                             "RelStrength": 1
                         },
                         { 
-                            "Wavelength": 6365.54,
+                            "Wavelength": 6363.78,
                             "RelStrength": 0.333
                         }
                     ]
@@ -69,7 +69,7 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 5877.25,
+                            "Wavelength": 5875.62,
                             "RelStrength": null
                         }
                     ]
@@ -80,15 +80,15 @@
                     "FlagGroups": ["Outflow"],
                     "Lines": [
                         {
-                            "Wavelength": 5008.24,
+                            "Wavelength": 5006.84,
                             "RelStrength": 1
                         },
                         { 
-                            "Wavelength": 4960.29,
+                            "Wavelength": 4958.91,
                             "RelStrength": 0.35
                         },
                         {
-                            "Wavelength": 4364.44,
+                            "Wavelength": 4363.21,
                             "RelStrength": null
                         }
                     ]
@@ -99,7 +99,7 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 3869.86,
+                            "Wavelength": 3868.76,
                             "RelStrength": null
                         }
                     ]
@@ -110,11 +110,11 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 3727.09,
+                            "Wavelength": 3726.03,
                             "RelStrength": null
                         },
                         {
-                            "Wavelength":3729.89,
+                            "Wavelength": 3728.82,
                             "RelStrength":null
                         }
                     ]
@@ -125,7 +125,7 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 3426.86,
+                            "Wavelength": 3425.88,
                             "RelStrength": null
                         }
                     ]
@@ -143,7 +143,7 @@
                     "FlagGroups": ["Broad"],
                     "Lines": [
                         {
-                            "Wavelength": 6564.63,
+                            "Wavelength": 6562.79,
                             "RelStrength": null
                         }
                     ]
@@ -154,7 +154,7 @@
                     "FlagGroups": ["Broad"],
                     "Lines": [
                         {
-                            "Wavelength": 4862.69,
+                            "Wavelength": 4861.28,
                             "RelStrength": null
                         }
                     ]
@@ -165,7 +165,7 @@
                     "FlagGroups": ["Broad"],
                     "Lines": [
                         {
-                            "Wavelength": 4341.69,
+                            "Wavelength": 4340.47,
                             "RelStrength": null
                         }
                     ]
