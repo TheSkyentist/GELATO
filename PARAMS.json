@@ -1,6 +1,7 @@
 {
     "OutFolder": "./Results/",
     "VacuumWav": false,
+    "RandomSeed": 1,
     "ContinuumRegion": 15000,
     "LineRegion": 300,
     "MaxIter": 1000,

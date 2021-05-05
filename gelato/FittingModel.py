@@ -2,6 +2,7 @@
 
 # Packages
 import copy
+import warnings
 import numpy as np
 from itertools import combinations
 from astropy.modeling import fitting
@@ -132,15 +133,36 @@ def FitModel(spectrum,model,region = None):
         region = np.ones(spectrum.wav.shape,dtype=bool)
 
     # Fit model
-    fit_model = fit(model,spectrum.wav[region],spectrum.flux[region],weights=spectrum.sqrtweight[region],maxiter=spectrum.p['MaxIter'])
+    with warnings.catch_warnings():
+        # Ignore warnings
+        warnings.simplefilter('ignore')
+        fit_model = fit(model,spectrum.wav[region],spectrum.flux[region],weights=spectrum.sqrtweight[region],maxiter=spectrum.p['MaxIter'])
+    
     return fit_model
 
 # Fit (Bootstrapped) Model
 def FitBoot(spectrum,model,i):
 
-    # print(i)
-    
-    fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
+    # Loading bar params
+    if ((spectrum.p['NProcess'] == 1) and spectrum.p['Verbose']):
+        N = 40 # Max length
+        p = int(100*i/(spectrum.p['NBoot'] - 1)) # Percentage
+        l = int(N*i/(spectrum.p['NBoot'] - 1)) # Length of bar
+        if p == 0:
+            print('Progress: |'+N*'-'+'|   0%',end='\r')
+        elif p < 10:
+            print('Progress: |'+l*'#'+(N-l)*'-'+'|   '+str(p)+'%',end='\r')
+        elif p < 100:
+            print('Progress: |'+l*'#'+(N-l)*'-'+'|  '+str(p)+'%',end='\r')
+        else: 
+            print('Progress: |'+N*'#'+'| 100%')
+
+    with warnings.catch_warnings():
+
+        # Ignore warnings
+        warnings.simplefilter('ignore')
+        fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
+
     return np.concatenate([fit_model.parameters,[MC.rChi2(spectrum,fit_model)]])
 
 # Split flux between emission lines

@@ -55,17 +55,29 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
         # Base Y axis on flux
         ymin = np.max([0,flux.min()])
         dy = flux.max() - ymin
-        ylim = [ymin,ymin+1.2*dy] # Increase Axis size by 20%
+        ylim = [ymin,ymin+1.3*dy] # Increase Axis size by 20%
+        text_height = ymin+1.2*dy 
 
-        # Plot Line Names
-        text_height = ymin+1.1*dy # Put labels halfway
+        # Get Line Names
+        texts = {}
         for group in spectrum.p['EmissionGroups']:
             for species in group['Species']:
                 if species['Flag'] >= 0:
                     for line in species['Lines']:
                         x = line['Wavelength']*(1+spectrum.z)
                         if ((x < wav[-1]) and (x > wav[0])):
-                            fax.text(x,text_height,species['Name'],rotation=90,fontsize=12,ha='center',va='center')
+                            texts[x] = species['Name']
+
+        # Plot names
+        for j,lam in enumerate(np.sort(list(texts.keys()))):
+            # Unpack
+            name = texts[lam]
+            # Calculate position
+            x = wav.min()+ (j+1)*(wav.max() - wav.min())/(len(texts)+1)
+            # Text
+            fax.text(x,text_height,name,rotation=90,fontsize=12,ha='center',va='center')
+            # Plot Lines
+            fax.plot([lam,lam,x,x],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
 
         # Axis labels and limits
         fax.set(yticks=fax.get_yticks()[1:],xlim=[wav.min(),wav.max()],xticks=[])
@@ -119,23 +131,35 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             # Base Y axis on flux
             ymin = np.max([0,flux.min()])
             dy = flux.max() - ymin
-            ylim = [ymin,ymin+1.2*dy] # Increase Axis size by 20%
+            ylim = [ymin,ymin+1.3*dy] # Increase Axis size by 20%
+            text_height = ymin+1.2*dy 
 
-            # Plot Line Names
-            text_height = (np.max(flux) + ylim[1])/2
+            # Get Line Names
+            texts = {}
             for group in spectrum.p['EmissionGroups']:
                 for species in group['Species']:
                     if species['Flag'] >= 0:
                         for line in species['Lines']:
                             x = line['Wavelength']*(1+spectrum.z)
                             if ((x < region[1]) and (x > region[0])):
-                                fax.text(x,text_height,species['Name'],rotation=90,fontsize=12,ha='center',va='center')
+                                texts[x] = species['Name']
+
+            # Plot names
+            for j,lam in enumerate(np.sort(list(texts.keys()))):
+                # Unpack
+                name = texts[lam]
+                # Calculate position
+                x = wav.min()+ (j+1)*(wav.max() - wav.min())/(len(texts)+1)
+                # Text
+                fax.text(x,text_height,name,rotation=90,fontsize=12,ha='center',va='center')
+                # Plot Lines
+                fax.plot([lam,lam,x,x],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
 
             fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
             fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
 
             # Residual Axis
-            text_height = ymin+1.1*dy # Put labels halfway
+            text_height = ymin+1.2*dy # Put labels halfway
             rax = fig.add_subplot(gs[1,i])
             rax.step(wav,(flux - model(spectrum.wav)[good])*isig,'gray')
             ymax = np.max(np.abs(rax.get_ylim()))
@@ -151,13 +175,17 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
 # Plot from results
 def plotfromresults(params,path,z):
 
+    if params["Verbose"]:
+        print("Presenting gelato:",path.split('/')[-1])
+
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(path,z,params)
 
     if spectrum.regions != []:
 
         ## Load Results ##
-        parameters = fits.getdata(params['OutFolder']+path.split('/')[-1].replace('.fits','-results.fits'))
+        fname = params['OutFolder']+path.split('/')[-1].replace('.fits','')+'-results.fits'
+        parameters = fits.getdata(fname)
         median = np.array([np.median(parameters[n]) for n in parameters.columns.names if 'EW' not in n])[:-1]
         
         ## Create model ##
@@ -178,6 +206,9 @@ def plotfromresults(params,path,z):
 
         # Plot
         Plot(spectrum,model,path,parameters.columns.names)
+
+    if params["Verbose"]:
+        print("Gelato presented:",path.split('/')[-1]) 
 
 # Plot from results
 if __name__ == "__main__":

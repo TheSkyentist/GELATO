@@ -25,7 +25,7 @@ def verify(params):
         return False
 
     # Check that all parameters are specified
-    for p in ['OutFolder', 'VacuumWav', 'ContinuumRegion', 'LineRegion', 'MaxIter', 'NBoot', 'FThresh', 'NProcess', 'Plotting', 'CalcEW', 'Overwrite', 'Concatenate', 'Verbose', 'EmissionGroups']:
+    for p in ['OutFolder', 'VacuumWav', 'RandomSeed', 'ContinuumRegion', 'LineRegion', 'MaxIter', 'NBoot', 'FThresh', 'NProcess', 'Plotting', 'CalcEW', 'Overwrite', 'Concatenate', 'Verbose', 'EmissionGroups']:
         if not p in params.keys():
             print('Parameters does not contain parameter:',p)
             return False
@@ -37,7 +37,7 @@ def verify(params):
             if not (type(params[p]) == str):
                 print('Parameter',p,'must be a string.')
                 return False
-        elif p in ['ContinuumRegion','LineRegion']:
+        elif p in ['RandomSeed','ContinuumRegion','LineRegion']:
             if not ((type(params[p]) == float) or (type(params[p]) == int)):
                 print('Parameter',p,'must be an int or a float.')
                 return False

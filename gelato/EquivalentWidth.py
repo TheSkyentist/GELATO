@@ -7,58 +7,57 @@ import numpy as np
 from astropy.io import fits
 from astropy.table import Table,hstack
 
-# gelato supporting files
-import gelato.CustomModels as CM
-import gelato.SpectrumClass as SC
-
 # Constants
 C = 299792.458 # km/s
 
 # Calculate Equivalent Width
-def EquivalentWidth(spectrum,model,parameters):
+def EquivalentWidth(spectrum,model,parameters,param_names):
 
     # Continuum
-    if 'PL_Continuum_Coefficient' in parameters.colnames:
+    if 'PL_Continuum_Coefficient' in param_names:
         continuum = model[0:2]
     else: continuum = model[0]
 
     # Index where emission lines start
     ind = len(continuum.parameters)
 
-    # Get continuum 
-    continuum = continuum(spectrum.wav)
+    # Get all continuum heights
+    continua = np.ones((parameters.shape[0],len(spectrum.wav)))
+    for i,params in enumerate(parameters):
+        continuum.parameters = params[:ind]
+        continua[i] = continuum(spectrum.wav)
 
     # Empty EW array
-    REWs = np.ones((int((len(parameters.colnames)-1-ind)/3),len(parameters)))
+    REWs = np.ones((parameters.shape[0],int((len(param_names)-1-ind)/3),))
     REWs_names = []
 
     # Iterate over Emission lines
-    for i in range(ind,len(parameters.colnames)-1,3):
+    for i in range(ind,len(param_names)-1,3):
 
         # Get line parameters
-        REWs_names.append(parameters.colnames[i].replace('-Redshift','-REW'))
+        REWs_names.append(param_names[i].replace('-Redshift','-REW'))
         center = float(REWs_names[-1].split('-')[-2]) 
-        opz = 1 + parameters[parameters.colnames[i]] # 1 + z
-        flux = parameters[parameters.colnames[i+1]] # Line flux
+        opz = 1 + parameters[:,i] # 1 + z
+        flux = parameters[:,i+1] # Line flux
 
         # Get line
         linewav = center*opz
         linewidth = linewav*spectrum.p['LineRegion']/(2*C)
 
         # Continuum height
-        heights = np.array([np.median(continuum[np.logical_and(spectrum.wav > lwv - lwd,spectrum.wav < lwv + lwd)]) for lwv,lwd in zip(linewav,linewidth)])
-        
+        heights = np.array([np.median(ctm[np.logical_and(spectrum.wav > lwv - lwd,spectrum.wav < lwv + lwd)]) for lwv,lwd,ctm in zip(linewav,linewidth,continua)])
+
         # Get REW
-        REWs[int((i-ind)/3)] = np.abs(flux/(heights*opz))
+        REWs[:,int((i-ind)/3)] = np.abs(flux/(heights*opz))
 
     # Return combined Results
-    return hstack([parameters,Table(data=REWs.T,names=REWs_names)])
+    return np.hstack((parameters,REWs)),param_names+REWs_names
 
 # Plot from results
 def EWfromresults(params,path,z):
 
     if params["Verbose"]:
-        print("Generating Equivalent Widths:",path.split('/')[-1])
+        print("Measuring Texture:",path.split('/')[-1])
 
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(path,z,params)
@@ -67,59 +66,45 @@ def EWfromresults(params,path,z):
 
         # Load name and parameters
         fname = params['OutFolder']+path.split('/')[-1].replace('.fits','')+'-results.fits'
-        parameters = fits.getdata(fname)
-        names = parameters.columns.names
-        
-        # Dont add if already has EWs
+        parameters = Table.read(fname)
+        names = parameters.colnames
+
+        # Dont add if already has EWs and no overwrite
         for n in names:
             if 'EW' in n:
-                if params["Verbose"]:
-                    print("Equivalent Widths Already Generated:",path.split('/')[-1])
-                return
+                if not params['Overwrite']:
+                    print('Texture already measured:',path.split('/')[-1])
+                    return
+                else: 
+                    parameters = parameters[[n for n in names if 'EW' not in n]]
+                    names = parameters.colnames
+                break
+        
+        # Put parameters into the form we need
+        parameters = np.array([parameters[n] for n in names]).T
 
-        # Index where emission lines begin
-        ind = (params['ContinuumDeg']+1)*len(spectrum.regions)
-
-        ## Create continuum ##
-        continuum = []
+        ## Create model ##
         # Add continuum
-        for region in spectrum.regions:
-            continuum.append(CM.Continuum(params['ContinuumDeg'],region))
-        continuum = np.sum(continuum)
+        model = CM.SSPContinuum(spectrum)
+        model.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+        if 'PL_Continuum_Coefficient' in names:
+            model += CM.PowerLawContinuum(spectrum)
 
-        EWs = []
-        EWnames = []
-        # Iterate over emission lines
+        # Add spectral lines
+        ind = len(model.parameters) # index where emission lines begin
         for i in range(ind,len(names)-1,3):
+            center = float(names[i].split('-')[-2])
+            model += CM.SpectralFeature(center,spectrum)
+        
+        # Calculate REWs
+        parameters,param_names = EquivalentWidth(spectrum,model,parameters,names)
 
-            # Split name
-            namesplit = names[i].split('-')
-            namesplit[-1] = 'REW'
-            EWnames.append('-'.join(namesplit))
-            
-            # Get line center
-            center = float(namesplit[-2])
+        # Turn into FITS table
+        parameters = Table(data=parameters,names=param_names)
+        
+    if params["Verbose"]:
+        print("Texture Measured:",path.split('/')[-1])
 
-            # Get line flux/redshift
-            lineflux = parameters[names[i+1]]
-            oneplusz = 1+parameters[names[i]]
-
-            # Initialize continuum fluxes
-            contflux = np.ones(len(parameters))
-
-            # Iterate over params
-            for j,params in enumerate(parameters):
-
-                # Load in continuum
-                continuum.parameters = params[:ind]
-                contflux[j] = continuum(center*oneplusz[j])
-
-            # Get EW
-            EWs.append(np.abs(lineflux/(contflux*oneplusz)))
-
-        # Save
-        return hstack([Table(parameters),Table(data=EWs,names=EWnames)]).write(fname,overwrite=True)
-    
 # EW from results
 # Plot from results
 if __name__ == "__main__":
@@ -128,8 +113,10 @@ if __name__ == "__main__":
     import sys
     import copy
     import argparse
+    import CustomModels as CM
+    import SpectrumClass as SC
     import ConstructParams as CP
-
+    
     ## Parse Arguements to find Parameter File ##
     parser = argparse.ArgumentParser()
     parser.add_argument('Parameters', type=str, help='Path to parameters file')

@@ -20,6 +20,9 @@ def gelato(params,path,z):
     # Load Params
     params = CP.construct(params)
 
+    # Set seed
+    # np.random.seed(params["RandomSeed"])
+
     # Get name of file
     name = path.split("/")[-1]
 
@@ -77,8 +80,17 @@ def gelato(params,path,z):
             if params["Verbose"]:
                 print("gelato presented:",name)
 
+         # Get equivalent wdiths
+        if params["CalcEW"]:
+            if params["Verbose"]:
+                print("Measuring Texture:",name)
+            parameters,param_names = EW.EquivalentWidth(spectrum,model,parameters,param_names)
+            if params["Verbose"]:
+                print("Measured Texture:",name)
+                
     # Otherwise:
     else:
+        # Just continuum
         parameters = continuum.parameters
         param_names = cont_pnames
         if params["Verbose"]:
@@ -90,20 +102,10 @@ def gelato(params,path,z):
                 print("Presenting gelato:",name)
             PL.PlotFig(spectrum,continuum,path,param_names)
             if params["Verbose"]:
-                print("gelato presented:",name)
+                print("Gelato presented:",name)
 
     # Turn into FITS table
     parameters = Table(data=parameters,names=param_names)
-
-    # Check if any of the lines can be fit
-    if len(spectrum.regions) > 0:
-        # Get equivalent wdiths
-        if params["CalcEW"]:
-            if params["Verbose"]:
-                print("Calculating REWs:",name)
-            parameters = EW.EquivalentWidth(spectrum,model,parameters)
-            if params["Verbose"]:
-                print("Calcuated REWs:",name)
 
     # Save results
     if params["Verbose"]:

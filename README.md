@@ -22,6 +22,7 @@ To install the dependancies, I recommend installing conda (through [Miniconda](h
 The environment can be installed from the provided "environment.yml" file.
 
 ```bash
+cd /path/to/GELATO/directory
 conda env create -f environment.yml
 ```
 
@@ -33,10 +34,15 @@ conda activate GELATO
 
 Whenever running GELATO scripts, they must be run from this environment.
 
-Installation
 -------------
 
-GELATO can be installed by cloning this git repository.
+First, clone the GELATO git repository. Then the GELATO scripts can be installed. Make sure you are in the GELATO conda environment.
+
+```bash
+cd /path/to/GELATO/directory
+conda activate GELATO
+python setup.py install
+```
 
 In your working directory, **you need to copy the "matplotlibrc" file** to control the plotting settings. This is most important if you are running GELATO with multiprocessing as this file sets the matplotlib backed to "Agg", a non-interactive backend, required for generating and saving figures on multiple threads.
 
@@ -76,17 +82,16 @@ Parameter File
 
 The behaviour of GELATO is controlled entirely by the "PARAMS.json" file. And example parameter file is included in the repository.
 
-* Outfolder: This parameter is the path to the output directory. 
-* ContinuumRegion: The border around emission lines in velocity space that where the continuum is fit (km/s). If the regions around two emission lines overlap, the two regions are merged and the lines share a continuum.
+* Outfolder: This parameter is the path to the output directory.
+* VacuumWav: Are the spectra being fit in air or vacuum wavelengths.  
+* ContinuumRegion: The border around emission lines in velocity space that will be excluded when fitting the continuum initially. 
 * LineRegion: The border around an emission line in velocity that must be contained within the spectrum in order to be fit (km/s). This region is also used to estimate the initial height of the line.
-* ContinuumDeg: Degree of polynomial for continuum background.
 * MaxIter: Maximum number of minimization algorithm iterations.
 * NBoot: Number of bootstrap iterations to constrain error on parameters.
 * FThresh: F-test threshold to incorporate additional model parameters.
 * NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
 * Plotting: Produce plots or not.
-* PlotComp: To plot only the components of the fit or the total fit.
-* CalcEW: To calculate equivalent widths or not.
+* CalcEW: To calculate (rest) equivalent widths or not.
 * Concatenate: To concatenate the results of a multiple GELATO run or not.
 * Overwrite: Overwrite the results of a previous GELATO run.
 * Verbose: To print GELATO output.
