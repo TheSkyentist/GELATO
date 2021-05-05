@@ -11,6 +11,7 @@ import gelato.Plotting as PL
 import gelato.BuildModel as BM
 import gelato.FittingModel as FM
 import gelato.SpectrumClass as SC
+import gelato.ModelComparison as MC
 import gelato.EquivalentWidth as EW
 import gelato.ConstructParams as CP
 
@@ -91,8 +92,8 @@ def gelato(params,path,z):
     # Otherwise:
     else:
         # Just continuum
-        parameters = continuum.parameters
-        param_names = cont_pnames
+        parameters = np.hstack([continuum.parameters,[MC.rChi2(spectrum,continuum)]])
+        param_names = cont_pnames + ["rChi2"]
         if params["Verbose"]:
             print("Flavour not found (no lines with spectral coverage):",name)
 

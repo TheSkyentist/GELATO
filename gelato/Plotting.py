@@ -80,8 +80,8 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             fax.plot([lam,lam,x,x],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
 
         # Axis labels and limits
-        fax.set(yticks=fax.get_yticks()[1:],xlim=[wav.min(),wav.max()],xticks=[])
         fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+        fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticks=[])
 
         # Residual Axis
         rax = fig.add_subplot(gs[1,0])
@@ -155,8 +155,8 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
                 # Plot Lines
                 fax.plot([lam,lam,x,x],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
 
-            fax.set(yticks=fax.get_yticks()[1:],xlim=region,xticks=[])
             fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+            fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticks=[])
 
             # Residual Axis
             text_height = ymin+1.2*dy # Put labels halfway
@@ -181,19 +181,19 @@ def plotfromresults(params,path,z):
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(path,z,params)
 
-    if spectrum.regions != []:
+    ## Load Results ##
+    fname = params['OutFolder']+path.split('/')[-1].replace('.fits','')+'-results.fits'
+    parameters = fits.getdata(fname)
+    median = np.array([np.median(parameters[n]) for n in parameters.columns.names if 'EW' not in n])[:-1]
+    
+    ## Create model ##
+    # Add continuum
+    model = CM.SSPContinuum(spectrum)
+    model.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+    if 'PL_Continuum_Coefficient' in parameters.columns.names:
+        model += CM.PowerLawContinuum(spectrum)
 
-        ## Load Results ##
-        fname = params['OutFolder']+path.split('/')[-1].replace('.fits','')+'-results.fits'
-        parameters = fits.getdata(fname)
-        median = np.array([np.median(parameters[n]) for n in parameters.columns.names if 'EW' not in n])[:-1]
-        
-        ## Create model ##
-        # Add continuum
-        model = CM.SSPContinuum(spectrum)
-        model.set_region(np.ones(spectrum.wav.shape,dtype=bool))
-        if 'PL_Continuum_Coefficient' in parameters.columns.names:
-            model += CM.PowerLawContinuum(spectrum)
+    if spectrum.regions != []:
 
         # Add spectral lines
         ind = len(model.parameters) # index where emission lines begin
@@ -206,6 +206,14 @@ def plotfromresults(params,path,z):
 
         # Plot
         Plot(spectrum,model,path,parameters.columns.names)
+
+    else:
+
+        # Finish model and add parameters
+        model.parameters = median
+
+        # Plot
+        PlotFig(spectrum,model,path,parameters.columns.names)
 
     if params["Verbose"]:
         print("Gelato presented:",path.split('/')[-1]) 
