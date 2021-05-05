@@ -22,7 +22,7 @@ def gelato(params,path,z):
     params = CP.construct(params)
 
     # Set seed
-    # np.random.seed(params["RandomSeed"])
+    np.random.seed(params["RandomSeed"])
 
     # Get name of file
     name = path.split("/")[-1]
@@ -82,10 +82,10 @@ def gelato(params,path,z):
          # Get equivalent wdiths
         if params["CalcEW"]:
             if params["Verbose"]:
-                print("Measuring Texture:",name)
+                print("Measuring texture:",name)
             parameters,param_names = EW.EquivalentWidth(spectrum,model,parameters,param_names)
             if params["Verbose"]:
-                print("Measured Texture:",name)
+                print("Measured texture:",name)
                 
     # Otherwise:
     else:

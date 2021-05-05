@@ -45,7 +45,14 @@ def EquivalentWidth(spectrum,model,parameters,param_names):
         linewidth = linewav*spectrum.p['LineRegion']/(2*C)
 
         # Continuum height
-        heights = np.array([np.median(ctm[np.logical_and(spectrum.wav > lwv - lwd,spectrum.wav < lwv + lwd)]) for lwv,lwd,ctm in zip(linewav,linewidth,continua)])
+        heights = np.ones(parameters.shape[0])
+        for j,lwv,lwd,ctm in zip(range(parameters.shape[0]),linewav,linewidth,continua):
+            # Continuum height region
+            region = np.logical_and(spectrum.wav > lwv - lwd,spectrum.wav < lwv + lwd)
+            if region.sum() == 0:
+                heights[j] = np.nan
+            else:
+                heights[j] = np.median(ctm[region])
 
         # Get REW
         REWs[:,int((i-ind)/3)] = np.abs(flux/(heights*opz))
@@ -57,7 +64,7 @@ def EquivalentWidth(spectrum,model,parameters,param_names):
 def EWfromresults(params,path,z):
 
     if params["Verbose"]:
-        print("Measuring Texture:",path.split('/')[-1])
+        print("Measuring texture:",path.split('/')[-1])
 
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(path,z,params)
@@ -103,7 +110,7 @@ def EWfromresults(params,path,z):
         parameters = Table(data=parameters,names=param_names)
         
     if params["Verbose"]:
-        print("Texture Measured:",path.split('/')[-1])
+        print("Texture measured:",path.split('/')[-1])
 
 # EW from results
 # Plot from results

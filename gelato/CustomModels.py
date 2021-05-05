@@ -104,43 +104,40 @@ class SpectralFeature(Fittable1DModel):
 class PowerLawContinuum(Fittable1DModel):
 
     """
-    Very similar to the 1D Gaussian but parametrized differently. 
+    Power Law continuum
     """
 
     # Parameters
     Coefficient = Parameter(default=0,bounds=(0,None))
     Index = Parameter(default=1.5,bounds=(0,None)) 
-    Redshift = Parameter(default=0)
+    Center = Parameter(default=0,fixed=True)
 
     def __init__(self, spectrum, **kwargs):
 
         # Set parameters
-        super().__init__(Redshift = spectrum.z, Coefficient=np.nanmedian(spectrum.flux), **kwargs)
-        self.Redshift.bounds = (spectrum.z - 0.005,spectrum.z + 0.005)
+        super().__init__(Coefficient=np.nanmedian(spectrum.flux), Center=np.nanmedian(spectrum.wav), **kwargs)
 
-    def evaluate(self, x, Coefficient, Index, Redshift):
+    def evaluate(self, x, Coefficient, Index, Center):
         """
-        Gaussian1D model function.
+        Power Law
         """
-        
-        return Coefficient*((x/(3000*(1+Redshift)))**(-Index))
+        return Coefficient*((x/Center)**(-Index))
         
     # Derivative with respect to every parameter
-    def fit_deriv(self, x, Coefficient, Index, Redshift):
+    def fit_deriv(self, x, Coefficient, Index, Center):
         
-        # 1 + z
-        oooneplusz = 1/(1 + Redshift)
-        # observed center
-        X = x*oooneplusz/3000
+        # Scaled Center
+        X = (x/Center)
 
+        # Derivatives
         d_Coefficient = (X)**(-Index)
         d_Index = -Coefficient*d_Coefficient*np.log(X)
-        d_Redshift = Index*Coefficient*d_Coefficient*oooneplusz
+        d_Center = Coefficient*Index*d_Coefficient/Center
 
-        return [d_Coefficient, d_Index, d_Redshift]
+        return [d_Coefficient, d_Index, d_Center]
 
     def get_names(self):
-        return ['PL_Continuum_Coefficient','PL_Continuum_Index','PL_Continuum_Redshift']
+        return ['PL_Continuum_Coefficient','PL_Continuum_Index','PL_Continuum_Center']
 
 # SSP Continuum
 class SSPContinuum(PolynomialModel):

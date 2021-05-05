@@ -11,7 +11,7 @@ from astropy.table import Table,vstack
 def concatfromresults(p,objects):
 
     if p["Verbose"]:
-        print("Concatenating Results...")
+        print("Combining gelato...")
 
     # Initalize loop
     first = True
@@ -41,11 +41,11 @@ def concatfromresults(p,objects):
                 ps = ps[np.invert(np.isinf(ps))]
 
                 # Add medians
-                data.append(np.median(ps))
+                data.append(np.nanmedian(ps))
                 names.append(n)
 
                 # Add errors
-                data.append(np.std(ps))
+                data.append(np.nanstd(ps))
                 names.append(n+'_err')
 
             tables.append(Table(data = np.array(data), names = names,dtype=dtype))
@@ -63,6 +63,9 @@ def concatfromresults(p,objects):
             vstack([results,table],join_type = 'outer').write(p['OutFolder']+'GELATO-results.fits',overwrite=True)
 
         i += 1
+
+    if p["Verbose"]:
+        print("Gelato combined.")
 
 # Main Function
 if __name__ == "__main__":

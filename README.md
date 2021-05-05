@@ -59,22 +59,30 @@ How it works
 
 1. Gathering Ingredients: First, the spectrum is loaded. The code assumes the spectrum file follows the SDSS format. Here, based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
 
-2. Creating Base: GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 17.7828] (Gyr)) with nominal resolutions of 5 AAngstroms.
+2. Creating Base (Continuum): GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 17.7828] (Gyr)) with nominal resolutions of 5 AAngstroms. The redshift of the continuum is assumed to be the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficiencts for the SSP models are constrained to be positive. Following the initial fit, an additional power law component is added, required to have a negative power law index and a positive coefficient. If the continuum model with a power law passes an F-Test for its inclusion, it is added to the model. 
 
-The base model is then constructed based on the emission line dictionary. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model flux is reasonable bounded based on these values, and the redshift of the line is bounded to be within 0.005 of it's starting value. The model is then fit to the spectrum.
+3. Creating Base (Emission Lines): The emission line models are then constructed based on the emission line dictionary. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model flux is reasonable bounded based on these values, and the redshift of the line is bounded to be within 0.005 of it's starting value. The model is then fit to the spectrum.
 
-3. The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing an F-test. The combinations of all accepted additional components are then then tested by measuring their Akaike Information Criteria (AICs). The model set with the lowest AIC is the final model.
+4. Adding Flavor: The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing an F-test. The combinations of all accepted additional components are then then tested by measuring their Akaike Information Criteria (AICs). The model set with the lowest AIC is the final model.
 
-4. In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again.
+5. Scooping Portions: In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again. 
 
-5. The full set of bootstrapped parameters is then saved to disk. Optionally, a figure of the final fit is produced and saved. The rest equivalent width of each line can optionally then be calculated. There exists a convenience function for finding the median values and standard deviations of each spectrum model fit and collecting them into one final table.
+6. Presenting gelato: Figures depicting the fit, for the entire spectrum and zoomed into specific lines, are then saved to disk. 
+
+7. Measuring texture: From the results, the rest equivalent width for each emission line is calculated. The height of the continuum is found by taking the median continuum in a region around the emission line. 
+
+8. Freexing results: The full set of bootstrapped parameters are saved to disk. 
+
+9. Combining gelato: If running on multiple objects, the median parameters and standard deviations for all of the fits are concatenated into one file and saved to disk. 
 
 Models
 -------------
 
 * Emission Line Model: Emission lines are modeled as Gaussians. They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 150 km/s, while it is bounded between 60 km/s and 500 km/s. This default can be adjusted in the "CustomModels.py" file. 
 
-* Continuum Model: The continuum is modeled as a polynomial with the degree specified by the parameters file.
+* Continuum SSP Model: The continuum is modeled as a polynomial with the degree specified by the parameters file.
+
+* Continuum Power Law Model: 
 
 Additional Components
 -------------
