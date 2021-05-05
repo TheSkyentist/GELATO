@@ -19,7 +19,7 @@ GELATO was developed using Astropy 3.2.3 and Python 3.6.10.
 
 To install the dependancies, I recommend installing conda (through [Miniconda](https://docs.conda.io/en/latest/miniconda.html)).
 
-The environment can be installed from the provided "environment.yml" file.
+A conda environment with nearly all the dependencies can be installed via the provided "environment.yml" file. If you do not wish to use conda, you can find the required version of python packages enumerated in the "environment.yml" file.
 
 ```bash
 cd /path/to/GELATO/directory
@@ -34,6 +34,14 @@ conda activate GELATO
 
 Whenever running GELATO scripts, they must be run from this environment.
 
+The final dependency is [Spectres](https://spectres.readthedocs.io/en/latest/) which can be installed by cloning the git repository or with pip. 
+
+```bash
+conda activate GELATO
+pip install spectres
+```
+
+Installation
 -------------
 
 First, clone the GELATO git repository. Then the GELATO scripts can be installed. Make sure you are in the GELATO conda environment.
@@ -49,9 +57,11 @@ In your working directory, **you need to copy the "matplotlibrc" file** to contr
 How it works
 -------------
 
-1. First, the spectrum is loaded. Here, based on the emission group dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. It then constructs regions around these emission lines based on the region width provided. If regions overlap, the emission lines will share a continuum.
+1. Gathering Ingredients: First, the spectrum is loaded. The code assumes the spectrum file follows the SDSS format. Here, based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
 
-2. The base model is then constructed based on the emission line dictionary. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model flux is reasonable bounded based on these values, and the redshift of the line is bounded to be within 0.005 of it's starting value. The model is then fit to the spectrum.
+2. Creating Base: GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 17.7828] (Gyr)) with nominal resolutions of 5 AAngstroms.
+
+The base model is then constructed based on the emission line dictionary. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model flux is reasonable bounded based on these values, and the redshift of the line is bounded to be within 0.005 of it's starting value. The model is then fit to the spectrum.
 
 3. The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component, it is accepted. This is decided by performing an F-test. The combinations of all accepted additional components are then then tested by measuring their Akaike Information Criteria (AICs). The model set with the lowest AIC is the final model.
 

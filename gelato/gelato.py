@@ -50,8 +50,6 @@ def gelato(params,path,z):
     if params["Verbose"]:
         print("Base created:",name)
 
-    # spectrum.LimitSpectrum()
-
     # Check if any of the lines can be fit
     if len(spectrum.regions) > 0:
 
