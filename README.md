@@ -256,9 +256,9 @@ GELATO cast (in order of appearance)
   
   Wrapper for running GELATO on multiple objects. If specifying multiple processes, each object will be run on an independent thread. To load an object file differently, this file should be edited.
 
-* run_GELATO_multi.py
+* params_to_tex.py
   
-  Wrapper for running GELATO on multiple objects. If specifying multiple processes, each object will be run on an independent thread. To load an object file differently, this file should be edited.
+  Convenience function for turning Parameters file (specifically the emission line dictionary) into a LaTeX table for easy inclusion in publications using this code.
 
 * PARAMS.json
   
