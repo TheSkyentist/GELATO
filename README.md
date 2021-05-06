@@ -78,11 +78,11 @@ How it works
 Models
 -------------
 
-* Emission Line Model: Emission lines are modeled as Gaussians. They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 150 km/s, while it is bounded between 60 km/s and 500 km/s. This default can be adjusted in the "CustomModels.py" file. 
+* Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift, a flux, and a dispersion (in km/s). They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 150 km/s, while it is bounded between 60 km/s and 500 km/s. This default can be adjusted in the "CustomModels.py" file.
 
-* Continuum SSP Model: The continuum is modeled as a polynomial with the degree specified by the parameters file.
+* Continuum SSP Model: The continuum is modeled as the sum of E-MILES SSP models. In total, 15 SSP models are used to build a continuum. The normalization coefficients are named for each SSP model.
 
-* Continuum Power Law Model: 
+* Continuum Power Law Model: An additional power law continuum is attempted to be fit in addition to the SSP models. It is parametrized with a power law index, a normalization coefficient, and a scale (y = coeff*(x/scale)**(-index)). The scale is set by the wavelength range of the spectrum and is not a fitted parameters.
 
 Additional Components
 -------------
@@ -138,33 +138,29 @@ Here we describe the format of the emission line dictionary.
       * Lines have a Wavelength. This is the rest wavelength of the line (same units as spectrum wavelength).
       * Lines have a RelStrength. This is a relative strength to the other members of the species. If set to null, it will have an independent flux.
 
-The "PARAMS.json" file in the directory gives a good example of how to take advantage of these features. It consists of five groups:
+The "PARAMS.json" file in the directory gives a good example of how to take advantage of these features. It consists of four groups:
 
-1. Name: NarrowLine. Here these features have not been set to share redshifts nor dispersions. It has a list of species:
+1. Name: Narrow. Here these features have not been set to share redshifts nor dispersions. It has a list of species:
    1. Name: SII. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
-      * A line with a rest wavelength of 6716.31 and a relative flux of null.
-      * A line with a rest wavelength of 6730.68 and a relative flux of null. This means the line fluxes are completely independent.
+      * A line with a rest wavelength of 6716.44 and a relative flux of null.
+      * A line with a rest wavelength of 6730.82 and a relative flux of null. This means the line fluxes are completely independent.
    2. Name: NII. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
-      * A line with a rest wavelength of 6583.34 and a relative flux of 1.
-      * A line with a rest wavelength of 6547.96 and a relative flux of 0.34. This means this line will always have 0.34/1 times the flux of the first line.
-   3. OIII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "BlueOIII". It is made out of two lines.
-      * A line with a rest wavelength of 5006.77 and a relative flux of 1.
-      * A line with a rest wavelength of 4958.83 and a relative flux of 0.35. This means this line will always have 0.35/1 times the flux of the first line.
-   4. Name: [NeIII]. Singlet line with no flags.
-   5. Name: [OII]. Singlet line with no flags.
-   6. Name: [NeV]. Singlet line with no flags.
+      * A line with a rest wavelength of 6583.45 and a relative flux of 1.
+      * A line with a rest wavelength of 6548.05 and a relative flux of 0.34. This means this line will always have 0.34/1 times the flux of the first line.
+   3. OIII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of two lines.
+      * A line with a rest wavelength of 5006.84 and a relative flux of 1.
+      * A line with a rest wavelength of 4958.91 and a relative flux of 0.35. This means this line will always have 0.35/1 times the flux of the first line.
 2. Name: Balmer. Here these features are set to share redshifts and dispersions. It has a list of species:
-   1. Halpha. A singlet line flagged with a 1, which corresponds to a "Broad" component. This additional component will be placed the group named "BroadBalmer". It is made out of one line.
-      * A line with a rest wavelength of 6562.80 and a relative flux of null.
-   2. Hbeta. These have been flagged with a 5, or in binary, 101. This corresponds to both a "Broad" component and an "Absorption" component. These will be placed in the "BroadBalmer" and "Abs" groups respectively. It is made out of one line.
-      * A line with a rest wavelength of 4861.32 and a relative flux of 1. Since there is only one line, the relative flux value does not matter.
-3. Name: BlueOIII. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will not share redshifts and dispersions.
-4. Name: BroadBalmer. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will share redshifts and dispersions. E.g. if both "Broad" lines are accepted (from Hbeta and Halpha), they will share the same redshift and dispersion by design.
-5. Name: Abs. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will not share redshifts and dispersions.
+   1. Ha. A singlet line flagged with a 1, which corresponds to a "Broad" component. This additional component will be placed the group named "Broad". It is made out of one line.
+      * A line with a rest wavelength of 6562.79 and a relative flux of null.
+   2. Hb. These have been flagged with a 1, which corresponds to a "Broad" component. This additional component will be placed the group named "Broad". It is made out of one line.
+      * A line with a rest wavelength of 4861.28 and a relative flux of null.
+3. Name: Outflow. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will not share redshifts and dispersions.
+4. Name: Broad. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will share redshifts and dispersions. E.g. if both "Broad" lines are accepted (from Hbeta and Halpha), they will share the same redshift and dispersion by design.
 
-Here is figure showing the hierarchy of the Emission Groups Parameter for the "PARAMS.json" file.
+Here is table showing the hierarchy of the Emission Groups Parameter for the "PARAMS.json" file. A script is provided that can turn a Emission Groups dictionary in a Parameter file into a LaTeX table.
 
-![Image of PARAMS](./EGFig.jpg)
+![Image of PARAMS](./PARAMS.png)
 
 Running GELATO
 -------------
@@ -173,7 +169,7 @@ In order to run GELATO you need:
 
 * The PARAMS.json file.
 * The spectrum or spectra.
-* The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 100. A basic estimate from the apparent position of any identified emission line should suffice.
+* The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 100. A basic estimate from the apparent position of any identified emission line should suffice. Ideally this is the redshift of the continuum as the redshift of the continuum is not fit.
 * If running on a list of spectra, GELATO takes in a comma delimited file, where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
 * (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified.
 
@@ -197,34 +193,34 @@ The two wrappers for GELATO are:
 python ~/Documents/GELATO/run_GELATO_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
 ```
 
-The plots for GELATO can also be created directly from the spectra and the results file in the following manners:
+Optionally, equivalent widths and plots can be generated when running GELATO. However, if you opt out of creating them during the run, you can always create them after using specific GELATO modules.
 
 For a single plot:
 
 ```bash
-python ~/Documents/GELATO/Plotting.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
+python ~/Documents/GELATO/gelato/Plotting.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
 ```
 
 For multiple plots:
 
 ```bash
-python ~/Documents/GELATO/Plotting.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
+python ~/Documents/GELATO/gelato/Plotting.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
 ```
 
 To generate equivalent widths and append them to the results file is similar to plotting:
 
 ```bash
-python ~/Documents/GELATO/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
+python ~/Documents/GELATO/gelato/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
 ```
 
 ```bash
-python ~/Documents/GELATO/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
+python ~/Documents/GELATO/gelato/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
 ```
 
 The concatenated results for GELATO can also be created directly the results files in the following manners:
 
 ```bash
-python ~/Documents/GELATO/ConcatResults.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
+python ~/Documents/GELATO/gelato/ConcatResults.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
 ```
 
 Running the Example
@@ -242,24 +238,6 @@ We can then run the code over the whole data set.
 python ../run_GELATO_multi.py ExPARAMS.json ExObjList.csv
 ```
 
-In order to produce rest equivalent widths for the whole sample we can run the following.
-
-```bash
-python ../EquivalentWidth.py ExPARAMS.json --ObjectList ExObjList.csv
-```
-
-In order to produce a concatenated table of all of the results, we can run the following code. (We could have achieved the same result by changing the Concatenate and CalcEW parameters to true)
-
-```bash
-python ../ConcatResults.py ExPARAMS.json ExObjList.csv
-```
-
-This will produce result tables and some plots in the Results folder. We can then edit the value of the PlotComp parameter and change it to false in order to produce the rest of the plots.
-
-```bash
-python ../Plotting.py ExPARAMS.json --ObjectList ExObjList.csv
-```
-
 The output from running the example will be put into 'Results/' and can be compared to the results in the 'Comparison/' directory.
 
 GELATO cast (in order of appearance)
@@ -274,6 +252,10 @@ GELATO cast (in order of appearance)
   
   Wrapper for running GELATO on a single object.
   
+* run_GELATO_multi.py
+  
+  Wrapper for running GELATO on multiple objects. If specifying multiple processes, each object will be run on an independent thread. To load an object file differently, this file should be edited.
+
 * run_GELATO_multi.py
   
   Wrapper for running GELATO on multiple objects. If specifying multiple processes, each object will be run on an independent thread. To load an object file differently, this file should be edited.
@@ -300,7 +282,7 @@ GELATO cast (in order of appearance)
 
 * CustomModels.py
 
-  Here are where the custom models used in GELATO are defined. Here exists a gaussian emission line model and a polynomial continuum continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can bs set.
+  Here are where the custom models used in GELATO are defined. Here exists a gaussian emission line model, the SSP continuum, and the power law continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can be set.
 
 * AdditionalComponents.py
 
@@ -344,16 +326,12 @@ FAQ
 -------------
 **How can I load spectra from other sources?**
 
-*By editing the SpectrumClass.py file, you can customize how spectra are loaded into GELATO.*
+*By editing the SpectrumClass.py file, you can customize how spectra are loaded into GELATO. However it might be easier to convert your spectrum to follow the SDSS convention.*
 
 **What are the units?**
 
-*ContinuumRegion and LineRegion are quoted velocity space and are given in km/s. The units in plotting can be changed in the Plotting.py fiile. The wavelength units for line centers must be given in the same units as the spectrum.*
+*ContinuumRegion and LineRegion are quoted velocity space and are given in km/s. Otherwise, the code is agnostic to the flux and wavelength units. However the plots assume the SDSS units. Currently the labels can only be changed in the Plotting.py file. Reach out if you would want this to be customizable from the PARAMS file and I can add it to GELATO. The wavelength units for line centers must be given in the same units as the spectrum.*
 
 **Do you mean velocity offsets, not redshifts?**
 
 *Each emission line is characterized by a redshift, which is trivial to convert to a velocity offset once a reference line is chosen. However this requires the user to choose a reference line. GELATO remains agnostic to this procedure and simply returns the redshift of each line.*
-
-**Why is it spelled GELATO but pronounced Quails?**
-
-*The author of the code, R. E. Hviding (pronounced VEE-ding) thought it important to draw attention to names that start with an H where the H is not pronounced.*

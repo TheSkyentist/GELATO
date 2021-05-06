@@ -7,3 +7,7 @@ build/
 dist/
 GELATO.egg-info/
 files.txt
+*.aux
+*.sty
+*.log
+*.tex

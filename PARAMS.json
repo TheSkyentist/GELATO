@@ -7,9 +7,9 @@
     "MaxIter": 1000,
     "NBoot": 500,
     "FThresh": 0.95,
-    "NProcess": 12,
+    "NProcess": 4,
     "Plotting": true,
-    "CalcEW": false,
+    "CalcEW": true,
     "Concatenate": true,
     "Overwrite": true,
     "Verbose": true,
@@ -50,32 +50,6 @@
                     ]
                 },
                 {
-                    "Name":"[OI]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 6300.30,
-                            "RelStrength": 1
-                        },
-                        { 
-                            "Wavelength": 6363.78,
-                            "RelStrength": 0.333
-                        }
-                    ]
-                },
-                {
-                    "Name":"[HeI]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 5875.62,
-                            "RelStrength": null
-                        }
-                    ]
-                },
-                {
                     "Name":"[OIII]",
                     "Flag": 2,
                     "FlagGroups": ["Outflow"],
@@ -87,47 +61,6 @@
                         { 
                             "Wavelength": 4958.91,
                             "RelStrength": 0.35
-                        },
-                        {
-                            "Wavelength": 4363.21,
-                            "RelStrength": null
-                        }
-                    ]
-                },
-                {
-                    "Name":"[NeIII]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 3868.76,
-                            "RelStrength": null
-                        }
-                    ]
-                },
-                {
-                    "Name":"[OII]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 3726.03,
-                            "RelStrength": null
-                        },
-                        {
-                            "Wavelength": 3728.82,
-                            "RelStrength":null
-                        }
-                    ]
-                },
-                {
-                    "Name":"[NeV]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 3425.88,
-                            "RelStrength": null
                         }
                     ]
                 }
@@ -159,17 +92,6 @@
                             "RelStrength": null
                         }
                     ]
-                },
-                {
-                    "Name":"Hg",
-                    "Flag": 1,
-                    "FlagGroups": ["Broad"],
-                    "Lines": [
-                        {
-                            "Wavelength": 4340.47,
-                            "RelStrength": null
-                        }
-                    ]
                 }
             ]
         },
@@ -183,12 +105,6 @@
             "Name":"Broad",
             "TieRedshift": true,
             "TieDispersion": true,
-            "Species": []
-        },
-        {
-            "Name":"Abs",
-            "TieRedshift": false,
-            "TieDispersion": false,
             "Species": []
         }
     ]
