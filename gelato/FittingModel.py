@@ -1,8 +1,11 @@
 """ Fit Model for Spectrum """
 
+# Ignore warnings
+import warnings
+warnings.simplefilter('ignore')
+
 # Packages
 import copy
-import warnings
 import numpy as np
 from itertools import combinations
 from astropy.modeling import fitting
@@ -133,10 +136,7 @@ def FitModel(spectrum,model,region = None):
         region = np.ones(spectrum.wav.shape,dtype=bool)
 
     # Fit model
-    with warnings.catch_warnings():
-        # Ignore warnings
-        warnings.simplefilter('ignore')
-        fit_model = fit(model,spectrum.wav[region],spectrum.flux[region],weights=spectrum.sqrtweight[region],maxiter=spectrum.p['MaxIter'])
+    fit_model = fit(model,spectrum.wav[region],spectrum.flux[region],weights=spectrum.sqrtweight[region],maxiter=spectrum.p['MaxIter'])
     
     return fit_model
 
@@ -157,11 +157,8 @@ def FitBoot(spectrum,model,i):
         else: 
             print('Progress: |'+N*'#'+'| 100%')
 
-    with warnings.catch_warnings():
-
-        # Ignore warnings
-        warnings.simplefilter('ignore')
-        fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
+    # Fit model
+    fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
 
     return np.concatenate([fit_model.parameters,[MC.rChi2(spectrum,fit_model)]])
 
