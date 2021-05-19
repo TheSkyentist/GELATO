@@ -108,7 +108,7 @@ The behaviour of GELATO is controlled entirely by the "PARAMS.json" file. And ex
 * FThresh: F-test threshold to incorporate additional model parameters.
 * NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
 * Plotting: Produce plots or not.
-* FnuUnits: String containing the units of the spectrum flux for purposes of plotting, can accept LaTeX syntax.
+* FlamUnits: String containing the units of the spectrum flux for purposes of plotting, can accept LaTeX syntax.
 * WavUnits: String containing the units of the spectrum wavelength for purposes of plotting, can accept LaTeX syntax.
 * CalcEW: To calculate (rest) equivalent widths or not.
 * Concatenate: To concatenate the results of a multiple GELATO run or not.

@@ -9,7 +9,7 @@
     "FThresh": 0.95,
     "NProcess": 4,
     "Plotting": true,
-    "FnuUnits": "$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \\AA$^{-1}$",
+    "FlamUnits": "$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \\AA$^{-1}$",
     "WavUnits": "\\AA",
     "CalcEW": true,
     "Concatenate": true,

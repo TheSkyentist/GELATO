@@ -33,7 +33,7 @@ def verify(params):
     # Check that all parameters are specified and of correct types
     for p in params.keys():
         # Now check that parameters are of the correct types
-        if p in ['OutFolder','FnuUnits','WavUnits']:
+        if p in ['OutFolder','FlamUnits','WavUnits']:
             if not (type(params[p]) == str):
                 print('Parameter',p,'must be a string.')
                 return False
