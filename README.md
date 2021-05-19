@@ -80,7 +80,7 @@ Models
 
 * Continuum SSP Model: The continuum is modeled as the sum of E-MILES SSP models. In total, 15 SSP models are used to build a continuum. The normalization coefficients are named for each SSP model.
 
-* Continuum Power Law Model: An additional power law continuum is attempted to be fit in addition to the SSP models. It is parametrized with a power law index, a normalization coefficient, and a scale (y = coeff*(x/scale)**(-index)). The scale is set by the wavelength range of the spectrum and is not a fitted parameters.
+* Continuum Power Law Model: An additional power law continuum is attempted to be fit in addition to the SSP models. It is parametrized with a power law index, a normalization coefficient, and a scale (y = coeff*(x/scale)**(-index)). The power law index has a default value of 1.5 and is allowed to vary in the range (1,3). The scale is set by the wavelength range of the spectrum and is not a fitted parameter.
 
 Additional Components
 -------------
