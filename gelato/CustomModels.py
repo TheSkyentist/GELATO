@@ -2,7 +2,6 @@
 
 import os
 import numpy as np
-from spectres import spectres
 from scipy.signal import fftconvolve
 from astropy.io import fits
 from astropy.modeling import Fittable1DModel,Parameter
@@ -185,8 +184,8 @@ class SSPContinuum(PolynomialModel):
         medians = np.array([np.median(s[np.logical_and.reduce([self.ssp_wav*(1+self.spectrum.z) > self.spectrum.wav.min(),self.ssp_wav*(1+self.spectrum.z) < self.spectrum.wav.max(),s>0])]) for s in self.ssps])
         self.parameters = np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*medians)
 
-        # Uncomment for Fixed
-        self.ssps = spectres(self.spectrum.wav,self.ssp_wav*(1+self.spectrum.z),self.ssps)
+        # Interpolate
+        self.ssps = np.array([np.interp(self.spectrum.wav,self.ssp_wav*(1+self.spectrum.z),s) for s in self.ssps])
 
     def prepare_inputs(self, x, **kwargs):
         inputs, format_info = super().prepare_inputs(x, **kwargs)
