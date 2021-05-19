@@ -7,7 +7,7 @@
     "MaxIter": 1000,
     "NBoot": 500,
     "FThresh": 0.95,
-    "NProcess": 12,
+    "NProcess": 1,
     "Plotting": true,
     "CalcEW": false,
     "Concatenate": false,
