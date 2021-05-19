@@ -30,9 +30,9 @@ def FitContinuum(spectrum):
 
     # Fit initial continuuum
     ssp_fit = FitModel(spectrum,sspcontinuum,np.invert(spectrum.emission_region))
-    
+
     # Try power law fit
-    continuum = BM.TieContinuum(sspcontinuum+plcontinuum,ssp_names+pl_names)
+    continuum = BM.TieContinuum(ssp_fit+plcontinuum,ssp_names+pl_names)
     cont_fit = FitModel(spectrum,continuum,np.invert(spectrum.emission_region))
 
     # Perform F-test

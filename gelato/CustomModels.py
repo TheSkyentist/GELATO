@@ -113,7 +113,7 @@ class PowerLawContinuum(Fittable1DModel):
     def __init__(self, spectrum, **kwargs):
 
         # Set parameters
-        super().__init__(Coefficient=np.nanmedian(spectrum.flux), Center=np.nanmedian(spectrum.wav), **kwargs)
+        super().__init__(Coefficient=np.nanmedian(spectrum.flux), Center=np.nanpercentile(spectrum.wav,20), **kwargs)
 
     def evaluate(self, x, Coefficient, Index, Center):
         """
@@ -202,7 +202,7 @@ class SSPContinuum(PolynomialModel):
         return np.dot(coeffs.T,ssps[:,self.region])[0]
 
     def get_names(self):
-        return ['Continuum_Redshift'] + [x.replace('.fits','') for x in self.ssp_names]
+        return ['SSP_Continuum_Redshift'] + [x.replace('.fits','') for x in self.ssp_names]
     
     def set_region(self,region):
         self.region = region

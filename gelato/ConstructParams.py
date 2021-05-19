@@ -25,7 +25,7 @@ def verify(params):
         return False
 
     # Check that all parameters are specified
-    for p in ['OutFolder', 'VacuumWav', 'RandomSeed', 'ContinuumRegion', 'LineRegion', 'MaxIter', 'NBoot', 'FThresh', 'NProcess', 'Plotting', 'CalcEW', 'Overwrite', 'Concatenate', 'Verbose', 'EmissionGroups']:
+    for p in ['OutFolder', 'VacuumWav', 'RandomSeed', 'ContinuumRegion', 'LineRegion', 'MaxIter', 'NBoot', 'FThresh', 'NProcess', 'Plotting', 'FlamUnits','WavUnits', 'CalcEW', 'Overwrite', 'Concatenate', 'Verbose', 'EmissionGroups']:
         if not p in params.keys():
             print('Parameters does not contain parameter:',p)
             return False
