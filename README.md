@@ -52,7 +52,7 @@ How it works
 
 1. Gathering Ingredients: First, the spectrum is loaded. The code assumes the spectrum file is a FITS table with the following columns:
     1. The log10 of the wavelengths [loglam]
-    2. The spectral flux density in fnu [flux]
+    2. The spectral flux density in flam [flux]
     3. The inverse variances of the data points [ivar].
 
     Based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
