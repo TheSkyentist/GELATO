@@ -34,13 +34,6 @@ conda activate GELATO
 
 Whenever running GELATO scripts, they must be run from this environment.
 
-The final dependency is [Spectres](https://spectres.readthedocs.io/en/latest/) which can be installed by cloning the git repository or with pip.
-
-```bash
-conda activate GELATO
-pip install spectres
-```
-
 Installation
 -------------
 
