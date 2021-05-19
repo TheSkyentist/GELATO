@@ -50,9 +50,14 @@ In your working directory, **you need to copy the "matplotlibrc" file** to contr
 How it works
 -------------
 
-1. Gathering Ingredients: First, the spectrum is loaded. The code assumes the spectrum file follows the SDSS format. Here, based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
+1. Gathering Ingredients: First, the spectrum is loaded. The code assumes the spectrum file is a FITS table with the following columns:
+    1. The log10 of the wavelengths [loglam]
+    2. The spectral flux density in fnu [flux]
+    3. The inverse variances of the data points [ivar].
 
-2. Creating Base (Continuum): GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 17.7828] (Gyr)) with nominal resolutions of 5 AAngstroms. The redshift of the continuum is assumed to be the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficiencts for the SSP models are constrained to be positive. Following the initial fit, an additional power law component is added, required to have a negative power law index and a positive coefficient. If the continuum model with a power law passes an F-Test for its inclusion, it is added to the model.
+    Based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
+
+2. Creating Base (Continuum): GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 17.7828] (Gyr)) with nominal resolutions of 5 AAngstroms. The redshift is allowed to vary around the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficients for the SSP models are constrained to be positive. Following the initial fit, an additional power law component is added, required to have a negative power law index and a positive coefficient. If the continuum model with a power law passes an F-Test for its inclusion, it is added to the model. Finally, the redshift of the continuum model is frozen and not moving forward.
 
 3. Creating Base (Emission Lines): The emission line models are then constructed based on the emission line dictionary. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model flux is reasonable bounded based on these values, and the redshift of the line is bounded to be within 0.005 of it's starting value. The model is then fit to the spectrum.
 
@@ -64,9 +69,10 @@ How it works
 
 7. Measuring texture: From the results, the rest equivalent width for each emission line is calculated. The height of the continuum is found by taking the median continuum in a region around the emission line.
 
-8. Freexing results: The full set of bootstrapped parameters are saved to disk.
+8. Freezing results: The full set of bootstrapped parameters are saved to disk.
 
 9. Combining gelato: If running on multiple objects, the median parameters and standard deviations for all of the fits are concatenated into one file and saved to disk.
+
 Models
 -------------
 
@@ -94,13 +100,16 @@ The behaviour of GELATO is controlled entirely by the "PARAMS.json" file. And ex
 
 * Outfolder: This parameter is the path to the output directory.
 * VacuumWav: Are the spectra being fit in air or vacuum wavelengths.  
-* ContinuumRegion: The border around emission lines in velocity space that will be excluded when fitting the continuum initially. 
+* RandomSeed: The seed used as input to NumPy for random number generation.
+* ContinuumRegion: The border around emission lines in velocity space that will be excluded when fitting the continuum initially.
 * LineRegion: The border around an emission line in velocity that must be contained within the spectrum in order to be fit (km/s). This region is also used to estimate the initial height of the line.
 * MaxIter: Maximum number of minimization algorithm iterations.
 * NBoot: Number of bootstrap iterations to constrain error on parameters.
 * FThresh: F-test threshold to incorporate additional model parameters.
 * NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
 * Plotting: Produce plots or not.
+* FnuUnits: String containing the units of the spectrum flux for purposes of plotting, can accept LaTeX syntax.
+* WavUnits: String containing the units of the spectrum wavelength for purposes of plotting, can accept LaTeX syntax.
 * CalcEW: To calculate (rest) equivalent widths or not.
 * Concatenate: To concatenate the results of a multiple GELATO run or not.
 * Overwrite: Overwrite the results of a previous GELATO run.

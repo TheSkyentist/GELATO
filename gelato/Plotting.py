@@ -80,14 +80,14 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             fax.plot([lam,lam,x,x],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
 
         # Axis labels and limits
-        fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+        fax.set(ylabel=r'$F_\lambda$ ['+spectrum.p['FnuUnits']+']',ylim=ylim)
         fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticks=[])
 
         # Residual Axis
         rax = fig.add_subplot(gs[1,0])
         rax.step(wav,(flux - model(spectrum.wav))*isig,'gray')
         ymax = np.max(np.abs(rax.get_ylim()))
-        rax.set(xlim=[wav.min(),wav.max()],xlabel=r'Wavelength [\AA]',ylim=[-ymax,ymax])
+        rax.set(xlim=[wav.min(),wav.max()],xlabel=r'Wavelength ['+spectrum.p['WavUnits']+']',ylim=[-ymax,ymax])
         rax.set_ylabel('Deviation',fontsize=15)
         
     elif (plottype == 1) or (plottype == 2):
@@ -155,7 +155,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
                 # Plot Lines
                 fax.plot([lam,lam,x,x],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
 
-            fax.set(ylabel=r'$F_\lambda$ [$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]',ylim=ylim)
+            fax.set(ylabel=r'$F_\lambda$ ['+spectrum.p['FnuUnits']+']',ylim=ylim)
             fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticks=[])
 
             # Residual Axis
@@ -163,7 +163,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             rax = fig.add_subplot(gs[1,i])
             rax.step(wav,(flux - model(spectrum.wav)[good])*isig,'gray')
             ymax = np.max(np.abs(rax.get_ylim()))
-            rax.set(xlim=region,xlabel=r'Wavelength [\AA]',ylim=[-ymax,ymax])
+            rax.set(xlim=region,xlabel=r'Wavelength ['+spectrum.p['WavUnits']+']',ylim=[-ymax,ymax])
             rax.set_ylabel('Deviation',fontsize=15)
 
     # Add title and save figure
