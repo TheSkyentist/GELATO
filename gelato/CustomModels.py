@@ -2,7 +2,6 @@
 
 import os
 import numpy as np
-from scipy.signal import fftconvolve
 from astropy.io import fits
 from astropy.modeling import Fittable1DModel,Parameter
 from astropy.modeling.polynomial import PolynomialModel
@@ -173,19 +172,16 @@ class SSPContinuum(PolynomialModel):
 
         # Call Polynomial Class
         super().__init__(
-            len(self.ssp_names)-1, n_models=n_models, model_set_axis=model_set_axis,
-            name=name, meta=meta, **params)
+            len(self.ssp_names), n_models=n_models, model_set_axis=model_set_axis,name=name, meta=meta, **params)
 
         # Set bounds
-        for pname in self.param_names: 
+        self.bounds[self.param_names[0]] = (spectrum.z - 0.005,spectrum.z + 0.005)
+        for pname in self.param_names[1:]: 
             self.bounds[pname] = (0,None)
 
         # Set initial parameters      
         medians = np.array([np.median(s[np.logical_and.reduce([self.ssp_wav*(1+self.spectrum.z) > self.spectrum.wav.min(),self.ssp_wav*(1+self.spectrum.z) < self.spectrum.wav.max(),s>0])]) for s in self.ssps])
-        self.parameters = np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*medians)
-
-        # Interpolate
-        self.ssps = np.array([np.interp(self.spectrum.wav,self.ssp_wav*(1+self.spectrum.z),s) for s in self.ssps])
+        self.parameters = np.append([self.spectrum.z],np.nanmedian(self.spectrum.flux)/(len(self.ssp_names)*medians))
 
     def prepare_inputs(self, x, **kwargs):
         inputs, format_info = super().prepare_inputs(x, **kwargs)
@@ -194,13 +190,27 @@ class SSPContinuum(PolynomialModel):
 
     def evaluate(self, x, *coeffs):
 
-        coeffs = np.array(coeffs)
+        # Get redshift and coefficients
+        z = coeffs[0]
+        coeffs = np.array(coeffs[1:])
         ssps = self.ssps
 
+        # If iterating on redshift, resample
+        if not self.fixed[self.param_names[0]]:
+            ssps = np.array([np.interp(self.spectrum.wav,self.ssp_wav*(1+z),s) for s in ssps])
+
         return np.dot(coeffs.T,ssps[:,self.region])[0]
-        
+
     def get_names(self):
-        return [x.replace('.fits','') for x in self.ssp_names]
+        return ['Continuum_Redshift'] + [x.replace('.fits','') for x in self.ssp_names]
     
     def set_region(self,region):
         self.region = region
+
+    def fix_params(self):
+
+        # Fix params
+        self.fixed[self.param_names[0]] = True
+
+        # Final interpolation
+        self.ssps = np.array([np.interp(self.spectrum.wav,self.ssp_wav*(1+self.parameters[0]),s) for s in self.ssps])

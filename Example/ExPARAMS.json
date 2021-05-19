@@ -7,10 +7,10 @@
     "MaxIter": 1000,
     "NBoot": 500,
     "FThresh": 0.95,
-    "NProcess": 1,
+    "NProcess": 4,
     "Plotting": true,
-    "CalcEW": false,
-    "Concatenate": false,
+    "CalcEW": true,
+    "Concatenate": true,
     "Overwrite": true,
     "Verbose": true,
     "EmissionGroups": [
@@ -111,12 +111,8 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 3726.03,
+                            "Wavelength": 3727.43,
                             "RelStrength": null
-                        },
-                        {
-                            "Wavelength": 3728.82,
-                            "RelStrength":null
                         }
                     ]
                 },
