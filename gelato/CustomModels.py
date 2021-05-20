@@ -22,7 +22,7 @@ class SpectralFeature(Fittable1DModel):
 
     # Parameters
     Redshift   = Parameter(default=0)
-    Flux       = Parameter(default=0,bounds=(None,None)) # Must be non-negative for emission
+    Flux       = Parameter(default=0,bounds=(0,None)) # Must be non-negative for emission
     Dispersion = Parameter(default=150,bounds=(60,500)) # Reasonable range
 
     def __init__(self, center, spectrum, Dispersion = Dispersion.default, **kwargs):
@@ -107,7 +107,7 @@ class PowerLawContinuum(Fittable1DModel):
 
     # Parameters
     Coefficient = Parameter(default=0,bounds=(0,None))
-    Index = Parameter(default=1.5,bounds=(-1,None)) 
+    Index = Parameter(default=1.5,bounds=(None,None)) 
     Center = Parameter(default=0,fixed=True)
 
     def __init__(self, spectrum, **kwargs):
