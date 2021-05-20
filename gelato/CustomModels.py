@@ -107,7 +107,7 @@ class PowerLawContinuum(Fittable1DModel):
 
     # Parameters
     Coefficient = Parameter(default=0,bounds=(0,None))
-    Index = Parameter(default=1.5,bounds=(1,3)) 
+    Index = Parameter(default=1.5,bounds=(-1,None)) 
     Center = Parameter(default=0,fixed=True)
 
     def __init__(self, spectrum, **kwargs):
