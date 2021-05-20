@@ -47,10 +47,10 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
         fax = fig.add_subplot(gs[0,0])
 
          # Plot data
-        fax.step(wav,flux,'gray')
+        fax.step(wav,flux,'gray',where='mid')
 
         # Plot model
-        fax.step(wav,model(spectrum.wav),'r')
+        fax.step(wav,model(spectrum.wav),'r',where='mid')
 
         # Base Y axis on flux
         ymin = np.max([0,flux.min()])
@@ -85,7 +85,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
 
         # Residual Axis
         rax = fig.add_subplot(gs[1,0])
-        rax.step(wav,(flux - model(spectrum.wav))*isig,'gray')
+        rax.step(wav,(flux - model(spectrum.wav))*isig,'gray',where='mid')
         ymax = np.max(np.abs(rax.get_ylim()))
         rax.set(xlim=[wav.min(),wav.max()],xlabel=r'Wavelength ['+spectrum.p['WavUnits']+']',ylim=[-ymax,ymax])
         rax.set_ylabel('Deviation',fontsize=15)
@@ -113,12 +113,12 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             fax = fig.add_subplot(gs[0,i])
 
             # Plot data
-            fax.step(wav,flux,'gray')
+            fax.step(wav,flux,'gray',where='mid')
 
             # Plot model
             # Are we plotting components?
             if plottype == 1:
-                fax.step(wav,model(spectrum.wav)[good],'r')
+                fax.step(wav,model(spectrum.wav)[good],'r',where='mid')
             elif plottype == 2:
                 init = 1
                 if 'PL_Continuum_Coefficient' in param_names:
@@ -126,7 +126,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
                 # Plot components
                 for j in range(init,model.n_submodels()):
                     fax.step(wav,continuum(spectrum.wav)[good]+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
-            fax.step(wav,continuum(spectrum.wav)[good],'k-')
+            fax.step(wav,continuum(spectrum.wav)[good],'k-',where='mid')
 
             # Base Y axis on flux
             ymin = np.max([0,flux.min()])
@@ -161,7 +161,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             # Residual Axis
             text_height = ymin+1.2*dy # Put labels halfway
             rax = fig.add_subplot(gs[1,i])
-            rax.step(wav,(flux - model(spectrum.wav)[good])*isig,'gray')
+            rax.step(wav,(flux - model(spectrum.wav)[good])*isig,'gray',where='mid')
             ymax = np.max(np.abs(rax.get_ylim()))
             rax.set(xlim=region,xlabel=r'Wavelength ['+spectrum.p['WavUnits']+']',ylim=[-ymax,ymax])
             rax.set_ylabel('Deviation',fontsize=15)
