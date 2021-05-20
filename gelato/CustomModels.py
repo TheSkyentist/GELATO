@@ -202,7 +202,7 @@ class SSPContinuum(PolynomialModel):
         return np.dot(coeffs.T,ssps[:,self.region])[0]
 
     def get_names(self):
-        return ['SSP_Continuum_Redshift'] + [x.replace('.fits','') for x in self.ssp_names]
+        return ['SSP_Continuum_Redshift'] + ['SSP_'+x.replace('.fits','') for x in self.ssp_names]
     
     def set_region(self,region):
         self.region = region
