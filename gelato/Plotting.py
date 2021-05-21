@@ -1,10 +1,16 @@
 #! /usr/bin/env python
 
 """ Plotting for Fit """
+
+# Ignore warnings
+import warnings
+warnings.simplefilter('ignore')
+
+# Packages
 import os
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
+from scipy.optimize import minimize
 
 # Colorblind friendly colors
 colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,0),(36,255,36),(219,109,0)])/255
@@ -58,26 +64,33 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
         ylim = [ymin,ymin+1.3*dy] # Increase Axis size by 20%
         text_height = ymin+1.2*dy 
 
-        # Get Line Names
-        texts = {}
+        # Get Line Names/Positions
+        linelocs = []
+        linelabels = []
         for group in spectrum.p['EmissionGroups']:
             for species in group['Species']:
                 if species['Flag'] >= 0:
                     for line in species['Lines']:
                         x = line['Wavelength']*(1+spectrum.z)
                         if ((x < wav[-1]) and (x > wav[0])):
-                            texts[x] = species['Name']
+                            linelocs.append(x)
+                            linelabels.append(species['Name'])
 
-        # Plot names
-        for j,lam in enumerate(np.sort(list(texts.keys()))):
-            # Unpack
-            name = texts[lam]
-            # Calculate position
-            x = wav.min()+ (j+1)*(wav.max() - wav.min())/(len(texts)+1)
-            # Text
-            fax.text(x,text_height,name,rotation=90,fontsize=12,ha='center',va='center')
-            # Plot Lines
-            fax.plot([lam,lam,x,x],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
+        # If we have lines to plot
+        if len(linelocs) > 0:
+
+            # Reorder line positions
+            inds = np.argsort(linelocs)
+            linelocs = np.array(linelocs)[inds]
+            linelabels = np.array(linelabels)[inds]
+            linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/65).sum(),np.linspace(linelocs.min(),linelocs.max(),len(inds)),method='Nelder-Mead',options={'adaptive':True,'maxiter':int(len(inds)*500)}).x
+
+            # Plot names
+            for lineloc,linelabel,linelabelloc in zip(linelocs,linelabels,linelabellocs):
+                # Text
+                fax.text(linelabelloc,text_height,linelabel,rotation=90,fontsize=12,ha='center',va='center')
+                # Plot Lines
+                fax.plot([lineloc,lineloc,linelabelloc,linelabelloc],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
 
         # Axis labels and limits
         fax.set(ylabel=r'$F_\lambda$ ['+spectrum.p['FlamUnits']+']',ylim=ylim)
@@ -133,27 +146,34 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             dy = flux.max() - ymin
             ylim = [ymin,ymin+1.3*dy] # Increase Axis size by 20%
             text_height = ymin+1.2*dy 
-
-            # Get Line Names
-            texts = {}
+                
+            # Get Line Names/Positions
+            linelocs = []
+            linelabels = []
             for group in spectrum.p['EmissionGroups']:
                 for species in group['Species']:
                     if species['Flag'] >= 0:
                         for line in species['Lines']:
                             x = line['Wavelength']*(1+spectrum.z)
-                            if ((x < region[1]) and (x > region[0])):
-                                texts[x] = species['Name']
+                            if ((x < wav[-1]) and (x > wav[0])):
+                                linelocs.append(x)
+                                linelabels.append(species['Name'])
 
-            # Plot names
-            for j,lam in enumerate(np.sort(list(texts.keys()))):
-                # Unpack
-                name = texts[lam]
-                # Calculate position
-                x = wav.min()+ (j+1)*(wav.max() - wav.min())/(len(texts)+1)
-                # Text
-                fax.text(x,text_height,name,rotation=90,fontsize=12,ha='center',va='center')
-                # Plot Lines
-                fax.plot([lam,lam,x,x],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
+            # If we have lines to plot
+            if len(linelocs) > 0:
+
+                # Reorder line positions
+                inds = np.argsort(linelocs)
+                linelocs = np.array(linelocs)[inds]
+                linelabels = np.array(linelabels)[inds]
+                linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/15).sum(),np.linspace(wav.min(),wav.max(),len(inds)+2)[1:-1],method='Nelder-Mead',options={'adaptive':True,'maxiter':int(len(inds)*500)}).x
+
+                # Plot names
+                for lineloc,linelabel,linelabelloc in zip(linelocs,linelabels,linelabellocs):
+                    # Text
+                    fax.text(linelabelloc,text_height,linelabel,rotation=90,fontsize=12,ha='center',va='center')
+                    # Plot Lines
+                    fax.plot([lineloc,lineloc,linelabelloc,linelabelloc],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
 
             fax.set(ylabel=r'$F_\lambda$ ['+spectrum.p['FlamUnits']+']',ylim=ylim)
             fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticks=[])

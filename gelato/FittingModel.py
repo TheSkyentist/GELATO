@@ -152,8 +152,8 @@ def FitBoot(spectrum,model,i):
     # Loading bar params
     if ((spectrum.p['NProcess'] == 1) and spectrum.p['Verbose']):
         N = 40 # Max length
-        p = int(100*i/(spectrum.p['NBoot'] - 1)) # Percentage
-        l = int(N*i/(spectrum.p['NBoot'] - 1)) # Length of bar
+        p = int(100*i/spectrum.p['NBoot']) # Percentage
+        l = int(N*i/(spectrum.p['NBoot'])) # Length of bar
         if p == 0:
             print('Progress: |'+N*'-'+'|   0%',end='\r')
         elif p < 10:
