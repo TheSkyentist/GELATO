@@ -5,8 +5,7 @@ GELATO
 -------------
 
 GELATO is a Python code designed to fit emission lines in the spectra of star forming galaxies and active galactic nuclei. In particular, it was built in order to fit spectra where many of the parameters of the emission lines are tied with respect to one another. GELATO attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines).
-
-GELATO was also built in order to test the inclusion of additional fitting parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? GELATO builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test and then comparisons of Akaike Information Criteria.
+-parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? GELATO builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test and then comparisons of Akaike Information Criteria.
 
 The spectra are fit using a Levenberg–Marquardt non-linear least squares algorithm with Gaussian line profiles.
 
@@ -19,7 +18,7 @@ GELATO was developed using Astropy 3.2.3 and Python 3.6.10.
 
 To install the dependancies, I recommend installing conda (through [Miniconda](https://docs.conda.io/en/latest/miniconda.html)).
 
-A conda environment with nearly all the dependencies can be installed via the provided "environment.yml" file. If you do not wish to use conda, you can find the required version of python packages enumerated in the "environment.yml" file.
+A conda environment with early all the dependencies can be installed via the provided "environment.yml" file. If you do not wish to use conda, you can find the required version of python packages enumerated in the "environment.yml" file.
 
 ```bash
 cd /path/to/GELATO/directory
@@ -51,13 +50,13 @@ How it works
 -------------
 
 1. Gathering Ingredients: First, the spectrum is loaded. The code assumes the spectrum file is a FITS table with the following columns:
-    1. The log10 of the wavelengths [loglam]
+    1. The log10 of the wavelengths in Angstroms [loglam]
     2. The spectral flux density in flam [flux]
     3. The inverse variances of the data points [ivar].
 
     Based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
 
-2. Creating Base (Continuum): GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 17.7828] (Gyr)) with nominal resolutions of 5 AAngstroms. The redshift is allowed to vary around the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficients for the SSP models are constrained to be positive. Following the initial fit, an additional power law component is added, required to have a negative power law index and a positive coefficient. If the continuum model with a power law passes an F-Test for its inclusion, it is added to the model. Finally, the redshift of the continuum model is frozen and not moving forward.
+2. Creating Base (Continuum): GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 17.7828] (Gyr)) with nominal resolutions of 5 Angstroms. The redshift is allowed to vary around the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficients for the SSP models are constrained to be positive. Following the initial fit, an additional power law component is added, required to have a negative power law index and a positive coefficient. If the continuum model with a power law passes an F-Test for its inclusion, it is added to the model. Finally, the redshift of the continuum model is frozen and not moving forward.
 
 3. Creating Base (Emission Lines): The emission line models are then constructed based on the emission line dictionary. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model flux is reasonable bounded based on these values, and the redshift of the line is bounded to be within 0.005 of it's starting value. The model is then fit to the spectrum.
 
@@ -80,7 +79,7 @@ Models
 
 * Continuum SSP Model: The continuum is modeled as the sum of E-MILES SSP models. In total, 15 SSP models are used to build a continuum. The normalization coefficients are named for each SSP model.
 
-* Continuum Power Law Model: An additional power law continuum is attempted to be fit in addition to the SSP models. It is parametrized with a power law index, a normalization coefficient, and a scale (y = coeff*(x/scale)**(-index)). The power law index has a default value of 1.5 and is allowed to vary in the range (1,3). The scale is set by the wavelength range of the spectrum and is not a fitted parameter.
+* Continuum Power Law Model: An additional power law continuum is attempted to be fit in addition to the SSP models. It is parametrized with a power law index, a normalization coefficient, and a scale (y = coeff*(x/scale)**(-index)). The power law index has a default value of 1.5. The scale is set by the wavelength range of the spectrum and is not a fitted parameter.
 
 Additional Components
 -------------
@@ -169,60 +168,62 @@ Running GELATO
 In order to run GELATO you need:
 
 * The PARAMS.json file.
-* The spectrum or spectra.
-* The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 100. A basic estimate from the apparent position of any identified emission line should suffice. Ideally this is the redshift of the continuum as the redshift of the continuum is not fit.
+* The spectrum or spectra. The log10 of the wavelength in Angstroms of the spectrum must be provided along with the flux in Flam units. The inverse variance of the fluxes, in corresponding units, must also be provided.
+* The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 200, preferable 1 part in 1000. A basic estimate from the apparent position of any identified emission line should suffice.
 * If running on a list of spectra, GELATO takes in a comma delimited file, where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
 * (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified.
 
-All of the following scripts can be made into executables and simply called directly.
+All of the following scripts are executable and can be called directly. Ensure that you are in the GELATO conda environment before running any of the scripts.
 
-The two wrappers for GELATO are:
+Two wrappers for GELATO are provided in the Convenience subdirectory.
 
 * "run_GELATO_single.py"
 
-   This script is designed to run GELATO over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object.
+   This script is designed to run GELATO over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object. You can copy this file into your working directory once GELATO has been installed into the conda environment.
 
   ```bash
-  python ~/Documents/GELATO/run_GELATO_multi.py ~/Example/PARAMS.json ~/Data/spectrum.fits 1.122
+  python run_GELATO_multi.py PARAMS.json spectrum.fits 0.5
   ```
 
 * "run_GELATO_multi.py"
 
-   This script is designed to run GELATO over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects.
+   This script is designed to run GELATO over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. You can copy this file into your working directory once GELATO has been installed into the conda environment.
 
-```bash
-python ~/Documents/GELATO/run_GELATO_multi.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
-```
+  ```bash
+  python run_GELATO_multi.py /path/to/PARAMS.json spectra_with_redshifts.csv
+  ```
 
-Optionally, equivalent widths and plots can be generated when running GELATO. However, if you opt out of creating them during the run, you can always create them after using specific GELATO modules.
+Optionally, equivalent widths and plots can be generated when running GELATO. However, if you opt out of creating them during the run, you can always create them after using specific GELATO modules. Symbolic links to these modules, which can be run directly, are provided Convenience subdirectory. These scripts can be copied to the working directory after the installation. Similairly, these scripts are executable and can be called directly.
 
-For a single plot:
+* "Plotting.py":
 
-```bash
-python ~/Documents/GELATO/gelato/Plotting.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
-```
+  ```bash
+  # For a single plot
+  python Plotting.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
+  ```
 
-For multiple plots:
+  ```bash
+  # For multiple plots
+  python Plotting.py PARAMS.json --ObjectList spectra_with_redshifts.csv
+  ```
 
-```bash
-python ~/Documents/GELATO/gelato/Plotting.py ~/Example/PARAMS.json --ObjectList ~/Data/spectra_with_redshifts.txt
-```
+* "EquivalentWidth.py"
 
-To generate equivalent widths and append them to the results file is similar to plotting:
+  ```bash
+  python EquivalentWidth.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
+  ```
 
-```bash
-python ~/Documents/GELATO/gelato/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
-```
-
-```bash
-python ~/Documents/GELATO/gelato/EquivalentWidth.py ~/Example/PARAMS.json --Spectrum ~/Data/spectrum.fits --Redshift 1.122
-```
+  ```bash
+  python EquivalentWidth.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
+  ```
 
 The concatenated results for GELATO can also be created directly the results files in the following manners:
 
-```bash
-python ~/Documents/GELATO/gelato/ConcatResults.py ~/Example/PARAMS.json ~/Data/spectra_with_redshifts.txt
-```
+* "ConcatResults.py"
+
+  ```bash
+  python ConcatResults.py PARAMS.json spectra_with_redshifts.csv
+  ```
 
 Running the Example
 
@@ -236,7 +237,7 @@ conda activate GELATO
 We can then run the code over the whole data set.
 
 ```bash
-python ../run_GELATO_multi.py ExPARAMS.json ExObjList.csv
+python ../Convenience/run_GELATO_multi.py ExPARAMS.json ExObjList.csv
 ```
 
 The output from running the example will be put into 'Results/' and can be compared to the results in the 'Comparison/' directory.
