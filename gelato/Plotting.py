@@ -100,7 +100,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
         rax = fig.add_subplot(gs[1,0])
         rax.step(wav,(flux - model(spectrum.wav))*isig,'gray',where='mid')
         ymax = np.max(np.abs(rax.get_ylim()))
-        rax.set(xlim=[wav.min(),wav.max()],xlabel=r'Wavelength ['+spectrum.p['WavUnits']+']',ylim=[-ymax,ymax])
+        rax.set(xlim=[wav.min(),wav.max()],xlabel=r'Wavelength [\AA]',ylim=[-ymax,ymax])
         rax.set_ylabel('Deviation',fontsize=15)
         
     elif (plottype == 1) or (plottype == 2):
@@ -183,7 +183,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             rax = fig.add_subplot(gs[1,i])
             rax.step(wav,(flux - model(spectrum.wav)[good])*isig,'gray',where='mid')
             ymax = np.max(np.abs(rax.get_ylim()))
-            rax.set(xlim=region,xlabel=r'Wavelength ['+spectrum.p['WavUnits']+']',ylim=[-ymax,ymax])
+            rax.set(xlim=region,xlabel=r'Wavelength [\AA]',ylim=[-ymax,ymax])
             rax.set_ylabel('Deviation',fontsize=15)
 
     # Add title and save figure

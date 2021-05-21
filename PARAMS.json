@@ -10,7 +10,6 @@
     "NProcess": 4,
     "Plotting": true,
     "FlamUnits": "$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \\AA$^{-1}$",
-    "WavUnits": "\\AA",
     "CalcEW": true,
     "Concatenate": true,
     "Overwrite": true,

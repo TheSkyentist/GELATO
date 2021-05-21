@@ -65,7 +65,10 @@ def gelato(params,path,z):
         # Bootstrap
         if params["Verbose"]:
             print("Scooping portions (this may take a while):",name)
-        parameters = np.array([FM.FitBoot(spectrum,model,i) for i in range(params["NBoot"])])
+        N = 40 # Max length of progress bar
+        parameters = np.array([FM.FitBoot(spectrum,model,i,N=N) for i in range(params["NBoot"])])
+        if ((spectrum.p['NProcess'] == 1) and spectrum.p['Verbose']):
+            print('Progress: |'+N*'#'+'| 100%')
         if params["Verbose"]:
             print("Portions scooped:",name)
 

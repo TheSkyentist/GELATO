@@ -147,21 +147,18 @@ def FitModel(spectrum,model,region = None):
     return fit_model
 
 # Fit (Bootstrapped) Model
-def FitBoot(spectrum,model,i):
+def FitBoot(spectrum,model,i,N):
 
     # Loading bar params
     if ((spectrum.p['NProcess'] == 1) and spectrum.p['Verbose']):
-        N = 40 # Max length
         p = int(100*i/spectrum.p['NBoot']) # Percentage
         l = int(N*i/(spectrum.p['NBoot'])) # Length of bar
         if p == 0:
             print('Progress: |'+N*'-'+'|   0%',end='\r')
         elif p < 10:
             print('Progress: |'+l*'#'+(N-l)*'-'+'|   '+str(p)+'%',end='\r')
-        elif p < 100:
+        else:
             print('Progress: |'+l*'#'+(N-l)*'-'+'|  '+str(p)+'%',end='\r')
-        else: 
-            print('Progress: |'+N*'#'+'| 100%')
 
     # Fit model
     fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
