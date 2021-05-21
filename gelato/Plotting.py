@@ -83,7 +83,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             inds = np.argsort(linelocs)
             linelocs = np.array(linelocs)[inds]
             linelabels = np.array(linelabels)[inds]
-            linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/65).sum(),np.linspace(linelocs.min(),linelocs.max(),len(inds)),method='Nelder-Mead',options={'adaptive':True,'maxiter':int(len(inds)*500)}).x
+            linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/65).sum(),np.linspace(linelocs.min(),linelocs.max(),len(inds)),method='Nelder-Mead',options={'adaptive':True,'maxiter':len(inds)*500}).x
 
             # Plot names
             for lineloc,linelabel,linelabelloc in zip(linelocs,linelabels,linelabellocs):
@@ -166,7 +166,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
                 inds = np.argsort(linelocs)
                 linelocs = np.array(linelocs)[inds]
                 linelabels = np.array(linelabels)[inds]
-                linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/15).sum(),np.linspace(wav.min(),wav.max(),len(inds)+2)[1:-1],method='Nelder-Mead',options={'adaptive':True,'maxiter':int(len(inds)*500)}).x
+                linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/15).sum(),np.linspace(wav.min(),wav.max(),len(inds)+2)[1:-1],method='Nelder-Mead',options={'adaptive':True,'maxiter':len(inds)*500}).x
 
                 # Plot names
                 for lineloc,linelabel,linelabelloc in zip(linelocs,linelabels,linelabellocs):
