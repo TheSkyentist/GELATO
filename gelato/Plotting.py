@@ -83,14 +83,14 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             inds = np.argsort(linelocs)
             linelocs = np.array(linelocs)[inds]
             linelabels = np.array(linelabels)[inds]
-            linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/65).sum(),np.linspace(linelocs.min(),linelocs.max(),len(inds)),method='Nelder-Mead',options={'adaptive':True,'maxiter':len(inds)*500}).x
+            linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/65).sum(),np.linspace(linelocs.min(),linelocs.max(),len(inds)),method='Nelder-Mead',options={'adaptive':True,'maxiter':len(inds)*750}).x
 
             # Plot names
             for lineloc,linelabel,linelabelloc in zip(linelocs,linelabels,linelabellocs):
                 # Text
                 fax.text(linelabelloc,text_height,linelabel,rotation=90,fontsize=12,ha='center',va='center')
                 # Plot Lines
-                fax.plot([lineloc,lineloc,linelabelloc,linelabelloc],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
+                fax.plot([lineloc,lineloc,linelabelloc,linelabelloc],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],ls='-',c='gray',lw=0.25)
 
         # Axis labels and limits
         fax.set(ylabel=r'$F_\lambda$ ['+spectrum.p['FlamUnits']+']',ylim=ylim)
@@ -139,7 +139,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
                 # Plot components
                 for j in range(init,model.n_submodels()):
                     fax.step(wav,continuum(spectrum.wav)[good]+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
-            fax.step(wav,continuum(spectrum.wav)[good],'k-',where='mid')
+            fax.step(wav,continuum(spectrum.wav)[good],ls='-',c='gray',where='mid')
 
             # Base Y axis on flux
             ymin = np.max([0,flux.min()])
