@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 """ Concatenate Results """
 
 # Import packages
@@ -66,25 +64,3 @@ def concatfromresults(p,objects):
 
     if p["Verbose"]:
         print("Gelato combined.")
-
-# Main Function
-if __name__ == "__main__":
-
-    import argparse
-    import numpy as np
-    import ConstructParams as CP
-
-    ## Parse Arguements ##
-    parser = argparse.ArgumentParser()
-    parser.add_argument('Parameters', type=str, help='Path to parameters file')
-    parser.add_argument('ObjectList', type=str, help='Path to object list with paths to spectra and their redshifts.')
-    args = parser.parse_args()
-    p = CP.construct(args.Parameters)
-    ## Parse Arguements
-
-    ## Assemble Objects
-    objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype='U100,f8',names=['File','z'])
-    ## Assemble Objects
-
-    ## Concatenate Results
-    concatfromresults(p,objects)

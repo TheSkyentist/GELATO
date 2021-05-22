@@ -1,11 +1,13 @@
-#! /usr/bin/env python
-
 """ Generate Rest Equivalent Widths """
 
 # Import packages
 import numpy as np
 from astropy.io import fits
 from astropy.table import Table,hstack
+
+# GELATO
+import gelato.CustomModels as CM
+import gelato.SpectrumClass as SC
 
 # Constants
 C = 299792.458 # km/s
@@ -111,47 +113,3 @@ def EWfromresults(params,path,z):
         
     if params["Verbose"]:
         print("Texture measured:",path.split('/')[-1])
-
-# EW from results
-# Plot from results
-if __name__ == "__main__":
-
-    # Import if we need them
-    import sys
-    import copy
-    import argparse
-    import CustomModels as CM
-    import SpectrumClass as SC
-    import ConstructParams as CP
-    
-    ## Parse Arguements to find Parameter File ##
-    parser = argparse.ArgumentParser()
-    parser.add_argument('Parameters', type=str, help='Path to parameters file')
-    parser.add_argument('--ObjectList', type=str, help='Path to object list with paths to spectra and their redshifts.')
-    parser.add_argument('--Spectrum', type=str, help='Path to spectrum.')
-    parser.add_argument('--Redshift', type=float, help='Redshift of object')
-    args = parser.parse_args()
-    p = CP.construct(args.Parameters)
-    ## Parse Arguements to find Parameter File ##
-
-    # Check if we are doing single or multi
-    single = args.Spectrum != None and args.Redshift != None
-    multi = args.ObjectList != None
-
-    if single == multi:
-        print('Specify either Object List XOR Spectrum and Redshift.')
-        print('Both or neither were entered.')
-    elif single: # One EW
-        EWfromresults(p, args.Spectrum, args.Redshift)
-    elif multi: # Many EW
-        # Load Obkects
-        objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype='U100,f8',names=['File','z'])
-        if p['NProcess'] > 1: # Mutlithread
-            import multiprocessing as mp
-            pool = mp.Pool(processes=p['NProcess'])
-            inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
-            pool.starmap(EWfromresults, inputs)
-            pool.close()
-            pool.join()
-        else: # Single Thread
-            for o in objects: EWfromresults(copy.deepcopy(p),o['File'],o['z'])

@@ -48,8 +48,8 @@ if __name__ == "__main__":
 
     ## Concatenate Results ##
     if p['Concatenate']:
-        import gelato.ConcatResults as CR
-        CR.concatfromresults(p,objects)
+        import gelato.Concatenate as C
+        C.concatfromresults(p,objects)
     ## Concatenate Results ##
 
     if p['Verbose']:
