@@ -93,7 +93,8 @@ def gelato(params,path,z):
     # Otherwise:
     else:
         # Just continuum
-        parameters = np.hstack([continuum.parameters,[MC.rChi2(spectrum,continuum)]])
+        model = continuum
+        parameters = np.hstack([model.parameters,[MC.rChi2(spectrum,model)]])
         param_names = cont_pnames + ["rChi2"]
         if params["Verbose"]:
             print("Flavour not found (no lines with spectral coverage):",name)
@@ -118,6 +119,9 @@ def gelato(params,path,z):
 
     if params["Verbose"]:
         print("GELATO finished for",name)
+
+    # Return model
+    return model
 
 def header():
     print("Welcome to GELATO")
