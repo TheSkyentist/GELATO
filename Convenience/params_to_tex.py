@@ -13,7 +13,7 @@ import gelato.ConstructParams as CP
 def TeX(params):
 
     tex = '\documentclass{article}\n\\usepackage{multirow}\n\\begin{document}\n\\begin{center}\n\\begin{tabular}{cccccccc}\n\hline\hline\hline\n'
-    tex += '\\multicolumn{3}{c}{\\textbf{Groups}} & \multicolumn{3}{|c|}{\\textbf{Species}} & \multicolumn{2}{c}{\\textbf{Lines}}\\\\\n\\textbf{Name} & \\textbf{Tie \\boldmath$z$?} & \\textbf{Tie \\boldmath$\sigma$?} & \multicolumn{1}{|c}{\\textbf{Name}} & \\textbf{Flag} & \multicolumn{1}{c|}{\\textbf{Comp.}} & \\textbf{\\boldmath$\lambda$ [\AA]} & \\textbf{Ratio}\\\\\hline\hline\n'
+    tex += '\\multicolumn{3}{c}{\\textbf{Groups}} & \multicolumn{3}{|c|}{\\textbf{Species}} & \multicolumn{2}{c}{\\textbf{Lines}}\\\\\n\\textbf{Name} & \\textbf{Tie \\boldmath$z$?} & \\textbf{Tie \\boldmath$\sigma$?} & \multicolumn{1}{|c}{\\textbf{Name}} & \\textbf{Flag} & \multicolumn{1}{c|}{\\textbf{Extra}} & \\textbf{\\boldmath$\lambda$ [\AA]} & \\textbf{Ratio}\\\\\hline\hline\n'
 
     for group in params['EmissionGroups']:
         # Number of lines
