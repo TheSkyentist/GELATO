@@ -137,8 +137,8 @@ The concatenated results, with median parameters and standard deviations, for GE
   ```
 
 Running the Example
-
 -------------
+
 We provided an example for running GELATO on a few SDSS spectra.This tutorial assumes you start in the Example directory. First we need to activate our GELATO environment.
 
 ```bash
