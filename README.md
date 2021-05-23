@@ -256,7 +256,6 @@ The current supported additional components are:
 In order to have GELATO attempt to fit an emission line with an additional component, the line must be flagged in the parameters file, described in the section below. The flag is an integer, whose bitwise digits describe if a specific additional component should be tried. Examples for all possible combinations are given in the figure following the description of the EmissionGroups parameter.
 
 GELATO submodules
-
 -------------
 
 * ConstructParams.py
@@ -304,13 +303,13 @@ GELATO submodules
   Scripts for concatenating results from a multi GELATO run. Can also be run independently on results after the fact.
 
 License
-
 -------------
+
 GELATO is an open-source software available under the GNU General Public License 3. In a nutshell, this code can be used and distributed by anyone, but any code that includes GELATO must also be distributed freely and openly (see LICENSE file for details).
 
 FAQ
-
 -------------
+
 **How can I load spectra from other sources?**
 
 *By editing the SpectrumClass.py file, you can customize how spectra are loaded into GELATO. However it might be easier to convert your spectrum to follow the SDSS convention.*
