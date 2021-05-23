@@ -1,19 +1,16 @@
 GELATO
 ========
 
+![Logo](./Images/Logo.png)
+![Example of Fit](./Images/Example1.png)
+![Example of Components](./Images/Example2.png)
+
 *Galaxy/AGN Emission Line Analysis TOol by Raphael Hviding*
 -------------
 
-![Logo](./Logo/Logo.png)
-![Example of Fit](./Example1.png)
-![Example of Components](./Example2.png)
-
-GELATO is a Python code designed to fit emission lines in the spectra of star forming galaxies and active galactic nuclei. In particular, it was built in order to fit spectra where many of the parameters of the emission lines are tied with respect to one another. GELATO attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines).
--parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? GELATO builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test and then comparisons of [Akaike Information Criteria](https://en.wikipedia.org/wiki/Akaike_information_criterion).
+GELATO is a Python code designed to fit emission lines in the spectra of star forming galaxies and active galactic nuclei. In particular, it was built in order to fit spectra where many of the parameters of the emission lines are tied with respect to one another. GELATO attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines). In addition, GELATO is designed to fit additional components to lines with comples kinematics. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? GELATO builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an [F-test](https://en.wikipedia.org/wiki/F-test) and then comparisons of [Akaike Information Criteria](https://en.wikipedia.org/wiki/Akaike_information_criterion).
 
 The spectra are fit using a [Levenberg–Marquardt](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) non-linear least squares algorithm with Gaussian line profiles.
-
-GELATO was designed to be run on SDSS spectra, but the code can be adapted to run on other spectra.
 
 Requirements
 -------------
@@ -76,30 +73,90 @@ How it works
 
 9. Combining gelato: If running on multiple objects, the median parameters and standard deviations for all of the fits are concatenated into one file and saved to disk.
 
-Models
+Running GELATO
 -------------
 
-* Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift, a flux, and a dispersion (in km/s). They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 150 km/s, while it is bounded between 60 km/s and 500 km/s. This default can be adjusted in the "CustomModels.py" file.
+In order to run GELATO you need:
 
-* Continuum SSP Model: The continuum is modeled as the sum of E-MILES SSP models. In total, 15 SSP models are used to build a continuum. The normalization coefficients are named for each SSP model.
+* The parameters file, a JSON file, the format of which is described below. An example JSON file is also provided.
+* The spectrum or spectra. The log10 of the wavelength in Angstroms of the spectrum must be provided along with the flux in Flam units. The inverse variance of the fluxes, in corresponding units, must also be provided.
+* The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 200, preferable 1 part in 1000. A basic estimate from the apparent position of any identified emission line should suffice.
+* If running on a list of spectra, GELATO takes in a comma delimited file, where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
+* (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified.
 
-* Continuum Power Law Model: An additional power law continuum is attempted to be fit in addition to the SSP models. It is parametrized with a power law index, a normalization coefficient, and a scale (y = coeff*(x/scale)**(-index)). The power law index has a default value of 1.5. The scale is set by the wavelength range of the spectrum and is not a fitted parameter.
+Currently, the best way to run GELATO is using the wrapper scripts in the in the Convenience subdirectory. The scripts are executable and can be called directly. Ensure that you are in the GELATO conda environment before running any of the scripts. These scripts can be copied to your working directory.
 
-Additional Components
+There are two wrappers for GELATO, one for running on a single spectrum, and one for running on a list of spectra.
+
+* "run_GELATO_single.py"
+
+   This script is designed to run GELATO over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object. You can copy this file into your working directory once GELATO has been installed into the conda environment.
+
+  ```bash
+  python run_GELATO_multi.py PARAMS.json spectrum.fits 0.5
+  ```
+
+* "run_GELATO_multi.py"
+
+   This script is designed to run GELATO over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. You can copy this file into your working directory once GELATO has been installed into the conda environment.
+
+  ```bash
+  python run_GELATO_multi.py /path/to/PARAMS.json spectra_with_redshifts.csv
+  ```
+
+During a GELATO run, rest equivalent widths and plots can be generated depending on what is specified in the parameter file. However, if you opt out of creating them during the run, you can always create them after using The following scripts. These scripts can be copied to the working directory after the installation. Similarly, these scripts are executable and can be called directly.
+
+* "Plotting.py":
+
+  ```bash
+  # For a single plot
+  python Plot_from_results.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
+  ```
+
+  ```bash
+  # For multiple plots
+  python Plot_from_results.py PARAMS.json --ObjectList spectra_with_redshifts.csv
+  ```
+
+* "EquivalentWidth.py"
+
+  ```bash
+  python EW_from_results.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
+  ```
+
+  ```bash
+  python EW_from_results.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
+  ```
+
+The concatenated results, calculating 1 sigma errorbars on the ftted parameters, for GELATO can also be created directly the results files in the following manners:
+
+* "Concat_from_results.py"
+
+  ```bash
+  python Concat_from_results.py PARAMS.json spectra_with_redshifts.csv
+  ```
+
+Running the Example
+
 -------------
+Here are the following instructions to run GELATO. This tutorial assumes you start in the Example directory. First we need to activate our GELATO environment.
 
-The current supported additional components are:
+```bash
+conda activate GELATO
+```
 
-1. Broad Component: The broad components are modeled as Gaussians. They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 1000 km/s, while it is bounded between 750 km/s and 10000 km/s.
-2. Outflow Component: They are forced to have a positive flux. The outflow components are modeled as Gaussians. The default value of the velocity dispersion of the line is set to 500 km/s, while it is bounded between 500 km/s and 1000 km/s.
-3. Absorption Component: The outflow components are modeled as Gaussians. They are forced to have a negative flux. The default value of the velocity dispersion of the line is set to 600 km/s, while it is bounded between 350 km/s and 3000 km/s.
+We can then run the code over the whole data set.
 
-In order to have GELATO attempt to fit an emission line with an additional component, the line must be flagged in the parameters file, described in the section below. The flag is an integer, whose bitwise digits describe if a specific additional component should be tried. Examples for all possible combinations are given in the figure following the description of the EmissionGroups parameter.
+```bash
+python ../Convenience/run_GELATO_multi.py ExPARAMS.json ExObjList.csv
+```
+
+The output from running the example will be put into 'Results/' and can be compared to the results in the 'Comparison/' directory.
 
 Parameter File
 -------------
 
-The behaviour of GELATO is controlled entirely by the "PARAMS.json" file. And example parameter file is included in the repository.
+The behaviour of GELATO is controlled entirely by the JSON parameters file. And example parameter file is included in the Example directory.
 
 * Outfolder: This parameter is the path to the output directory.
 * VacuumWav: Are the spectra being fit in air or vacuum wavelengths.  
@@ -112,7 +169,6 @@ The behaviour of GELATO is controlled entirely by the "PARAMS.json" file. And ex
 * NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
 * Plotting: Produce plots or not.
 * FlamUnits: String containing the units of the spectrum flux for purposes of plotting, can accept LaTeX syntax.
-* WavUnits: String containing the units of the spectrum wavelength for purposes of plotting, can accept LaTeX syntax.
 * CalcEW: To calculate (rest) equivalent widths or not.
 * Concatenate: To concatenate the results of a multiple GELATO run or not.
 * Overwrite: Overwrite the results of a previous GELATO run.
@@ -164,87 +220,27 @@ The "PARAMS.json" file in the directory gives a good example of how to take adva
 
 Here is table showing the hierarchy of the Emission Groups Parameter for the "PARAMS.json" file. A script is provided that can turn a Emission Groups dictionary in a Parameter file into a LaTeX table.
 
-![Image of PARAMS](./PARAMS.png)
+![Image of PARAMS](./Images/PARAMS.png)
 
-Running GELATO
+Models
 -------------
 
-In order to run GELATO you need:
+* Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift, a flux, and a dispersion (in km/s). They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 150 km/s, while it is bounded between 60 km/s and 500 km/s. This default can be adjusted in the "CustomModels.py" file.
 
-* The PARAMS.json file.
-* The spectrum or spectra. The log10 of the wavelength in Angstroms of the spectrum must be provided along with the flux in Flam units. The inverse variance of the fluxes, in corresponding units, must also be provided.
-* The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 200, preferable 1 part in 1000. A basic estimate from the apparent position of any identified emission line should suffice.
-* If running on a list of spectra, GELATO takes in a comma delimited file, where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
-* (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified.
+* Continuum SSP Model: The continuum is modeled as the sum of E-MILES SSP models. In total, 15 SSP models are used to build a continuum. The normalization coefficients are named for each SSP model.
 
-All of the following scripts are executable and can be called directly. Ensure that you are in the GELATO conda environment before running any of the scripts.
+* Continuum Power Law Model: An additional power law continuum is attempted to be fit in addition to the SSP models. It is parametrized with a power law index, a normalization coefficient, and a scale (y = coeff*(x/scale)**(-index)). The power law index has a default value of 1.5. The scale is set by the wavelength range of the spectrum and is not a fitted parameter.
 
-Two wrappers for GELATO are provided in the Convenience subdirectory.
-
-* "run_GELATO_single.py"
-
-   This script is designed to run GELATO over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object. You can copy this file into your working directory once GELATO has been installed into the conda environment.
-
-  ```bash
-  python run_GELATO_multi.py PARAMS.json spectrum.fits 0.5
-  ```
-
-* "run_GELATO_multi.py"
-
-   This script is designed to run GELATO over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. You can copy this file into your working directory once GELATO has been installed into the conda environment.
-
-  ```bash
-  python run_GELATO_multi.py /path/to/PARAMS.json spectra_with_redshifts.csv
-  ```
-
-Optionally, equivalent widths and plots can be generated when running GELATO. However, if you opt out of creating them during the run, you can always create them after using specific GELATO modules. Symbolic links to these modules, which can be run directly, are provided Convenience subdirectory. These scripts can be copied to the working directory after the installation. Similairly, these scripts are executable and can be called directly.
-
-* "Plotting.py":
-
-  ```bash
-  # For a single plot
-  python Plotting.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
-  ```
-
-  ```bash
-  # For multiple plots
-  python Plotting.py PARAMS.json --ObjectList spectra_with_redshifts.csv
-  ```
-
-* "EquivalentWidth.py"
-
-  ```bash
-  python EquivalentWidth.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
-  ```
-
-  ```bash
-  python EquivalentWidth.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
-  ```
-
-The concatenated results for GELATO can also be created directly the results files in the following manners:
-
-* "ConcatResults.py"
-
-  ```bash
-  python ConcatResults.py PARAMS.json spectra_with_redshifts.csv
-  ```
-
-Running the Example
-
+Additional Components
 -------------
-Here are the following instructions to run GELATO. This tutorial assumes you start in the Example directory. First we need to activate our GELATO environment.
 
-```bash
-conda activate GELATO
-```
+The current supported additional components are:
 
-We can then run the code over the whole data set.
+1. Broad Component: The broad components are modeled as Gaussians. They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 1000 km/s, while it is bounded between 750 km/s and 10000 km/s.
+2. Outflow Component: They are forced to have a positive flux. The outflow components are modeled as Gaussians. The default value of the velocity dispersion of the line is set to 500 km/s, while it is bounded between 500 km/s and 1000 km/s.
+3. Absorption Component: The outflow components are modeled as Gaussians. They are forced to have a negative flux. The default value of the velocity dispersion of the line is set to 600 km/s, while it is bounded between 350 km/s and 3000 km/s.
 
-```bash
-python ../Convenience/run_GELATO_multi.py ExPARAMS.json ExObjList.csv
-```
-
-The output from running the example will be put into 'Results/' and can be compared to the results in the 'Comparison/' directory.
+In order to have GELATO attempt to fit an emission line with an additional component, the line must be flagged in the parameters file, described in the section below. The flag is an integer, whose bitwise digits describe if a specific additional component should be tried. Examples for all possible combinations are given in the figure following the description of the EmissionGroups parameter.
 
 GELATO cast (in order of appearance)
 
