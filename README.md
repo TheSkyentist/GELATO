@@ -4,7 +4,7 @@ GELATO
 *Galaxy/AGN Emission Line Analysis TOol by Raphael Hviding*
 -------------
 
-![Logo](./Logo.png)
+![Logo](./Logo/Logo.png)
 ![Example of Fit](./Example1.png)
 ![Example of Components](./Example2.png)
 
