@@ -317,7 +317,7 @@ FAQ
 
 **What are the units?**
 
-*ContinuumRegion and LineRegion are quoted velocity space and are given in km/s. Otherwise, the code is agnostic to the flux and wavelength units. However the plots assume the SDSS units. Currently the labels can only be changed in the Plotting.py file. Reach out if you would want this to be customizable from the PARAMS file and I can add it to GELATO. The wavelength units for line centers must be given in the same units as the spectrum.*
+*ContinuumRegion and LineRegion are quoted velocity space and are given in km/s. Otherwise, the code is agnostic to the flux units. The wavelengths must be given in Angstroms.*
 
 **Do you mean velocity offsets, not redshifts?**
 
