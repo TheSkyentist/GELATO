@@ -4,10 +4,14 @@ GELATO
 *Galaxy/AGN Emission Line Analysis TOol by Raphael Hviding*
 -------------
 
-GELATO is a Python code designed to fit emission lines in the spectra of star forming galaxies and active galactic nuclei. In particular, it was built in order to fit spectra where many of the parameters of the emission lines are tied with respect to one another. GELATO attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines).
--parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? GELATO builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test and then comparisons of Akaike Information Criteria.
+![Logo](./Logo.png)
+![Example of Fit](./Example1.png)
+![Example of Components](./Example2.png)
 
-The spectra are fit using a Levenberg–Marquardt non-linear least squares algorithm with Gaussian line profiles.
+GELATO is a Python code designed to fit emission lines in the spectra of star forming galaxies and active galactic nuclei. In particular, it was built in order to fit spectra where many of the parameters of the emission lines are tied with respect to one another. GELATO attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines).
+-parameters. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? GELATO builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an F-test and then comparisons of [Akaike Information Criteria](https://en.wikipedia.org/wiki/Akaike_information_criterion).
+
+The spectra are fit using a [Levenberg–Marquardt](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) non-linear least squares algorithm with Gaussian line profiles.
 
 GELATO was designed to be run on SDSS spectra, but the code can be adapted to run on other spectra.
 
