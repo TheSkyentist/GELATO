@@ -259,10 +259,6 @@ GELATO submodules
 
 -------------
 
-* PARAMS.json
-  
-  Paramter file that controls GELATO behavior.
-
 * ConstructParams.py
 
   Routines for turning the PARAMS.json file into a python dictionary, and verifying that it is in the correct format.
