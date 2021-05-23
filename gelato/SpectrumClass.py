@@ -38,8 +38,6 @@ class Spectrum:
         self.emission_region = np.zeros(self.wav.shape,dtype=bool)
         for r in self.regions:
             self.emission_region[np.logical_and(r[0]<self.wav,self.wav<r[1])] = True
-        
-        # self.LimitSpectrum()
     
     # Return reduced regions and emission lines based on spectrum wavelength
     def regionAndLines(self):
@@ -85,16 +83,6 @@ class Spectrum:
                 self.regions = np.delete(self.regions,i+1,0)
                 self.reduceRegions()
                 break
-    
-    # Pair down spectrum
-    def LimitSpectrum(self):
-
-        # Only take data in regions
-        self.wav = self.wav[self.emission_region]
-        self.flux = self.flux[self.emission_region]
-        self.weight = self.weight[self.emission_region]
-        self.sqrtweight = self.sqrtweight[self.emission_region]
-        self.sigma = self.sigma[self.emission_region]
 
     # Boostrap the Flux
     def Boostrap(self):

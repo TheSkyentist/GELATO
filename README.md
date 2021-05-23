@@ -57,7 +57,7 @@ How it works
 
     Based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
 
-2. Creating Base (Continuum): GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 17.7828] (Gyr)) with nominal resolutions of 5 Angstroms. The redshift is allowed to vary around the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficients for the SSP models are constrained to be positive. Following the initial fit, an additional power law component is added, required to have a negative power law index and a positive coefficient. If the continuum model with a power law passes an F-Test for its inclusion, it is added to the model. Finally, the redshift of the continuum model is frozen and not moving forward.
+2. Creating Base (Continuum): GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 17.7828] (Gyr)) with nominal resolutions of 5 Angstroms. Note, since the continuum models have a minimum wavelength of 1680 Angstroms, there is a maximum wavelength that can be fit with GELATO based on the spectral coverage of the input spectra. The redshift is allowed to vary around the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficients for the SSP models are constrained to be positive. Following the initial fit, an additional power law component is added, required to have a negative power law index and a positive coefficient. If the continuum model with a power law passes an F-test for its inclusion, it is added to the model. Finally, the redshift of the continuum model is frozen and not moving forward.
 
 3. Creating Base (Emission Lines): The emission line models are then constructed based on the emission line dictionary. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model flux is reasonable bounded based on these values, and the redshift of the line is bounded to be within 0.005 of it's starting value. The model is then fit to the spectrum.
 
@@ -128,7 +128,7 @@ During a GELATO run, rest equivalent widths and plots can be generated depending
   python EW_from_results.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
   ```
 
-The concatenated results, calculating 1 sigma errorbars on the ftted parameters, for GELATO can also be created directly the results files in the following manners:
+The concatenated results, with median parameters and standard deviations, for GELATO can also be created directly the results files in the following manner:
 
 * "Concat_from_results.py"
 
@@ -139,7 +139,7 @@ The concatenated results, calculating 1 sigma errorbars on the ftted parameters,
 Running the Example
 
 -------------
-Here are the following instructions to run GELATO. This tutorial assumes you start in the Example directory. First we need to activate our GELATO environment.
+We provided an example for running GELATO on a few SDSS spectra.This tutorial assumes you start in the Example directory. First we need to activate our GELATO environment.
 
 ```bash
 conda activate GELATO
@@ -153,17 +153,19 @@ python ../Convenience/run_GELATO_multi.py ExPARAMS.json ExObjList.csv
 
 The output from running the example will be put into 'Results/' and can be compared to the results in the 'Comparison/' directory.
 
+While GELATO is designed to be run in this fashion, an IPython notebook is provided in the Example directory. This can also help with how to access GELATO output.
+
 Parameter File
 -------------
 
-The behaviour of GELATO is controlled entirely by the JSON parameters file. And example parameter file is included in the Example directory.
+The behavior of GELATO is controlled entirely by the JSON parameters file. And example parameter file is included in the Example directory.
 
 * Outfolder: This parameter is the path to the output directory.
 * VacuumWav: Are the spectra being fit in air or vacuum wavelengths.  
 * RandomSeed: The seed used as input to NumPy for random number generation.
 * ContinuumRegion: The border around emission lines in velocity space that will be excluded when fitting the continuum initially.
 * LineRegion: The border around an emission line in velocity that must be contained within the spectrum in order to be fit (km/s). This region is also used to estimate the initial height of the line.
-* MaxIter: Maximum number of minimization algorithm iterations.
+* MaxIter: Maximum number of minimization algorithm iterations. A value of 1000 is a good choice that allows fitting to reach the minimum.
 * NBoot: Number of bootstrap iterations to constrain error on parameters.
 * FThresh: F-test threshold to incorporate additional model parameters.
 * NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
@@ -198,27 +200,38 @@ Here we describe the format of the emission line dictionary.
       * Lines have a Wavelength. This is the rest wavelength of the line (same units as spectrum wavelength).
       * Lines have a RelStrength. This is a relative strength to the other members of the species. If set to null, it will have an independent flux.
 
-The "PARAMS.json" file in the directory gives a good example of how to take advantage of these features. It consists of four groups:
+The "ExampleParameters.json" file in the Example directory gives a good example of how to take advantage of these features. This is not mean to represent a physically accurate sample, but to give an idea of all of the features of the code. It consists of four groups:
 
-1. Name: Narrow. Here these features have not been set to share redshifts nor dispersions. It has a list of species:
+1. Name: AGN. Here we might put our AGN lines which in this case we want to share redshifts but we don't want to share dispersions. It has a list of species:
    1. Name: SII. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
-      * A line with a rest wavelength of 6716.44 and a relative flux of null.
-      * A line with a rest wavelength of 6730.82 and a relative flux of null. This means the line fluxes are completely independent.
-   2. Name: NII. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
+      * A line with a rest wavelength of 6716.44 and its flux is left free.
+      * A line with a rest wavelength of 6730.82 and its flux is left free. This means the line fluxes are completely independent.
+   2. Name: NII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of two lines.
       * A line with a rest wavelength of 6583.45 and a relative flux of 1.
       * A line with a rest wavelength of 6548.05 and a relative flux of 0.34. This means this line will always have 0.34/1 times the flux of the first line.
-   3. OIII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of two lines.
+   3. OIII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of three lines.
       * A line with a rest wavelength of 5006.84 and a relative flux of 1.
       * A line with a rest wavelength of 4958.91 and a relative flux of 0.35. This means this line will always have 0.35/1 times the flux of the first line.
-2. Name: Balmer. Here these features are set to share redshifts and dispersions. It has a list of species:
-   1. Ha. A singlet line flagged with a 1, which corresponds to a "Broad" component. This additional component will be placed the group named "Broad". It is made out of one line.
-      * A line with a rest wavelength of 6562.79 and a relative flux of null.
-   2. Hb. These have been flagged with a 1, which corresponds to a "Broad" component. This additional component will be placed the group named "Broad". It is made out of one line.
-      * A line with a rest wavelength of 4861.28 and a relative flux of null.
-3. Name: Outflow. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will not share redshifts and dispersions.
-4. Name: Broad. This is an empty group as it may receive additional components from other groups. If more than one component lands in this group, they will share redshifts and dispersions. E.g. if both "Broad" lines are accepted (from Hbeta and Halpha), they will share the same redshift and dispersion by design.
+      * A line with a rest wavelength of 4363.21 and its flux is left free.
+2. Name: SF. Here these features are set to share redshifts and dispersions. It has a list of species:
+   1. Name: OI.  There are no flags on this component, so the list is empty. It is made out of two lines.
+      * A line with a rest wavelength of 6300.3 and a relative flux of 3.
+      * A line with a rest wavelength of 6463.78 and a relative flux of 1. This means this line will always have 1/3 times the flux of the first line.
+   2. Name: OII. A singlet line with no flags, so the list is empty.
+      * A line with a rest wavelength of 3727.43 and its flux is left free.
+3. Name: Balmer. Here these features will not share redshifts and dispersions. It has a list of species:
+   1. HI. These features will share the same velocity dispersion and redshift. These have been flagged with a 1, which corresponds to a "Broad" component. This additional component will be placed the group named "Balmer". It is made out of one line.
+      * A line with a rest wavelength of 6562.79 and its flux is left free.
+      * A line with a rest wavelength of 4861.28 and its flux is left free.
+      * A line with a rest wavelength of 4340.47 and its flux is left free.
+4. Name: Outflow
+  If more than one component lands in this group, they will share redshifts and dispersions. E.g. if "Outflow" lines are accepted (from NII and OIII), they will share the same redshift and dispersion by design.
 
-Here is table showing the hierarchy of the Emission Groups Parameter for the "PARAMS.json" file. A script is provided that can turn a Emission Groups dictionary in a Parameter file into a LaTeX table.
+Here is table showing the hierarchy of the Emission Groups Parameter for the "PARAMS.json" file. A script, params_to_TeX.py, is provided in the Convenience directory can turn a Emission Groups dictionary in a Parameter file into a LaTeX table.
+
+  ```bash
+  python params_to_TeX.py PARAMS.json
+  ```
 
 ![Image of PARAMS](./Images/PARAMS.png)
 
@@ -242,25 +255,9 @@ The current supported additional components are:
 
 In order to have GELATO attempt to fit an emission line with an additional component, the line must be flagged in the parameters file, described in the section below. The flag is an integer, whose bitwise digits describe if a specific additional component should be tried. Examples for all possible combinations are given in the figure following the description of the EmissionGroups parameter.
 
-GELATO cast (in order of appearance)
+GELATO submodules
 
 -------------
-
-* README.md
-  
-  Here you are! The documentation for GELATO.
-
-* run_GELATO_single.py
-  
-  Wrapper for running GELATO on a single object.
-  
-* run_GELATO_multi.py
-  
-  Wrapper for running GELATO on multiple objects. If specifying multiple processes, each object will be run on an independent thread. To load an object file differently, this file should be edited.
-
-* params_to_tex.py
-  
-  Convenience function for turning Parameters file (specifically the emission line dictionary) into a LaTeX table for easy inclusion in publications using this code.
 
 * PARAMS.json
   
@@ -296,7 +293,7 @@ GELATO cast (in order of appearance)
 
 * ModelComparison.py
 
-  Here are scripts for model comparison and selection, including F-Tests and AIC calculation.
+  Here are scripts for model comparison and selection, including F-tests and AIC calculation.
 
 * Plotting.py
 
@@ -306,17 +303,9 @@ GELATO cast (in order of appearance)
 
   Here are the scripts for creating and saving emission line EW. Can also be run directly on GELATO results in order to generate EW after the fact. Rest equivalent widths are generated by assuming a flat continuum at the height of the continuum at the emission line center.
 
-* ConcatenateResults.py
+* Concatenate.py
 
   Scripts for concatenating results from a multi GELATO run. Can also be run independently on results after the fact.
-
-* matplotlibrc
-
-  A matplotlib settings file that controls the output of figures. Can be changed to the user's liking. However, for running GELATO on multiple threads, the backend must be set to a non-interactive backend, e.g. "Agg".
-
-* LICENSE
-
-  Code license, GELATO is distributed under the GNU General Public License 3.
 
 License
 

@@ -10,7 +10,7 @@ warnings.simplefilter('ignore')
 import os
 import numpy as np
 from astropy.io import fits
-import matplotlib.pyplot as plt
+from matplotlib import pyplot
 from scipy.optimize import minimize
 
 # GELATO
@@ -46,7 +46,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
     if plottype == 0:
 
         # Make figure
-        fig = plt.figure(figsize=(15,7))
+        fig = pyplot.figure(figsize=(15,7))
         gs = fig.add_gridspec(ncols=1,nrows=2,height_ratios=[4,1],hspace=0)
 
         # Get Spectrum
@@ -112,7 +112,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
 
         # Make figure
         ncols   = len(spectrum.regions)
-        fig = plt.figure(figsize = (5*ncols,7))
+        fig = pyplot.figure(figsize = (5*ncols,7))
         gs = fig.add_gridspec(ncols=ncols,nrows=2,height_ratios=[4,1],hspace=0)
 
         # Continuum
@@ -195,7 +195,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
     fig.suptitle(figname.replace('_','\_')+', $z='+str(np.round(spectrum.z,3))+'$',y=0.95)
     fig.tight_layout()
     fig.savefig(spectrum.p['OutFolder'] + figname + '.pdf')
-    plt.close(fig)
+    pyplot.close(fig)
 
 # Plot from results
 def plotfromresults(params,path,z):

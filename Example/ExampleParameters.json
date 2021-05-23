@@ -16,8 +16,8 @@
     "Verbose": true,
     "EmissionGroups": [
         {
-            "Name":"Nebular",
-            "TieRedshift": false,
+            "Name":"AGN",
+            "TieRedshift": true,
             "TieDispersion": false,
             "Species": [
                 {
@@ -37,8 +37,8 @@
                 },
                 {
                     "Name":"[NII]",
-                    "Flag": 0,
-                    "FlagGroups": [],
+                    "Flag": 2,
+                    "FlagGroups": ["Outflow"],
                     "Lines": [
                         {
                             "Wavelength": 6583.45,
@@ -51,35 +51,9 @@
                     ]
                 },
                 {
-                    "Name":"[OI]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 6300.30,
-                            "RelStrength": 1
-                        },
-                        { 
-                            "Wavelength": 6363.78,
-                            "RelStrength": 0.333
-                        }
-                    ]
-                },
-                {
-                    "Name":"[HeI]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 5875.62,
-                            "RelStrength": null
-                        }
-                    ]
-                },
-                {
                     "Name":"[OIII]",
                     "Flag": 2,
-                    "FlagGroups": ["Nebular"],
+                    "FlagGroups": ["Outflow"],
                     "Lines": [
                         {
                             "Wavelength": 5006.84,
@@ -107,17 +81,6 @@
                     ]
                 },
                 {
-                    "Name":"[OII]",
-                    "Flag": 0,
-                    "FlagGroups": [],
-                    "Lines": [
-                        {
-                            "Wavelength": 3727.43,
-                            "RelStrength": null
-                        }
-                    ]
-                },
-                {
                     "Name":"[NeV]",
                     "Flag": 0,
                     "FlagGroups": [],
@@ -127,11 +90,51 @@
                             "RelStrength": null
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "Name":"SF",
+            "TieRedshift": true,
+            "TieDispersion": true,
+            "Species": [
+                {
+                    "Name":"[OI]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 6300.30,
+                            "RelStrength": 3
+                        },
+                        { 
+                            "Wavelength": 6363.78,
+                            "RelStrength": 1
+                        }
+                    ]
                 },
+                {
+                    "Name":"[OII]",
+                    "Flag": 0,
+                    "FlagGroups": [],
+                    "Lines": [
+                        {
+                            "Wavelength": 3727.43,
+                            "RelStrength": null
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Name":"Balmer",
+            "TieRedshift": false,
+            "TieDispersion": false,
+            "Species": [
                 {
                     "Name":"HI",
                     "Flag": 1,
-                    "FlagGroups": ["Nebular"],
+                    "FlagGroups": ["Balmer"],
                     "Lines": [
                         {
                             "Wavelength": 6562.79,
@@ -148,6 +151,12 @@
                     ]
                 }
             ]
+        },
+        {
+            "Name":"Outflow",
+            "TieRedshift": true,
+            "TieDispersion": true,
+            "Species": []
         }
     ]
 }

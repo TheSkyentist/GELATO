@@ -4,3 +4,4 @@ dependencies:
   - astropy=3.2.3
   - scipy
   - matplotlib
+  - jupyter
