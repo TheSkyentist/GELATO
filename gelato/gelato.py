@@ -19,8 +19,8 @@ import gelato.ConstructParams as CP
 def gelato(params,path,z):
 
     # Load Params
-    params = CP.construct(params)
-
+    if type(params) == str: params = CP.construct(params)
+    
     # Set seed
     np.random.seed(params["RandomSeed"])
 
@@ -67,7 +67,7 @@ def gelato(params,path,z):
             print("Scooping portions (this may take a while):",name)
         N = 40 # Max length of progress bar
         parameters = np.array([FM.FitBoot(spectrum,model,i,N=N) for i in range(params["NBoot"])])
-        if ((spectrum.p['NProcess'] == 1) and spectrum.p['Verbose']):
+        if ((params['NProcess'] == 1) and params['Verbose']):
             print('Progress: |'+N*'#'+'| 100%')
         if params["Verbose"]:
             print("Portions scooped:",name)
@@ -120,8 +120,8 @@ def gelato(params,path,z):
     if params["Verbose"]:
         print("GELATO finished for",name)
 
-    # Return model
-    return model
+    # Return model (If not multiprocessing)
+    if params["NProcess"] == 1: return model
 
 def header():
     print("Welcome to GELATO")
