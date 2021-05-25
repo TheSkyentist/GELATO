@@ -144,7 +144,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
                 # Plot components
                 for j in range(init,model.n_submodels()):
                     fax.step(wav,continuum(spectrum.wav)[good]+model[j](wav),'--',c=colors[(j-ncols) % len(colors)])
-            fax.step(wav,continuum(spectrum.wav)[good],ls='-',c='gray',where='mid')
+            fax.step(wav,continuum(spectrum.wav)[good],ls='-',c='k',where='mid')
 
             # Base Y axis on flux
             ymin = np.max([0,flux.min()])
