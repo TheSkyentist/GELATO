@@ -147,7 +147,7 @@ def PlotFig(spectrum,model,path,param_names,plottype=0):
             fax.step(wav,continuum(spectrum.wav)[good],ls='-',c='k',where='mid')
 
             # Base Y axis on flux
-            ymin = np.max([0,flux.min()])
+            ymin = np.max([0,flux.min() - (flux.max() - flux.min())/20])
             dy = flux.max() - ymin
             ylim = [ymin,ymin+1.3*dy] # Increase Axis size by 20%
             text_height = ymin+1.2*dy 
