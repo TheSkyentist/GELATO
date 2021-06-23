@@ -1,15 +1,14 @@
 """ Fit Model for Spectrum """
 
-# Ignore warnings
-import warnings
-warnings.simplefilter('ignore')
+# # Ignore warnings
+# import warnings
+# warnings.simplefilter('ignore')
 
 # Packages
 import copy
 import numpy as np
 from itertools import combinations
-from astropy.modeling import fitting
-fit = fitting.LevMarLSQFitter()
+from scipy.optimize import least_squares
 
 # gelato supporting files
 import gelato.BuildModel as BM
@@ -20,47 +19,61 @@ import gelato.AdditionalComponents as AC
 # Perform initial fit of continuum with F-test
 def FitContinuum(spectrum):
 
+    # Continuum region
+    region = np.invert(spectrum.emission_region)
+    args = (spectrum.wav[region],spectrum.flux[region],spectrum.isig[region])
+
     # SSP Continuum
-    sspcontinuum = CM.SSPContinuum(spectrum)
-    ssp_names = sspcontinuum.get_names()
+    sspfree = CM.CompoundModel([CM.SSPContinuumFree(spectrum)])
+    zscale = sspfree.models[0].zscale
 
-    # Power Law Continuum
-    plcontinuum = CM.PowerLawContinuum(spectrum)
-    pl_names = plcontinuum.get_names()
+    # Fit initial continuuum with free redshift
+    sspfreefit = FitModel(sspfree,sspfree.starting(),args).x
 
-    # Fit initial continuuum
-    ssp_fit = FitModel(spectrum,sspcontinuum,np.invert(spectrum.emission_region))
+    # SSP+PL Continuum
+    pl = CM.PowerLawContinuum(spectrum,nssps=sspfree.nparams()-1)
+    ssppl = CM.CompoundModel([sspfree.models[0],pl])
 
-    # Try power law fit
-    continuum = BM.TieContinuum(ssp_fit+plcontinuum,ssp_names+pl_names)
-    continuum[1].parameters[0] *= 1/(continuum[0].parameters.size-1)
-    cont_fit = FitModel(spectrum,continuum,np.invert(spectrum.emission_region))
+    # Starting values
+    x0 = ssppl.starting()
+    x0[:len(sspfreefit)] = sspfreefit
+
+    # Fit initial continuuum with free redshift
+    sspplfit = FitModel(ssppl,x0,args).x
 
     # Perform F-test
-    if MC.FTest(spectrum,ssp_fit,cont_fit,np.invert(spectrum.emission_region)):
-        
-        # Fix redshift
-        sspcontinuum.fix_params()
-        sspcontinuum.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+    if MC.FTest(sspfree,sspfreefit,ssppl,sspplfit,spectrum,args):
+
+        # Get fixed redshift compound model
+        sspfixed = CM.SSPContinuumFixed(sspplfit[0]/zscale,spectrum)
+        cont = CM.CompoundModel([sspfixed,pl])
+        cont.starting() # Initialized SSPs
+
+        # Get starting values
+        x0 = sspplfit[1:]
 
         # Return w/ PL component
-        cont = sspcontinuum+plcontinuum
-        cont.parameters = cont_fit.parameters
-        return cont,ssp_names+pl_names
+        return cont,x0
     
-    # Fix redshift
-    ssp_fit.fix_params()
-    ssp_fit.set_region(np.ones(spectrum.wav.shape,dtype=bool))
+    # Fixed Redshift compound model
+    sspfixed = CM.CompoundModel([CM.SSPContinuumFixed(sspfreefit[0]/zscale,spectrum)])
+    sspfixed.starting()
 
-    return ssp_fit,ssp_names
+    return sspfixed,sspfreefit[1:]
 
 # Construct Full Model with F-tests for additional parameters
-def FitComponents(spectrum,continuum,cont_pnames,emission,emiss_pnames):
+def FitComponents(spectrum,cont,cont_x,emis,emis_x):
+
+    # Fit region
+    args = (spectrum.wav,spectrum.flux,spectrum.isig)
 
     # Base Model
-    base_model = BM.BuildModel(continuum,emission)
-    base_model = BM.TieParams(spectrum,base_model,cont_pnames+emiss_pnames)
-    base_model = FitModel(spectrum,base_model)
+    constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names())
+    base_model,x0 = BM.BuildModel(spectrum,cont,cont_x,emis,emis_x,constraints)
+
+    # Initial fit
+    x0 = base_model.constrain(x0) # Limit to true parameters
+    base_fit = FitModel(base_model,x0,args,jac=base_model.jacobian).x
 
     # Find number of flags
     flags = 0
@@ -77,18 +90,21 @@ def FitComponents(spectrum,continuum,cont_pnames,emission,emiss_pnames):
         
         # Add new component
         EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],i)
-        emission,emiss_pnames = BM.BuildEmission(spectrum,EmissionGroups)
+        emis,emis_x = BM.BuildEmission(spectrum,EmissionGroups)
 
-        # Split FLux
-        model = BM.BuildModel(continuum,emission)
-        model = SplitFlux(model,cont_pnames+emiss_pnames)
-        
-        # Fit model
-        model = BM.TieParams(spectrum,model,cont_pnames+emiss_pnames,EmissionGroups)
-        model = FitModel(spectrum,model)
+        # Create New Model
+        constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names())
+        model,x0 = BM.BuildModel(spectrum,cont,cont_x,emis,emis_x,constraints)
+
+        # Inital guess, split flux amongst new lines
+        x0 = SplitFlux(model,x0)
+        x0 = model.constrain(x0) # Limit to true parameters
+
+        # Fit Model
+        model_fit = FitModel(model,x0,args,jac=model.jacobian).x
 
         # Perform F-test
-        if MC.FTest(spectrum,base_model,model):
+        if MC.FTest(base_model,base_fit,model,model_fit,spectrum,args):
             accepted.append(i)
 
     ## Check all combinations of accepted components with AICs
@@ -103,18 +119,21 @@ def FitComponents(spectrum,continuum,cont_pnames,emission,emiss_pnames):
 
         # Add new components
         EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],c)
-        emission,emiss_pnames = BM.BuildEmission(spectrum,EmissionGroups)
+        emis,emis_x = BM.BuildEmission(spectrum,EmissionGroups)
 
-        # Split Flux
-        model = BM.BuildModel(continuum,emission)
-        model = SplitFlux(model,cont_pnames+emiss_pnames)
+        # Create New Model
+        constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names())
+        model,x0 = BM.BuildModel(spectrum,cont,cont_x,emis,emis_x,constraints)
 
-        # Fit model
-        model = BM.TieParams(spectrum,model,cont_pnames+emiss_pnames,EmissionGroups)
-        model = FitModel(spectrum,model)
+        # Inital guess, split flux amongst new lines
+        x0 = SplitFlux(model,x0)
+        x0 = model.constrain(x0) # Limit to true parameters
+
+        # Fit Model
+        model_fit = FitModel(model,x0,args,jac=model.jacobian).x
 
         # Calcualte AIC
-        AICs[i] = MC.AIC(model,spectrum)
+        AICs[i] = MC.AIC(model,model_fit,args)
 
     # Use min AIC
     if combs != []:
@@ -125,29 +144,26 @@ def FitComponents(spectrum,continuum,cont_pnames,emission,emiss_pnames):
     # Construct Final Model
     EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],accepted)
     emission,emiss_pnames = BM.BuildEmission(spectrum,EmissionGroups)
+    constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names())
+    model,x0 = BM.BuildModel(spectrum,cont,cont_x,emis,emis_x,constraints)
 
-    # Split Flux
-    model = BM.BuildModel(continuum,emission)
-    model = SplitFlux(model,cont_pnames+emiss_pnames)
-    # Fit model
-    model = BM.TieParams(spectrum,model,cont_pnames+emiss_pnames,EmissionGroups)
-    model = FitModel(spectrum,model)
+    # Inital guess, split flux amongst new lines
+    x0 = SplitFlux(model,x0)
+    x0 = model.constrain(x0) # Limit to true parameters
 
-    return model,cont_pnames+emiss_pnames
+    # Fit Model
+    model_fit = FitModel(model,x0,args,jac=model.jacobian).x
 
-# Fit Model, must specify region
-def FitModel(spectrum,model,region = None):
+    return model,model_fit
 
-    if type(region) == type(None):
-        region = np.ones(spectrum.wav.shape,dtype=bool)
-
-    # Fit model
-    fit_model = fit(model,spectrum.wav[region],spectrum.flux[region],weights=spectrum.sqrtweight[region],maxiter=spectrum.p['MaxIter'])
+# Fit Model
+def FitModel(model,x0,args,jac='2-point'):
     
-    return fit_model
+    fit = least_squares(fun = model.residual, jac=jac, x0 = x0, args = args,  bounds = model.get_bounds(), method='trf')
+    return fit
 
 # Fit (Bootstrapped) Model
-def FitBoot(spectrum,model,i,N):
+def FitBoot(model,x0,spectrum,i,N):
 
     # Loading bar params
     if ((spectrum.p['NProcess'] == 1) and spectrum.p['Verbose']):
@@ -161,34 +177,33 @@ def FitBoot(spectrum,model,i,N):
             print('Progress: |'+l*'#'+(N-l)*'-'+'|  '+str(p)+'%',end='\r')
 
     # Fit model
-    fit_model = fit(model,spectrum.wav,spectrum.Boostrap(),weights=spectrum.sqrtweight,maxiter=spectrum.p['MaxIter'])
+    args = spectrum.wav,spectrum.Bootstrap(),spectrum.isig
+    fit_model = FitModel(model,x0,args)
 
-    return np.concatenate([fit_model.parameters,[MC.rChi2(spectrum,fit_model)]])
+    return np.concatenate([fit_model.x,[np.square(fit_model.fun).sum()]])
 
 # Split flux between emission lines
-def SplitFlux(model,param_names):
+def SplitFlux(model,x0):
 
     # Count up number of components for a line
     numcomp = {}
-    for param_name in param_names:
+    for i,param_name in enumerate(model.get_names()):
         if 'Flux' in param_name:
-            if model.parameters[param_names.index(param_name)] >= 0:
-                line = param_name.split('-')[-2]
+            if x0[i] >= 0:
+                line = param_name.split('_')[-2]
                 if line not in numcomp.keys():
                     numcomp[line] = 1
                 else: 
                     numcomp[line] += 1
     
     # Reduce flux of a line by number of components
-    for i,param_name in enumerate(param_names):
+    for i,param_name in enumerate(model.get_names()):
         if 'Flux' in param_name:
-            n = numcomp[param_name.split('-')[-2]]
+            n = numcomp[param_name.split('_')[-2]]
             if n > 1:
-                parameters = model.parameters
-                parameters[i] = model.parameters[i]/n
-                model.parameters = parameters
+                x0[i] /= n
             
-    return model
+    return x0
 
 # Add additional component to a model
 def AddComplexity(EmissionGroups_old,index):
@@ -232,7 +247,7 @@ def AddComplexity(EmissionGroups_old,index):
                             
                                 # Construct the added entry
                                 entry = {
-                                   'Name':species['Name'] + '-' + AC.ComponentName(k),
+                                   'Name':species['Name'] + '_' + AC.ComponentName(k),
                                    'Lines':species['Lines'],
                                    'Flag': int('-0b1'+k*'0',2),
                                    'FlagGroups':[]

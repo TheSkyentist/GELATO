@@ -22,7 +22,7 @@ def ComponentName(index):
     if index == 2:
         return 'Absorption'
 
-def AddComponent(flag, line, spectrum):
+def AddComponent(flag, line, spectrum, prefix, zscale=100):
 
     '''
     For each bit position, what is the model that we implement,
@@ -34,44 +34,34 @@ def AddComponent(flag, line, spectrum):
     flag = bin(flag)[3:]
     index = len(flag) - flag.index('1') - 1
 
-
     ''' Broad '''
     if index == 0: 
     
         # Broad line model
-        # Use wider default dispersion
-        model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 1000)
-
-        # Reassignflux bounds
-        oldMaxDispersion = model.Dispersion.bounds[1]
-        model.Dispersion.bounds = (750,10000)
-        model.Flux.bounds = (0,1.5*model.Flux*model.Dispersion.bounds[1]/oldMaxDispersion)
+        model = CM.SpectralFeature(center = line,spec = spectrum, prefix=prefix, zscale=zscale)
+        x0 = model.starting()
         
-        return model
+        # Use wider default dispersion
+        x0[2] = 1000 # Dispersion
 
+        # Reassign Dispersion bounds
+        oldMaxDispersion = model.Dispersion_bounds[1]
+        model.Dispersion_bounds = (750,10000)
+
+        # Reassign Flux Bounds
+        model.Flux_bounds = (0,1.5*x0[1]*model.Dispersion_bounds[1]/oldMaxDispersion)
+        
     ''' Outflow '''
     if index == 1: 
     
-        # Broad line model
+        # Outflow model
+        model = CM.SpectralFeature(center = line,spec = spectrum, prefix=prefix, zscale=zscale)
+        x0 = model.starting()
+
         # Use wider default dispersion
-        model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 500)
-        model.Dispersion.bounds = (500,1000)
+        x0[2] = 500 # Dispersion
 
-        return model
+        # Reassign Dispersion bounds
+        model.Dispersion_bounds = (500,1000)
 
-    ''' Absorption '''
-    if index == 2: 
-    
-        # Absorption line model
-        # Use wider default dispersion        
-        model = CM.SpectralFeature(center = line,spectrum = spectrum, Dispersion = 600)
-
-        # Reassign Flux
-        oldMaxDispersion = model.Dispersion.bounds[1]
-        oldFlux = model.Flux.value
-        model.Dispersion.bounds = (350,3000)
-        model.Flux.bounds = (-model.Flux.bounds[1]*1000/oldMaxDispersion,0) # Must be non-positive
-
-        model.Redshift = spectrum.z
-        model.Flux = -oldFlux*model.Dispersion/oldMaxDispersion/2
-        return model
+    return model,x0

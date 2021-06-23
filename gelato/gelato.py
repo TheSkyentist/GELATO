@@ -42,11 +42,10 @@ def gelato(params,path,z):
     if params["Verbose"]:
         print("Ingredients gathered:",name)
 
-    ## Create Base Model ##
+    ## Fit Continuum ##
     if params["Verbose"]:
         print("Making the base:",name)
-    continuum,cont_pnames = FM.FitContinuum(spectrum)
-    emission,emiss_pnames = BM.BuildEmission(spectrum)
+    cont,cont_x = FM.FitContinuum(spectrum)
     if params["Verbose"]:
         print("Base created:",name)
 
@@ -57,8 +56,9 @@ def gelato(params,path,z):
         if params["Verbose"]:
             print("Adding flavor:",name)
         
-        model,param_names = FM.FitComponents(spectrum,continuum,cont_pnames,emission,emiss_pnames)
-        param_names = param_names + ["rChi2"]
+        # Build emission line model
+        emis,emis_x = BM.BuildEmission(spectrum)
+        model,model_fit = FM.FitComponents(spectrum,cont,cont_x,emis,emis_x)
         if params["Verbose"]:
             print("Flavor added:",name)
 
@@ -66,46 +66,70 @@ def gelato(params,path,z):
         if params["Verbose"]:
             print("Scooping portions (this may take a while):",name)
         N = 40 # Max length of progress bar
-        parameters = np.array([FM.FitBoot(spectrum,model,i,N=N) for i in range(params["NBoot"])])
+        parameters = np.array([FM.FitBoot(model,model_fit,spectrum,i,N=N) for i in range(params["NBoot"])])
         if ((params['NProcess'] == 1) and params['Verbose']):
             print('Progress: |'+N*'#'+'| 100%')
         if params["Verbose"]:
             print("Portions scooped:",name)
+
+        # Expand parameters and names
+        parameters = model.expand_multiple(parameters)
+        param_names = model.get_names()+('rChi2',)
 
         ## Plotting ##
         if params["Plotting"]:
             if params["Verbose"]:
                 print("Presenting gelato:",name)
             # Set model parameters to median values
-            model.parameters = np.median(parameters,0)[:-1]
-            PL.Plot(spectrum,model,path,param_names)
+            medians = np.median(parameters,0)[:-1]
+            PL.Plot(spectrum,model,medians,path)
             if params["Verbose"]:
                 print("gelato presented:",name)
 
-         # Get equivalent wdiths
+        # Remove redshift scaling from parameters
+        ind = cont.nparams()
+        for i,j in zip(range(ind,parameters.shape[1]-1,3),range(len(cont.models),len(model.models))):
+            parameters[:,i] /= model.models[j].zscale
+
+        ## Equivalent Widths ##
         if params["CalcEW"]:
             if params["Verbose"]:
                 print("Measuring texture:",name)
             parameters,param_names = EW.EquivalentWidth(spectrum,model,parameters,param_names)
             if params["Verbose"]:
                 print("Measured texture:",name)
-                
+
     # Otherwise:
     else:
-        # Just continuum
-        model = continuum
-        parameters = np.hstack([model.parameters,[MC.rChi2(spectrum,model)]])
-        param_names = cont_pnames + ["rChi2"]
+
         if params["Verbose"]:
             print("Flavour not found (no lines with spectral coverage):",name)
+
+        # Just continuum
+        model = cont
+
+        # Get Chi2
+        region = np.invert(spectrum.emission_region)
+        args = (spectrum.wav,spectrum.flux,spectrum.isig)
+        residuals = model.residual(cont_x,*args)[region]
+        parameters = np.array([np.hstack([cont_x,[np.square(residuals).sum()]])])
+        param_names = model.get_names()+('rChi2',)
 
         ## Plotting ##
         if params["Plotting"]:
             if params["Verbose"]:
                 print("Presenting gelato:",name)
-            PL.PlotFig(spectrum,continuum,path,param_names)
+                medians = np.median(parameters,0)[:-1]
+            PL.PlotFig(spectrum,model,medians,path)
             if params["Verbose"]:
                 print("Gelato presented:",name)
+
+    # Add in continuum redshifts
+    parameters = np.hstack([np.ones((len(parameters),1))*model.models[0].redshift,parameters])
+    param_names = ('SSP_Redshift',) + param_names
+
+    # Turn Chi2 into rChi2
+    parameters[:,param_names.index('rChi2')] /= len(spectrum.wav) - model.nparams()
 
     # Turn into FITS table
     parameters = Table(data=parameters,names=param_names)

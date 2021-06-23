@@ -6,6 +6,7 @@ EGFig.pdf
 build/
 dist/
 GELATO.egg-info/
+Results/
 files.txt
 *.aux
 *.sty

@@ -29,9 +29,10 @@ class Spectrum:
         self.wav = 10**spectrum['loglam'][good]
         self.flux = spectrum['flux'][good]
         self.weight = weight[good]
-        self.sqrtweight = np.sqrt(self.weight)
-        self.sigma = 1/self.sqrtweight
-
+        self.isig = np.sqrt(self.weight)
+        self.sigma = 1/self.isig
+        self.var = 1/self.weight
+        
         # Create regions and lines
         self.regionAndLines()
         self.reduceRegions()
@@ -85,6 +86,6 @@ class Spectrum:
                 break
 
     # Boostrap the Flux
-    def Boostrap(self):
+    def Bootstrap(self):
 
         return np.random.normal(self.flux,self.sigma)

@@ -3,31 +3,29 @@ import numpy as np
 import scipy.stats as stats
 
 # Preform an f-test
-def FTest(spectrum,model1,model2,fitregion = None):
-
-    if type(fitregion) == type(None): 
-        fitregion = np.ones(spectrum.wav.shape,dtype=bool)
+def FTest(model1,x1,model2,x2,spectrum,args):
 
     # Find full and reduced model
-    if (model1.parameters.size < model2.parameters.size):
+    if (model1.nparams() < model2.nparams()):
         model_full = model2
+        x_full = x2
         model_redu = model1
+        x_redu = x1
     else: 
         model_full = model1
+        x_full = x1
         model_redu = model2
+        x_full = x2
 
     # Degrees of freedom
-    # N = 0
-    # for region in spectrum.regions:
-    #     N += np.sum(np.logical_and(region[0] < spectrum.wav[fitregion],spectrum.wav[fitregion] < region[1]))
-    N = fitregion.sum()
+    N = args[0].size
 
-    df_redu = N - np.sum([val == False for val in model_redu.tied.values()])
-    df_full = N - np.sum([val == False for val in model_full.tied.values()])
+    df_redu = N - model_redu.nparams()
+    df_full = N - model_full.nparams()
 
     # Calculate Chi2
-    RSS_redu = Chi2(model_redu,spectrum.wav[fitregion],spectrum.flux[fitregion],spectrum.weight[fitregion])
-    RSS_full = Chi2(model_full,spectrum.wav[fitregion],spectrum.flux[fitregion],spectrum.weight[fitregion])
+    RSS_redu = Chi2(model_redu,x_redu,args)
+    RSS_full = Chi2(model_full,x_full,args)
 
     # F-test
     F_value = ((RSS_redu - RSS_full)/(df_redu - df_full))/(RSS_full/df_full)
@@ -37,22 +35,11 @@ def FTest(spectrum,model1,model2,fitregion = None):
     return F_distrib.cdf(F_value) > spectrum.p['FThresh']
 
 # Calculate Akaike Information Criterion
-def AIC(model,spectrum):
-
-    # Model parameters
-    k = np.sum([val == False for val in model.tied.values()])
+def AIC(model,p,args):
 
     # Correct up to a constant
-    return Chi2(model,spectrum.wav,spectrum.flux,spectrum.weight) + 2*k
+    return Chi2(model,p,args) + 2*model.nparams()
 
-# Chi Squared of model
-def Chi2(model,x,y,weights):
-    r = y - model(x) # Residual
-    return np.sum(r*r*weights)
+def Chi2(model,p,args):
 
-# Reduce Chi Squared of model
-def rChi2(spectrum,model):
-    # Degrees of freedom
-    N = spectrum.wav.size
-    dof = N - np.sum([val == False for val in model.tied.values()])
-    return Chi2(model,spectrum.wav,spectrum.flux,spectrum.weight)/dof
+    return np.square(model.residual(p,*args)).sum()

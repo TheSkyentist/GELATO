@@ -13,32 +13,36 @@ import gelato.SpectrumClass as SC
 C = 299792.458 # km/s
 
 # Calculate Equivalent Width
-def EquivalentWidth(spectrum,model,parameters,param_names):
+def EquivalentWidth(spectrum,model,parameters,param_names=None):
 
-    # Continuum
-    if 'PL_Continuum_Coefficient' in param_names:
-        continuum = model[0:2]
-    else: continuum = model[0]
+    if type(param_names) == type(None):
+        param_names = model.get_names()
 
-    # Index where emission lines start
-    ind = len(continuum.parameters)
+    # Continuum and Model
+    args = spectrum.wav,spectrum.flux,spectrum.isig
+    if 'PowerLaw_Coefficient' in param_names:
+        continuum = CM.CompoundModel(model.models[0:2])
+    else: 
+        continuum = CM.CompoundModel(model.models[0:1])
+
+    # Where continuum parameters start
+    ind = continuum.nparams()
 
     # Get all continuum heights
     continua = np.ones((parameters.shape[0],len(spectrum.wav)))
     for i,params in enumerate(parameters):
-        continuum.parameters = params[:ind]
-        continua[i] = continuum(spectrum.wav)
+        continua[i] = continuum.evaluate(params,*args)
 
     # Empty EW array
-    REWs = np.ones((parameters.shape[0],int((len(param_names)-1-ind)/3),))
-    REWs_names = []
+    REWs = np.zeros((parameters.shape[0],int((parameters.shape[1]-1-ind)/3)))
 
     # Iterate over Emission lines
-    for i in range(ind,len(param_names)-1,3):
+    for i in range(ind,parameters.shape[1]-1,3):
 
         # Get line parameters
-        REWs_names.append(param_names[i].replace('-Redshift','-REW'))
-        center = float(REWs_names[-1].split('-')[-2]) 
+        param_names += (param_names[i].replace('_Redshift','_REW'),)
+
+        center = float(param_names[i].split('_')[-2]) 
         opz = 1 + parameters[:,i] # 1 + z
         flux = parameters[:,i+1] # Line flux
 
@@ -55,12 +59,12 @@ def EquivalentWidth(spectrum,model,parameters,param_names):
                 heights[j] = np.nan
             else:
                 heights[j] = np.median(ctm[region])
-
+    
         # Get REW
         REWs[:,int((i-ind)/3)] = np.abs(flux/(heights*opz))
 
     # Return combined Results
-    return np.hstack((parameters,REWs)),param_names+REWs_names
+    return np.hstack((parameters,REWs)),param_names
 
 # Plot from results
 def EWfromresults(params,path,z):
@@ -94,16 +98,19 @@ def EWfromresults(params,path,z):
 
         ## Create model ##
         # Add continuum
-        model = CM.SSPContinuum(spectrum)
-        model.set_region(np.ones(spectrum.wav.shape,dtype=bool))
-        if 'PL_Continuum_Coefficient' in names:
-            model += CM.PowerLawContinuum(spectrum)
+        models = [CM.SSPContinuumFree(spectrum,zscale=1)]
+        if 'PowerLaw_Coefficient' in names:
+            models.append(CM.PowerLawContinuum(spectrum))
+            models[-1].starting()
 
         # Add spectral lines
-        ind = len(model.parameters) # index where emission lines begin
+        ind = sum([m.nparams for m in models]) # index where emission lines begin
         for i in range(ind,len(names)-1,3):
-            center = float(names[i].split('-')[-2])
-            model += CM.SpectralFeature(center,spectrum)
+            center = float(names[i].split('_')[-2])
+            models.append(CM.SpectralFeature(center,spectrum,zscale=1))
+
+        # Final model
+        model = CM.CompoundModel(models)
         
         # Calculate REWs
         parameters,param_names = EquivalentWidth(spectrum,model,parameters,names)

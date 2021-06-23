@@ -2,26 +2,23 @@
 
 # Packages
 import numpy as np
+from scipy.optimize import LinearConstraint
 
 # gelato supporting files
 import gelato.CustomModels as CM
 import gelato.AdditionalComponents as AC
 
 # Build the model from continuum and emission
-def BuildModel(continuum,emission):
+def BuildModel(spec,cont,cont_x,emis,emis_x,constraints=[]):
 
-    model = continuum+emission
-    model.parameters[0:continuum.parameters.size] = continuum.parameters
-    model.parameters[continuum.parameters.size:] = emission.parameters
-
-    return model
+    return CM.CompoundModel(cont.models+emis.models,constraints=constraints),np.concatenate([cont_x,emis_x])
 
 # Build the emission lines from the EmissionGroups and spectrum with initial guess
 def BuildEmission(spectrum, EmissionGroups=None):
     
     ## Build Base Model
     model_components = []
-    param_names = []
+    x0 = []
 
     # Check if we were passed an emission lines
     if EmissionGroups == None:
@@ -31,60 +28,32 @@ def BuildEmission(spectrum, EmissionGroups=None):
     for group in EmissionGroups:
         for species in group['Species']:
             for line in species['Lines']:
-                name =  group['Name'] + '-' + species['Name'] + '-' + str(line['Wavelength']) + '-'
+                name =  group['Name']+'_'+species['Name']+'_'+str(line['Wavelength'])
                 
                 # If additional component
                 if species['Flag'] < 0:
-                    model = AC.AddComponent(species['Flag'],line['Wavelength'],spectrum)
-                    
+                    model,x = AC.AddComponent(species['Flag'],line['Wavelength'],spectrum,name)
+                    x0.append(x)
+
                 # IF original model component
                 else:
-                    model = CM.SpectralFeature(center = line['Wavelength'],spectrum = spectrum)
+                    model = CM.SpectralFeature(line['Wavelength'],spectrum,name)
+                    x0.append(model.starting())
 
                 # Add model
                 model_components.append(model)
                 
-                # Collect param names
-                for pname in model_components[-1].param_names:
-                    param_names.append(name+pname)
     ## Build Base Model
 
-    ## Tie parameters ##
-    model = TieParams(spectrum,np.sum(model_components),param_names,EmissionGroups)
-    ## Tie parameters ##
+    return CM.CompoundModel(model_components),np.concatenate(x0)
 
-    return model,param_names
+# Tied Emission model parameters
+def TieParams(spectrum,param_names,EmissionGroups=None):
 
-# Tie Model Parameters:
-def TieParams(spectrum,model,param_names,EmissionGroups=None):
+    constraints = []
 
     if type(EmissionGroups) == type(None):
         EmissionGroups = spectrum.p['EmissionGroups']
-
-    # Tie Continuum
-    model = TieContinuum(model,param_names)
-
-    # Tie Emission
-    model = TieEmission(spectrum,model,param_names,EmissionGroups)
-
-    return model
-
-# Tie Continuum Redshift
-def TieContinuum(cont,cont_pnames):
-
-    first_redshift = True
-    for pname in cont_pnames:
-        if (('Redshift' in pname) and ('Continuum' in pname)):
-            if first_redshift:
-                TieRedshift = GenTieFunc(cont_pnames.index(pname))
-                first_redshift = False
-            else:
-                cont.tied[cont.param_names[cont_pnames.index(pname)]] = TieRedshift
-
-    return cont
-
-# Tied Emission model parameters
-def TieEmission(spectrum,model,param_names,EmissionGroups):
 
     ## Tie parameters ##
     for group in EmissionGroups:
@@ -96,58 +65,76 @@ def TieEmission(spectrum,model,param_names,EmissionGroups):
 
             for line in species['Lines']:
                 
-                # Find parameter name prefix
-                name =  group['Name'] + '-' + species['Name'] + '-' + str(line['Wavelength']) + '-'
+                # Find parameter names
+                name =  group['Name'] + '_' + species['Name'] + '_' + str(line['Wavelength']) + '_'
+                name_Redshift = name + 'Redshift'
+                name_Dispersion = name + 'Dispersion'
+                name_Flux = name + 'Flux'
 
                 ## Tie Group Components
                 # Check for first line in group and make tie functions
                 if first_group_member:
                     first_group_member = False
-                    TieGroupRedshift = GenTieFunc(param_names.index(name+'Redshift'))
-                    TieGroupDispersion = GenTieFunc(param_names.index(name+'Dispersion'))
+                    first_group_redshift_index = param_names.index(name_Redshift)
+                    first_group_dispersion_index = param_names.index(name_Dispersion)
                 else:
                     # Otherwise tie redshift (check if we should)
                     if group['TieRedshift']:
-                        model.tied[model.param_names[param_names.index(name+'Redshift')]] = TieGroupRedshift
+                        constraints.append(np.zeros(len(param_names)))
+                        constraints[-1][first_group_redshift_index] = 1
+                        constraints[-1][param_names.index(name_Redshift)] = 1
                     # Otherwise tie dispersion (check if we should)
                     if group['TieDispersion']:
-                        model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieGroupDispersion
-                    
+                        constraints.append(np.zeros(len(param_names)))
+                        constraints[-1][first_group_dispersion_index] = 1
+                        constraints[-1][param_names.index(name_Dispersion)] = 1
+
                 ## Tie Species Components
                 # Tie Dispersion and Redshift
                 # Check for first line in species and make tie functions
                 if first_species_line:
                     # Dispersion
                     first_species_line = False
-                    TieSpeciesRedshift = GenTieFunc(param_names.index(name+'Redshift'))
-                    TieSpeciesDispersion = GenTieFunc(param_names.index(name+'Dispersion'))
+                    first_species_redshift_index = param_names.index(name_Redshift)
+                    first_species_dispersion_index = param_names.index(name_Dispersion)
 
                 # Otherwise tie params
                 else:
-                    # Dispersion and Redshift
-                    model.tied[model.param_names[param_names.index(name+'Redshift')]] = TieSpeciesRedshift                
-                    model.tied[model.param_names[param_names.index(name+'Dispersion')]] = TieSpeciesDispersion                
+                    # Redshift
+                    constraints.append(np.zeros(len(param_names)))
+                    constraints[-1][first_species_redshift_index] = 1
+                    constraints[-1][param_names.index(name_Redshift)] = 1
+                    # Dispersion
+                    constraints.append(np.zeros(len(param_names)))
+                    constraints[-1][first_species_dispersion_index] = 1
+                    constraints[-1][param_names.index(name_Dispersion)] = 1
 
                 # Tie Flux
                 if (first_species_flux and (line['RelStrength'] != None)):
                     first_species_flux = False
                     # Flux
                     reference_flux = line['RelStrength']
-                    index_flux = param_names.index(name+'Flux')
+                    index_flux = param_names.index(name_Flux)
                 elif (line['RelStrength'] != None):
-                    height_index = param_names.index(name+'Flux')
-                    TieFlux = GenTieFunc(index_flux,scale=line['RelStrength']/reference_flux)
-                    model.tied[model.param_names[height_index]] = TieFlux
-            
-    ##Tie parameters ##
+                    constraints.append(np.zeros(len(param_names)))
+                    constraints[-1][index_flux] = 1
+                    constraints[-1][param_names.index(name_Flux)] = line['RelStrength']/reference_flux
 
-    return model
+    ## Tie parameters ##
 
-# Generate Tie Paramater Function, needed to preserve static values in function
-# Note: tried using lambda function in place, but it didn't work. 
-def GenTieFunc(index,scale=1):
+    ## Create Constraints ##
+    sorton = np.array([tuple(np.argwhere(c).T[0]) for c in constraints],dtype=[('a','<i8'),('b','<i8')])
+    constraints = np.array(constraints)[np.argsort(sorton)]
 
-    def TieFunc(model):
-        return model.parameters[index]*scale
+    # Get unique constraints
+    cont_list = []
+    tar_idx = []
+    for c in constraints:
+        ref_i = np.argwhere(c)[0][0] # Reference index
+        tar_i = np.argwhere(c)[1][0] # Target index
+        if tar_i not in tar_idx:
+            tar_idx.append(tar_i)
+            cont_list.append((ref_i,tar_i,c[tar_i]))
+    ## Create Constraints ##
 
-    return TieFunc
+    return cont_list
