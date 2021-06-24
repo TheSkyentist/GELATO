@@ -93,7 +93,7 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
         emis,emis_x = BM.BuildEmission(spectrum,EmissionGroups)
 
         # Create New Model
-        constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names())
+        constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names(),EmissionGroups)
         model,x0 = BM.BuildModel(spectrum,cont,cont_x,emis,emis_x,constraints)
 
         # Inital guess, split flux amongst new lines
@@ -122,7 +122,7 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
         emis,emis_x = BM.BuildEmission(spectrum,EmissionGroups)
 
         # Create New Model
-        constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names())
+        constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names(),EmissionGroups)
         model,x0 = BM.BuildModel(spectrum,cont,cont_x,emis,emis_x,constraints)
 
         # Inital guess, split flux amongst new lines
@@ -143,8 +143,9 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
 
     # Construct Final Model
     EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],accepted)
-    emission,emiss_pnames = BM.BuildEmission(spectrum,EmissionGroups)
-    constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names())
+    emis,emis_x = BM.BuildEmission(spectrum,EmissionGroups)
+
+    constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names(),EmissionGroups)
     model,x0 = BM.BuildModel(spectrum,cont,cont_x,emis,emis_x,constraints)
 
     # Inital guess, split flux amongst new lines
@@ -178,9 +179,9 @@ def FitBoot(model,x0,spectrum,i,N):
 
     # Fit model
     args = spectrum.wav,spectrum.Bootstrap(),spectrum.isig
-    fit_model = FitModel(model,x0,args)
+    fit_model = FitModel(model,x0,args,jac=model.jacobian)
 
-    return np.concatenate([fit_model.x,[np.square(fit_model.fun).sum()]])
+    return np.concatenate([fit_model.x,[np.square(model.residual(fit_model.x,spectrum.wav,spectrum.flux,spectrum.isig)).sum()]])
 
 # Split flux between emission lines
 def SplitFlux(model,x0):

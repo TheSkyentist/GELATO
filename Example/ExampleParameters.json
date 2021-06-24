@@ -5,7 +5,7 @@
     "ContinuumRegion": 15000,
     "LineRegion": 300,
     "MaxIter": 1000,
-    "NBoot": 5,
+    "NBoot": 10,
     "FThresh": 0.95,
     "NProcess": 1,
     "Plotting": true,

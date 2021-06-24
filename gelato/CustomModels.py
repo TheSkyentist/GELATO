@@ -28,7 +28,7 @@ class CompoundModel():
 
     def nparams(self):
 
-        return sum(m.nparams for m in self.models) - len(self.constraints) -  np.sum([b[0] == b[1] for b in self.get_bounds().T])
+        return sum(m.nparams for m in self.models) - len(self.constraints)
 
     def starting(self):
 
