@@ -21,6 +21,8 @@ class CompoundModel():
         # Constraints
         self.constraints = constraints
         self.contindices = list(np.sort([c[1] for c in constraints]))
+        for c in constraints:
+            print(c)
         self.constrained = len(constraints) > 0
 
         # Index where relevant parameters start
@@ -56,7 +58,7 @@ class CompoundModel():
         return (np.delete(jac,self.contindices,axis=0)*isig).T
 
     def get_bounds(self):
-        
+
         return np.delete(np.array(sum((m.get_bounds() for m in self.models),())).T,self.contindices,axis=1)
 
     def get_names(self):
@@ -130,6 +132,7 @@ class SpectralFeature():
 
         # Find starting height and then flux
         Height = np.abs(np.max(spec.flux[inline]) - np.median(spec.flux[inreg]))
+        if Height == 0: Height = np.max(spec.sigma[inline])
         Flux = Height * (1 + spec.z) * self.Dispersion * self.center / ( OOSQRT_2_PI * C )
 
         # Set bounds
