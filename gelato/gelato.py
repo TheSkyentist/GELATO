@@ -20,9 +20,6 @@ def gelato(params,path,z):
 
     # Load Params
     if type(params) == str: params = CP.construct(params)
-    
-    # Set seed
-    np.random.seed(params["RandomSeed"])
 
     # Get name of file
     name = path.split("/")[-1]

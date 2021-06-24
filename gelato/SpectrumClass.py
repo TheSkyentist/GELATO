@@ -18,6 +18,9 @@ class Spectrum:
         # Object's redshift
         self.z = z
 
+        # Random State
+        self.rs = np.random.RandomState(np.random.MT19937(np.random.SeedSequence(p['RandomSeed'])))
+
         # Load Spectrum
         spectrum = fits.getdata(path)
 
@@ -88,4 +91,4 @@ class Spectrum:
     # Boostrap the Flux
     def Bootstrap(self):
 
-        return np.random.normal(self.flux,self.sigma)
+        return self.rs.normal(self.flux,self.sigma)
