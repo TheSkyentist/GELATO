@@ -21,8 +21,6 @@ class CompoundModel():
         # Constraints
         self.constraints = constraints
         self.contindices = list(np.sort([c[1] for c in constraints]))
-        for c in constraints:
-            print(c)
         self.constrained = len(constraints) > 0
 
         # Index where relevant parameters start
