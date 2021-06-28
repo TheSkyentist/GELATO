@@ -160,7 +160,7 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
 # Fit Model
 def FitModel(model,x0,args,jac='3-point'):
     
-    fit = least_squares(fun = model.residual, jac=jac, x0 = x0, args = args,  bounds = model.get_bounds(), method='trf', xtol=None)
+    fit = least_squares(fun = model.residual, jac=jac, x0 = x0, args = args,  bounds = model.get_bounds(), method='trf', xtol=None, ftol = 1e-2)
 
     return fit
 
