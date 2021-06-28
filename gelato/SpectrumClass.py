@@ -18,9 +18,6 @@ class Spectrum:
         # Object's redshift
         self.z = z
 
-        # Random State
-        self.rs = np.random.RandomState(np.random.MT19937(np.random.SeedSequence(p['RandomSeed'])))
-
         # Load Spectrum
         spectrum = fits.getdata(path)
 
@@ -43,6 +40,12 @@ class Spectrum:
         for r in self.regions:
             self.emission_region[np.logical_and(r[0]<self.wav,self.wav<r[1])] = True
     
+        # Create Bootstrap with Repeatable Random State
+        rs=np.random.RandomState(np.random.MT19937(np.random.SeedSequence(p['RandomSeed'])))
+        self.bootstrap = rs.normal(size=(p['NBoot'],good.sum()))
+        self.bootstrap *= np.array([self.sigma])
+        self.bootstrap += self.flux
+
     # Return reduced regions and emission lines based on spectrum wavelength
     def regionAndLines(self):
 
@@ -89,6 +92,6 @@ class Spectrum:
                 break
 
     # Boostrap the Flux
-    def Bootstrap(self):
+    def Bootstrap(self,i):
 
-        return self.rs.normal(self.flux,self.sigma)
+        return self.bootstrap[i]

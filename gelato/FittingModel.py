@@ -178,7 +178,7 @@ def FitBoot(model,x0,spectrum,i,N):
             print('Progress: |'+l*'#'+(N-l)*'-'+'|  '+str(p)+'%',end='\r')
 
     # Fit model
-    args = spectrum.wav,spectrum.Bootstrap(),spectrum.isig
+    args = spectrum.wav,spectrum.Bootstrap(i),spectrum.isig
     fit_model = FitModel(model,x0,args,jac=model.jacobian)
 
     return np.concatenate([fit_model.x,[np.square(model.residual(fit_model.x,spectrum.wav,spectrum.flux,spectrum.isig)).sum()]])
