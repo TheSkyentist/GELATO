@@ -158,9 +158,10 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
     return model,model_fit
 
 # Fit Model
-def FitModel(model,x0,args,jac='2-point'):
+def FitModel(model,x0,args,jac='3-point'):
     
-    fit = least_squares(fun = model.residual, jac=jac, x0 = x0, args = args,  bounds = model.get_bounds(), method='trf')
+    fit = least_squares(fun = model.residual, jac=jac, x0 = x0, args = args,  bounds = model.get_bounds(), method='trf', xtol=None, x_scale='jac')
+    
     return fit
 
 # Fit (Bootstrapped) Model
