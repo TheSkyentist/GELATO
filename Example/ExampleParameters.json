@@ -37,8 +37,8 @@
                 },
                 {
                     "Name":"[NII]",
-                    "Flag": 0,
-                    "FlagGroups": [],
+                    "Flag": 2,
+                    "FlagGroups": ["Outflow"],
                     "Lines": [
                         {
                             "Wavelength": 6583.45,
@@ -52,8 +52,8 @@
                 },
                 {
                     "Name":"[OIII]",
-                    "Flag": 0,
-                    "FlagGroups": [],
+                    "Flag": 2,
+                    "FlagGroups": ["Outflow"],
                     "Lines": [
                         {
                             "Wavelength": 5006.84,
@@ -133,8 +133,8 @@
             "Species": [
                 {
                     "Name":"HI",
-                    "Flag": 0,
-                    "FlagGroups": [],
+                    "Flag": 1,
+                    "FlagGroups": ["Balmer"],
                     "Lines": [
                         {
                             "Wavelength": 6562.79,
