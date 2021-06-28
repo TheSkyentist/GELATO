@@ -49,7 +49,8 @@ def concatfromresults(p,objects):
             tables.append(Table(data = np.array(data), names = names,dtype=dtype))
 
         table = vstack(tables,join_type = 'outer')
-        for c in table.colnames: table[c][table.mask[c]] = np.nan
+        if not type(table.mask) == type(None):
+            for c in table.colnames: table[c][table.mask[c]] = np.nan
 
         # If first entry, save to disk directly
         if first:
