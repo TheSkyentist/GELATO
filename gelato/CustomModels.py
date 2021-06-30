@@ -334,7 +334,7 @@ class SSPContinuumFixed():
             with fits.open(ssp_dir+ssp_name) as f:
                 h = f[0].header
                 flux = f[0].data
-                ssps.append(flux)
+                ssps.append(flux/flux.max())
 
         # Get SSP Wavelength, depends on Vacuum or Air Wavelengths
         if self.spec.p['VacuumWav']: 
