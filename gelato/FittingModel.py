@@ -23,28 +23,32 @@ def FitContinuum(spectrum):
     region = np.invert(spectrum.emission_region)
     args = (spectrum.wav[region],spectrum.flux[region],spectrum.isig[region])
 
-    # SSP Continuum
-    sspfree = CM.CompoundModel([CM.SSPContinuumFree(spectrum)])
-    zscale = sspfree.models[0].zscale
+    # SSP Continuum        
+    ssp = CM.CompoundModel([CM.SSPContinuumFree(spectrum)])
+    zscale = ssp.models[0].zscale
 
     # Fit initial continuuum with free redshift
-    sspfreefit = FitModel(sspfree,sspfree.starting(),args).x
+    sspfit = FitModel(ssp,ssp.starting(),args).x
 
-    x[0]
+    # Round redshift (numerical stability)
+    sspfit[0] = np.round(sspfit[0],3)
 
     # SSP+PL Continuum
-    pl = CM.PowerLawContinuum(spectrum,nssps=sspfree.nparams()-1)
-    ssppl = CM.CompoundModel([sspfree.models[0],pl])
+    pl = CM.PowerLawContinuum(spectrum,nssps=ssp.nparams()-1)
+    ssppl = CM.CompoundModel([ssp.models[0],pl])
 
     # Starting values
     x0 = ssppl.starting()
-    x0[:len(sspfreefit)] = sspfreefit
+    x0[:len(sspfit)] = sspfit
 
     # Fit initial continuuum with free redshift
     sspplfit = FitModel(ssppl,x0,args).x
 
+    # Round redshift (numerical stability)
+    sspplfit[0] = np.round(sspplfit[0],3)
+
     # Perform F-test
-    if MC.FTest(sspfree,sspfreefit,ssppl,sspplfit,spectrum,args):
+    if MC.FTest(ssp,sspfit,ssppl,sspplfit,spectrum,args):
 
         # Get fixed redshift compound model
         sspfixed = CM.SSPContinuumFixed(sspplfit[0]/zscale,spectrum)
@@ -58,7 +62,7 @@ def FitContinuum(spectrum):
         return cont,x0
     
     # Fixed Redshift compound model
-    sspfixed = CM.CompoundModel([CM.SSPContinuumFixed(sspfreefit[0]/zscale,spectrum)])
+    sspfixed = CM.CompoundModel([CM.SSPContinuumFixed(sspfit[0]/zscale,spectrum)])
     sspfixed.starting()
 
     return sspfixed,sspfreefit[1:]
@@ -162,8 +166,7 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
 # Fit Model
 def FitModel(model,x0,args,jac='3-point'):
     
-    fit = least_squares(fun = model.residual, jac=jac, x0 = x0, args = args,  bounds = model.get_bounds(), method='trf', ftol = 1e-7, xtol = None, x_scale='jac', verbose=2)
-    print(fit)
+    fit = least_squares(fun = model.residual, jac=jac, x0 = x0, args = args,  bounds = model.get_bounds(), method='trf', xtol = None, x_scale='jac')
 
     return fit
 
