@@ -32,16 +32,16 @@ class CompoundModel():
 
     def starting(self):
 
-        return np.concatenate([m.starting() for m in self.models])
+        return np.concatenate([m.starting() for m in self.models]).astype('float32')
 
     def residual(self,p,x,y,isig):
 
         if self.constrained: p = self.expand(p)
-        return (self.evaluate(p,x,y,isig) - y)*isig
+        return ((self.evaluate(p,x,y,isig) - y)*isig).astype('float32')
 
     def evaluate(self,p,x,y,isig):
 
-        return np.sum([m.evaluate(p[i:i+m.nparams],x,y,isig) for i,m in zip(self.indices,self.models)],0)
+        return np.sum([m.evaluate(p[i:i+m.nparams],x,y,isig) for i,m in zip(self.indices,self.models)],0).astype('float32')
 
     def jacobian(self,p,x,y,isig):
 
@@ -53,11 +53,11 @@ class CompoundModel():
         for c in self.constraints: 
             jac[c[0]] += jac[c[1]]*c[2]
 
-        return (np.delete(jac,self.contindices,axis=0)*isig).T
+        return ((np.delete(jac,self.contindices,axis=0)*isig).T).astype('float32')
 
     def get_bounds(self):
 
-        return np.delete(np.array(sum((m.get_bounds() for m in self.models),())).T,self.contindices,axis=1)
+        return np.delete(np.array(sum((m.get_bounds() for m in self.models),())).T,self.contindices,axis=1).astype('float32')
 
     def get_names(self):
 

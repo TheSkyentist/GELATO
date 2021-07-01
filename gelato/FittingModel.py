@@ -58,7 +58,7 @@ def FitContinuum(spectrum):
     # Fixed Redshift compound model
     sspfixed = CM.CompoundModel([CM.SSPContinuumFixed(sspfit[0]/zscale,spectrum)])
     sspfixed.starting()
-
+    
     return sspfixed,sspfreefit[1:]
 
 # Construct Full Model with F-tests for additional parameters

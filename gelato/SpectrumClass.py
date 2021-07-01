@@ -22,12 +22,12 @@ class Spectrum:
         spectrum = fits.getdata(path)
 
         # Only take good values
-        weight = spectrum['ivar'].astype('float64')
+        weight = spectrum['ivar'].astype('float32')
         good = weight > 0
 
         # Initial data
-        self.wav = 10**spectrum['loglam'][good].astype('float64')
-        self.flux = spectrum['flux'][good].astype('float64')
+        self.wav = 10**spectrum['loglam'][good].astype('float32')
+        self.flux = spectrum['flux'][good].astype('float32')
         self.weight = weight[good]
         self.isig = np.sqrt(self.weight)
         self.sigma = 1/self.isig
