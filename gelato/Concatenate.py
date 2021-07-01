@@ -30,7 +30,7 @@ def concatfromresults(p,objects):
             # Initalize Lists
             data = [name]
             names = ['Name']
-            dtype = [np.unicode_] + [np.float_ for i in range(2*len(parameters.columns.names))]
+            dtype = [np.unicode_] + [p['Precision'] for i in range(2*len(parameters.columns.names))]
             
             # Iterate over columns and add
             for n in parameters.columns.names:

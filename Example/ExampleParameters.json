@@ -2,9 +2,8 @@
     "OutFolder": "./Results/",
     "VacuumWav": false,
     "RandomSeed": 1,
-    "ContinuumRegion": 15000,
     "LineRegion": 300,
-    "MaxIter": 1000,
+    "ContinuumRegion": 15000,
     "NBoot": 10,
     "FThresh": 0.95,
     "NProcess": 1,
@@ -14,6 +13,7 @@
     "Concatenate": true,
     "Overwrite": true,
     "Verbose": true,
+    "Precision": "single",
     "EmissionGroups": [
         {
             "Name":"AGN",

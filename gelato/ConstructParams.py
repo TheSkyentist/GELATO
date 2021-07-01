@@ -25,7 +25,7 @@ def verify(params):
         return False
 
     # Check that all parameters are specified
-    for p in ['OutFolder', 'VacuumWav', 'RandomSeed', 'ContinuumRegion', 'LineRegion', 'MaxIter', 'NBoot', 'FThresh', 'NProcess', 'Plotting', 'FlamUnits', 'CalcEW', 'Overwrite', 'Concatenate', 'Verbose', 'EmissionGroups']:
+    for p in ['OutFolder', 'VacuumWav', 'RandomSeed', 'ContinuumRegion', 'LineRegion', 'NBoot', 'FThresh', 'NProcess', 'Plotting', 'FlamUnits', 'Precision', 'CalcEW', 'Overwrite', 'Concatenate', 'Verbose', 'EmissionGroups']:
         if not p in params.keys():
             print('Parameters does not contain parameter:',p)
             return False
@@ -37,11 +37,15 @@ def verify(params):
             if not (type(params[p]) == str):
                 print('Parameter',p,'must be a string.')
                 return False
+        elif p in ['Precision']:
+            if not ((params[p] == 'single') or (params[p] == 'double')):
+                print('Parameter',p,'must be one of single or double.')
+                return False
         elif p in ['RandomSeed','ContinuumRegion','LineRegion']:
             if not ((type(params[p]) == float) or (type(params[p]) == int)):
                 print('Parameter',p,'must be an int or a float.')
                 return False
-        elif p in ['MaxIter','NBoot','NProcess']:
+        elif p in ['NBoot','NProcess']:
             if not ((type(params[p]) == int) and (params[p] > 0)):
                 print('Parameter',p,'must be a positive int.')
                 return False

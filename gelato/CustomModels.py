@@ -390,7 +390,7 @@ class SSPContinuumFree():
     Continuum from SSPs
     """
 
-    def __init__(self, spec, zscale = 100):
+    def __init__(self, spec, zscale=100):
 
         # Keep track
         self.spec = spec

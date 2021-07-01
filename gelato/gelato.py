@@ -63,7 +63,7 @@ def gelato(params,path,z):
         if params["Verbose"]:
             print("Scooping portions (this may take a while):",name)
         N = 40 # Max length of progress bar
-        parameters = np.array([FM.FitBoot(model,model_fit,spectrum,i,N=N) for i in range(params["NBoot"])])
+        parameters = np.array([FM.FitBoot(model,model_fit,spectrum,i,N=N) for i in range(params["NBoot"])]).astype(params['Precision'])
         if ((params['NProcess'] == 1) and params['Verbose']):
             print('Progress: |'+N*'#'+'| 100%')
         if params["Verbose"]:
@@ -122,7 +122,7 @@ def gelato(params,path,z):
                 print("Gelato presented:",name)
 
     # Add in continuum redshifts
-    parameters = np.hstack([np.ones((len(parameters),1))*model.models[0].redshift,parameters])
+    parameters = np.hstack([np.ones((len(parameters),1),dtype=params['Precision'])*model.models[0].redshift,parameters])
     param_names = ('SSP_Redshift',) + param_names
 
     # Turn Chi2 into rChi2
