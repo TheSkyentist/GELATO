@@ -22,12 +22,12 @@ class Spectrum:
         spectrum = fits.getdata(path)
 
         # Only take good values
-        weight = spectrum['ivar']
+        weight = spectrum['ivar'].astype('float64')
         good = weight > 0
 
         # Initial data
-        self.wav = 10**spectrum['loglam'][good]
-        self.flux = spectrum['flux'][good]
+        self.wav = 10**spectrum['loglam'][good].astype('float64')
+        self.flux = spectrum['flux'][good].astype('float64')
         self.weight = weight[good]
         self.isig = np.sqrt(self.weight)
         self.sigma = 1/self.isig
@@ -41,7 +41,7 @@ class Spectrum:
             self.emission_region[np.logical_and(r[0]<self.wav,self.wav<r[1])] = True
     
         # Create Bootstrap with Repeatable Random State
-        rs=np.random.RandomState(np.random.MT19937(np.random.SeedSequence(p['RandomSeed'])))
+        rs=np.random.default_rng(p['RandomSeed'])
         self.bootstrap = rs.normal(size=(p['NBoot'],good.sum()))
         self.bootstrap *= np.array([self.sigma])
         self.bootstrap += self.flux
