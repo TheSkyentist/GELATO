@@ -30,9 +30,6 @@ def FitContinuum(spectrum):
     # Fit initial continuuum with free redshift
     sspfit = FitModel(ssp,ssp.starting(),args).x
 
-    # Round redshift (numerical stability)
-    sspfit[0] = np.round(sspfit[0],3)
-
     # SSP+PL Continuum
     pl = CM.PowerLawContinuum(spectrum,nssps=ssp.nparams()-1)
     ssppl = CM.CompoundModel([ssp.models[0],pl])
@@ -43,9 +40,6 @@ def FitContinuum(spectrum):
 
     # Fit initial continuuum with free redshift
     sspplfit = FitModel(ssppl,x0,args).x
-
-    # Round redshift (numerical stability)
-    sspplfit[0] = np.round(sspplfit[0],3)
 
     # Perform F-test
     if MC.FTest(ssp,sspfit,ssppl,sspplfit,spectrum,args):
