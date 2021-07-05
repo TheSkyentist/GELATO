@@ -26,7 +26,7 @@ class Spectrum:
         good = weight > 0
 
         # Initial data
-        self.wav = 10**spectrum['loglam'][good].astype(p['Precision'])
+        self.wav = (10**spectrum['loglam'][good]).astype(p['Precision'])
         self.flux = spectrum['flux'][good].astype(p['Precision'])
         self.weight = weight[good]
         self.isig = np.sqrt(self.weight)

@@ -64,4 +64,7 @@ def AddComponent(flag, line, spectrum, prefix, zscale=100):
         # Reassign Dispersion bounds
         model.Dispersion_bounds = (500,1000)
 
+        # Reassign Redshift bounds
+        model.Redshift_bounds = (model.zscale*(spectrum.z-0.01),model.zscale*spectrum.z)
+
     return model,x0

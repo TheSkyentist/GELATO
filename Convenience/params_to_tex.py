@@ -8,42 +8,79 @@ import argparse
 
 # gelato supporting files
 import gelato.ConstructParams as CP
+import gelato.AdditionalComponents as AC
 
 # Turn parameters into TeX file
 def TeX(params):
 
-    tex = '\documentclass{article}\n\\usepackage{multirow}\n\\begin{document}\n\\begin{center}\n\\begin{tabular}{cccccccc}\n\hline\hline\hline\n'
-    tex += '\\multicolumn{3}{c}{\\textbf{Groups}} & \multicolumn{3}{|c|}{\\textbf{Species}} & \multicolumn{2}{c}{\\textbf{Lines}}\\\\\n\\textbf{Name} & \\textbf{Tie \\boldmath$z$?} & \\textbf{Tie \\boldmath$\sigma$?} & \multicolumn{1}{|c}{\\textbf{Name}} & \\textbf{Flag} & \multicolumn{1}{c|}{\\textbf{Extra}} & \\textbf{\\boldmath$\lambda$ [\AA]} & \\textbf{Ratio}\\\\\hline\hline\n'
+    # Add premble
+    tex = '\documentclass{article}\n\\usepackage{multirow}\n\\begin{document}\n\\begin{center}\n\\noindent\n\\begin{tabular}{c|cc|ccccc}\n\hline\hline\hline\n'
+    # Header
+    tex += '\multicolumn{5}{c|}{\\textbf{Species (Tie \\boldmath$z$ \& $\sigma$)}} & \multicolumn{3}{c}{\\textbf{Groups}}\\\\\n'
+    # Subheader
+    tex += '\\textbf{Name} & \multicolumn{1}{|c}{\\textbf{Line [\\AA]}} & \multicolumn{1}{c|}{\\textbf{Ratio}} & \\textbf{+Comp} & \multicolumn{1}{c|}{\\textbf{$\\to$Group}} & \\textbf{Name} & \\textbf{Tie \\boldmath$z$?} & \\textbf{Tie \\boldmath$\sigma$?} \\\\\hline\hline\n'
 
-    for group in params['EmissionGroups']:
-        # Number of lines
+    # Iterate over Groups
+    for i,group in enumerate(params['EmissionGroups']):
+    
+        # Number of lines in the group
         Glines = 0
         for s in group['Species']:
             for l in s['Lines']: Glines += 1
-        if Glines == 0: Glines = 1
         
+        # If empty group, add it
+        if Glines == 0: 
+            tex += 5*' & '+' & '.join(['\multirow{1}{*}{'+x+'}' for x in [group['Name'],str(group['TieRedshift']),str(group['TieDispersion'])]])
+            tex += '\\\\\n'
+            if i < len(params['EmissionGroups']):
+                tex += '\cline{0-6}\n'
+
         # Multirow
-        tex += '&'.join(['\multirow{'+str(Glines)+'}{*}{'+x+'}' for x in [group['Name'],str(group['TieRedshift']),str(group['TieDispersion'])]]) + '&'
-        
-        for i,species in enumerate(group['Species']):
+        for j,species in enumerate(group['Species']):
+            
+            # Number of lines in the species
             Slines = 0
             for l in species['Lines']: Slines += 1
-            if Slines == 0: Slines = 1
+            if Slines == 0: Slines = 1 # If no lines, still want some width to row
 
-            if i > 0: tex += ' & & & '
-            tex += ' & '.join(['\multirow{'+str(Slines)+'}{*}{'+str(x)+'}' for x in [species['Name'],species['Flag'],str(species['FlagGroups']).replace("'",'').replace('[','').replace(']','')]]) + '&'
-            
-            for j,line in enumerate(species['Lines']):
+            # Iterate over line
+            for k,line in enumerate(species['Lines']):
 
-                if j > 0: tex += ' & & & & & &'
-                tex += '' + str(line['Wavelength']) + ' & ' + str(line['RelStrength']).replace('None','-') + '\\\\\n'
+                # If first species, add it
+                if k == 0:
+                    
+                    # Add in Species Name
+                    tex += ' & '.join(['\multirow{'+str(Slines)+'}{*}{'+str(x)+'}' for x in [species['Name']]])
 
-            tex += '\cline{4-8}\n'
+                    # Add in Wavelengths and Relstrenghs
+                    tex += '&' + str(line['Wavelength']) + ' & ' + str(line['RelStrength']).replace('None','-') + '&'
 
-        if len(group['Species']) == 0: tex += '\\\\'
-        tex += '\hline\hline\n'
+                    # Add in Components
+                    # Get components 
+                    components = '{\\footnotesize '+', '.join([AC.ComponentName(i) for i,f in enumerate(bin(species['Flag'])[2:][::-1]) if f == '1'])+'}'
+                    flaggroups =  '{\\footnotesize '+', '.join(species['FlagGroups'])+'}'
+                    tex += ' & '.join(['\multirow{'+str(Slines)+'}{*}{'+str(x)+'}' for x in [components,flaggroups]]) +'&'
 
-    tex += '\hline\n\end{tabular}\n\\end{center}\n\\end{document}'
+                    # If first group, add it
+                    if j == 0:
+                        tex += ' & '.join(['\multirow{'+str(Glines)+'}{*}{'+x+'}' for x in [group['Name'],str(group['TieRedshift']),str(group['TieDispersion'])]])
+                
+                else: 
+                    tex += '&' + str(line['Wavelength']) + ' & ' + str(line['RelStrength']).replace('None','-')
+
+                # Add new line
+                tex += '\\\\\n'
+
+                # Add horizontal lines
+                if k == Slines - 1:
+                    if j == len(group['Species'])-1:
+                        if i < len(params['EmissionGroups']):
+                            tex += '\cline{0-7}\n'
+                    else: tex += '\cline{0-4}\n'
+                else:
+                    tex += '\cline{2-3}\n'
+
+    tex += '\hline\hline\hline\n\end{tabular}\n\\end{center}\n\\end{document}'
     return tex
 
 # Main Function
