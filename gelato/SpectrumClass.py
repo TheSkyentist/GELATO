@@ -16,7 +16,7 @@ class Spectrum:
         self.p = p
 
         # Object's redshift
-        self.z = z
+        self.z = np.array(z).astype(p['Precision'])
 
         # Load Spectrum
         spectrum = fits.getdata(path)

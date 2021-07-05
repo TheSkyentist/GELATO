@@ -32,16 +32,16 @@ class CompoundModel():
 
     def starting(self):
 
-        return np.concatenate([m.starting() for m in self.models]).astype('float32')
+        return np.concatenate([m.starting() for m in self.models])
 
     def residual(self,p,x,y,isig):
 
         if self.constrained: p = self.expand(p)
-        return ((self.evaluate(p,x,y,isig) - y)*isig).astype('float32')
+        return ((self.evaluate(p,x,y,isig) - y)*isig)
 
     def evaluate(self,p,x,y,isig):
 
-        return np.sum([m.evaluate(p[i:i+m.nparams],x,y,isig) for i,m in zip(self.indices,self.models)],0).astype('float32')
+        return np.sum([m.evaluate(p[i:i+m.nparams],x,y,isig) for i,m in zip(self.indices,self.models)],0)
 
     def jacobian(self,p,x,y,isig):
 
@@ -53,7 +53,7 @@ class CompoundModel():
         for c in self.constraints: 
             jac[c[0]] += jac[c[1]]*c[2]
 
-        return ((np.delete(jac,self.contindices,axis=0)*isig).T).astype('float32')
+        return ((np.delete(jac,self.contindices,axis=0)*isig).T)
 
     def get_bounds(self):
 
@@ -394,7 +394,7 @@ class SSPContinuumFree():
 
         # Keep track
         self.spec = spec
-        self.zscale = zscale
+        self.zscale = np.array(zscale,dtype=spec.p['Precision'])
         
         # List SSPs
         ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
@@ -410,13 +410,14 @@ class SSPContinuumFree():
                 h = f[0].header
                 flux = f[0].data
                 ssps.append(flux)
-        self.ssps = np.array(ssps)
+        self.ssps = np.array(ssps,dtype=spec.p['Precision'])
 
         # Get SSP Wavelength, depends on Vacuum or Air Wavelengths
         if self.spec.p['VacuumWav']: 
             self.ssp_wav = fits.getdata(ssp_dir+'SSP_Wavelength_Vacuum.fits')
         else: 
             self.ssp_wav = (np.arange(h['NAXIS1']) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
+        self.ssp_wav = self.ssp_wav.astype(spec.p['Precision'])
 
         # Set bounds
         self.bounds = ((zscale*(spec.z-0.005),zscale*(spec.z+0.005)),) + tuple((0,np.inf) for i in range(self.nparams-1))
@@ -439,7 +440,7 @@ class SSPContinuumFree():
         coeffs = np.array(p[1:])
         ssps = self.ssps
 
-        ssps = np.array([np.interp(x,self.ssp_wav*(1+z),s) for s in ssps])
+        ssps = np.array([np.interp(x,self.ssp_wav*(1+z),s) for s in ssps],dtype=self.spec.p['Precision'])
 
         return np.dot(coeffs.T,ssps)
 
