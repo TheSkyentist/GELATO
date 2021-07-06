@@ -319,7 +319,7 @@ class SSPContinuumFixed():
 
         # Keep track
         self.spec = spec
-        self.redshift = redshift
+        self.redshift = np.array(redshift).astype(spec.p['Precision'])
         
         # List SSPs
         ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
@@ -335,15 +335,17 @@ class SSPContinuumFixed():
                 h = f[0].header
                 flux = f[0].data
                 ssps.append(flux)
+        self.ssps = np.array(ssps,dtype=spec.p['Precision'])
 
         # Get SSP Wavelength, depends on Vacuum or Air Wavelengths
         if self.spec.p['VacuumWav']: 
             self.ssp_wav = fits.getdata(ssp_dir+'SSP_Wavelength_Vacuum.fits')
         else: 
             self.ssp_wav = (np.arange(h['NAXIS1']) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
+        self.ssp_wav = self.ssp_wav.astype(spec.p['Precision'])
 
         # Interpolate SSP
-        self.ssps = np.array([np.interp(self.spec.wav,self.ssp_wav*(1+redshift),f) for f in ssps])
+        self.ssps = np.array([np.interp(self.spec.wav,self.ssp_wav*(1+redshift),f) for f in ssps],dtype=spec.p['Precision'])
 
         # Set bounds
         self.bounds = tuple((0,np.inf) for i in range(self.nparams))
