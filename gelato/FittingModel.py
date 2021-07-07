@@ -46,7 +46,6 @@ def FitContinuum(spectrum):
 
         # Final Redshift (Round for Stability)
         z = np.round(sspplfit[0]/zscale,4)
-        print(z)
 
         # Get fixed redshift compound model
         sspfixed = CM.SSPContinuumFixed(z,spectrum)
@@ -61,13 +60,12 @@ def FitContinuum(spectrum):
 
     # Final Redshift (Round for Stability)
     z = np.round(sspfit[0]/zscale,4)
-    print(z)
 
     # Fixed Redshift compound model
     sspfixed = CM.CompoundModel([CM.SSPContinuumFixed(z,spectrum)])
     sspfixed.starting()
     
-    return sspfixed,sspfreefit[1:]
+    return sspfixed,sspfit[1:]
 
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,cont,cont_x,emis,emis_x):
