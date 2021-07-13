@@ -31,7 +31,7 @@ if __name__ == "__main__":
         gelato.header()
 
     ## Assemble Objects
-    objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['File','z'])
+    objects = np.atleast_1d(np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['File','z']))
     ## Assemble Objects
 
     ## Run gelato ##
