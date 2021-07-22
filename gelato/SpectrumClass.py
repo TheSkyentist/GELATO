@@ -16,18 +16,18 @@ class Spectrum:
         self.p = p
 
         # Object's redshift
-        self.z = np.array(z).astype(p['Precision'])
+        self.z = z
 
         # Load Spectrum
         spectrum = fits.getdata(path)
 
         # Only take good values
-        weight = spectrum['ivar'].astype(p['Precision'])
+        weight = spectrum['ivar'].astype('double')
         good = weight > 0
 
         # Initial data
-        self.wav = (10**spectrum['loglam'][good]).astype(p['Precision'])
-        self.flux = spectrum['flux'][good].astype(p['Precision'])
+        self.wav = (10**spectrum['loglam'][good]).astype('double')
+        self.flux = spectrum['flux'][good].astype('double')
         self.weight = weight[good]
         self.isig = np.sqrt(self.weight)
         self.sigma = 1/self.isig

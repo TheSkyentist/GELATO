@@ -63,8 +63,6 @@ def EquivalentWidth(spectrum,model,parameters,param_names=None):
         # Get REW
         REWs[:,int((i-ind)/3)] = np.abs(flux/(heights*opz))
 
-    REWs = REWs.astype(spectrum.p['Precision'])
-
     # Return combined Results
     return np.hstack((parameters,REWs)),param_names
 

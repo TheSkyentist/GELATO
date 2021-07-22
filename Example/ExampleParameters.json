@@ -13,7 +13,6 @@
     "Concatenate": true,
     "Overwrite": true,
     "Verbose": true,
-    "Precision": "single",
     "EmissionGroups": [
         {
             "Name":"AGN",

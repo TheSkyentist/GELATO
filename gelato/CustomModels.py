@@ -57,7 +57,7 @@ class CompoundModel():
 
     def get_bounds(self):
 
-        return np.delete(np.array(sum((m.get_bounds() for m in self.models),())).T,self.contindices,axis=1).astype('float32')
+        return np.delete(np.array(sum((m.get_bounds() for m in self.models),())).T,self.contindices,axis=1)
 
     def get_names(self):
 
@@ -319,7 +319,7 @@ class SSPContinuumFixed():
 
         # Keep track
         self.spec = spec
-        self.redshift = np.array(redshift).astype(spec.p['Precision'])
+        self.redshift = redshift
         
         # List SSPs
         ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
@@ -335,17 +335,16 @@ class SSPContinuumFixed():
                 h = f[0].header
                 flux = f[0].data
                 ssps.append(flux)
-        self.ssps = np.array(ssps,dtype=spec.p['Precision'])
+        self.ssps = np.array(ssps)
 
         # Get SSP Wavelength, depends on Vacuum or Air Wavelengths
         if self.spec.p['VacuumWav']: 
             self.ssp_wav = fits.getdata(ssp_dir+'SSP_Wavelength_Vacuum.fits')
         else: 
             self.ssp_wav = (np.arange(h['NAXIS1']) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
-        self.ssp_wav = self.ssp_wav.astype(spec.p['Precision'])
 
         # Interpolate SSP
-        self.ssps = np.array([np.interp(self.spec.wav,self.ssp_wav*(1+redshift),f) for f in ssps],dtype=spec.p['Precision'])
+        self.ssps = np.array([np.interp(self.spec.wav,self.ssp_wav*(1+redshift),f) for f in ssps])
 
         # Set bounds
         self.bounds = tuple((0,np.inf) for i in range(self.nparams))
@@ -396,7 +395,7 @@ class SSPContinuumFree():
 
         # Keep track
         self.spec = spec
-        self.zscale = np.array(zscale,dtype=spec.p['Precision'])
+        self.zscale = zscale
         
         # List SSPs
         ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
@@ -412,14 +411,13 @@ class SSPContinuumFree():
                 h = f[0].header
                 flux = f[0].data
                 ssps.append(flux)
-        self.ssps = np.array(ssps,dtype=spec.p['Precision'])
+        self.ssps = np.array(ssps)
 
         # Get SSP Wavelength, depends on Vacuum or Air Wavelengths
         if self.spec.p['VacuumWav']: 
             self.ssp_wav = fits.getdata(ssp_dir+'SSP_Wavelength_Vacuum.fits')
         else: 
             self.ssp_wav = (np.arange(h['NAXIS1']) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
-        self.ssp_wav = self.ssp_wav.astype(spec.p['Precision'])
 
         # Set bounds
         self.bounds = ((zscale*(spec.z-0.005),zscale*(spec.z+0.005)),) + tuple((0,np.inf) for i in range(self.nparams-1))
@@ -442,7 +440,7 @@ class SSPContinuumFree():
         coeffs = np.array(p[1:])
         ssps = self.ssps
 
-        ssps = np.array([np.interp(x,self.ssp_wav*(1+z),s) for s in ssps],dtype=self.spec.p['Precision'])
+        ssps = np.array([np.interp(x,self.ssp_wav*(1+z),s) for s in ssps])
 
         return np.dot(coeffs.T,ssps)
 
