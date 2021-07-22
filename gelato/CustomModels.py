@@ -95,7 +95,7 @@ class SpectralFeature():
 
     # Default Dispersion Values #km/s
     Dispersion = 150
-    Dispersion_bounds = (60,500)
+    Dispersion_bounds = (60,1000)
 
     # Number of parameters of this model
     nparams = 3

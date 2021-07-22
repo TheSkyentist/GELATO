@@ -42,11 +42,11 @@ def AddComponent(flag, line, spectrum, prefix, zscale=100):
         x0 = model.starting()
         
         # Use wider default dispersion
-        x0[2] = 1000 # Dispersion
+        x0[2] = 1200 # Dispersion
 
         # Reassign Dispersion bounds
         oldMaxDispersion = model.Dispersion_bounds[1]
-        model.Dispersion_bounds = (750,10000)
+        model.Dispersion_bounds = (1000,10000)
 
         # Reassign Flux Bounds
         model.Flux_bounds = (0,1.5*x0[1]*model.Dispersion_bounds[1]/oldMaxDispersion)
