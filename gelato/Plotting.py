@@ -143,26 +143,27 @@ def PlotFig(spectrum,model,model_fit,path,plottype=0):
             fax.step(wav,flux,'gray',where='mid')
 
             # Plot model
-            # Are we plotting components?
-            if plottype == 1:
-                fax.step(wav,f[good],'r',where='mid')
-            elif plottype == 2:
-                init = 1
-                if 'PowerLaw_Coefficient' in model.get_names():
-                    init = 2
-                # Plot components
-                for j in range(init,len(model.models)):
-                    m = model.models[j]
-                    idx = model.indices[j]
-                    m = CM.CompoundModel([m]).evaluate(model_fit[idx:idx+m.nparams],*(wav,flux,isig))
-                    fax.step(wav,continuum[good]+m,'--',c=colors[(j-ncols) % len(colors)])
-            fax.step(wav,continuum[good],ls='-',c='k',where='mid')
+            fax.step(wav,f[good],'r',where='mid')
 
             # Base Y axis on flux
             ymin = np.max([0,flux.min() - (flux.max() - flux.min())/20])
             dy = flux.max() - ymin
             ylim = [ymin,ymin+1.3*dy] # Increase Axis size by 20%
             text_height = ymin+1.2*dy 
+
+            # Plot Continuum
+            if plottype == 1:
+                fax.step(wav,continuum[good],ls='-',c='k',where='mid')
+            # Plot components
+            elif plottype == 2:
+                init = 1
+                if 'PowerLaw_Coefficient' in model.get_names():
+                    init = 2
+                for j in range(init,len(model.models)):
+                    m = model.models[j]
+                    idx = model.indices[j]
+                    m = CM.CompoundModel([m]).evaluate(model_fit[idx:idx+m.nparams],*(wav,flux,isig))
+                    fax.step(wav,ymin+m,'--',c='gray')
                 
             # Get Line Names/Positions
             linelocs = []

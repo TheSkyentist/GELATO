@@ -129,12 +129,12 @@ class SpectralFeature():
         inline = np.logical_and(spec.wav > lwav - lwidth,spec.wav < lwav + lwidth)
 
         # Find starting height and then flux
-        Height = np.abs(np.max(spec.flux[inline]) - np.median(spec.flux[inreg]))
+        Height = np.abs(np.max(spec.flux[inline]) - np.min(spec.flux[inreg]))
         if Height == 0: Height = np.max(spec.sigma[inline])
         Flux = Height * (1 + spec.z) * self.Dispersion * self.center / ( OOSQRT_2_PI * C )
 
         # Set bounds
-        self.Redshift_bounds = (self.zscale*(spec.z-5e-3),self.zscale*(spec.z+5e-3))
+        self.Redshift_bounds = (self.zscale*(spec.z-0.001),self.zscale*(spec.z+0.001))
         self.Flux_bounds = (0,1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion)
 
         # Return starting value
@@ -420,7 +420,7 @@ class SSPContinuumFree():
             self.ssp_wav = (np.arange(h['NAXIS1']) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
 
         # Set bounds
-        self.bounds = ((zscale*(spec.z-0.005),zscale*(spec.z+0.005)),) + tuple((0,np.inf) for i in range(self.nparams-1))
+        self.bounds = ((zscale*(spec.z-0.001),zscale*(spec.z+0.001)),) + tuple((0,np.inf) for i in range(self.nparams-1))
 
     def starting(self):
 
