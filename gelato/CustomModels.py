@@ -315,6 +315,7 @@ class SSPContinuumFixed():
 
         # Keep track
         self.spec = spec
+        self.redshift = redshift
         
         # List SSPs
         ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
