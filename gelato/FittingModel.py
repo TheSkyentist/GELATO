@@ -25,7 +25,6 @@ def FitContinuum(spectrum):
 
     # SSP Continuum        
     ssp = CM.CompoundModel([CM.SSPContinuumFree(spectrum)])
-    zscale = ssp.models[0].zscale
 
     # Fit initial continuuum with free redshift
     sspfit = FitModel(ssp,ssp.starting(),args).x
@@ -45,7 +44,7 @@ def FitContinuum(spectrum):
     if MC.FTest(ssp,sspfit,ssppl,sspplfit,spectrum,args):
 
         # Final Redshift (Round for Stability)
-        z = np.round(sspplfit[0]/zscale,4)
+        z = sspplfit[0]
 
         # Get fixed redshift compound model
         sspfixed = CM.SSPContinuumFixed(z,spectrum)
@@ -59,7 +58,7 @@ def FitContinuum(spectrum):
         return cont,x0
 
     # Final Redshift (Round for Stability)
-    z = np.round(sspfit[0]/zscale,4)
+    z = sspfit[0]
 
     # Fixed Redshift compound model
     sspfixed = CM.CompoundModel([CM.SSPContinuumFixed(z,spectrum)])

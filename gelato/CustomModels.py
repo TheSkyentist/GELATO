@@ -5,7 +5,8 @@ import numpy as np
 from astropy.io import fits
 
 OOSQRT_2_PI = 1/np.sqrt(2*np.pi)
-C = 299792.458 # km/s
+C = 299792.458 # km/s (sets the units of the returned values, needs to be changed in both CustomModels and AdditionalComponents)
+C2 = C*C
 
 class CompoundModel():
 
@@ -100,7 +101,7 @@ class SpectralFeature():
     # Number of parameters of this model
     nparams = 3
 
-    def __init__(self,center,spec,prefix='',zscale=100):
+    def __init__(self,center,spec,prefix=''):
         
         # Keep track
         self.spec = spec
@@ -108,9 +109,6 @@ class SpectralFeature():
 
         # Set center of line
         self.center = center
-
-        # Set redshift scale for numerical stability
-        self.zscale = zscale
 
     def starting(self):
 
@@ -134,11 +132,11 @@ class SpectralFeature():
         Flux = Height * (1 + spec.z) * self.Dispersion * self.center / ( OOSQRT_2_PI * C )
 
         # Set bounds
-        self.Redshift_bounds = (self.zscale*(spec.z-0.001),self.zscale*(spec.z+0.001))
+        self.Redshift_bounds = (C*(spec.z-0.001),C*(spec.z+0.001))
         self.Flux_bounds = (0,1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion)
 
         # Return starting value
-        return np.array([spec.z*self.zscale,Flux,self.Dispersion])
+        return np.array([spec.z*C,Flux,self.Dispersion])
 
     def evaluate(self,p,x,y,isig):
 
@@ -147,12 +145,12 @@ class SpectralFeature():
         Redshift,Flux,Dispersion = p # Unpack
 
         # Calculate a few things in advance
-        oolspv = 1/(self.center * (self.zscale + Redshift)) # lam * ( zscale + v )
+        oolcpv = 1/(self.center * (C + Redshift)) # lam * ( C + v )
         ood = 1/Dispersion
-        exponand = ( C * ood ) * ( self.zscale * x * oolspv - 1) 
+        exponand = ( C * ood ) * ( C * x * oolcpv - 1) 
 
         # Calculate Gaussian
-        y = self.zscale * C * Flux * np.exp(-0.5 * exponand * exponand) * oolspv * OOSQRT_2_PI * ood
+        y = C2 * Flux * np.exp(-0.5 * exponand * exponand) * oolcpv * OOSQRT_2_PI * ood
         return y
 
     def jacobian(self,p,x,y,isig):
@@ -162,16 +160,15 @@ class SpectralFeature():
         Redshift,Flux,Dispersion = p # Unpack
 
         # Calculate a few things in advance
-        oospv = 1/(self.zscale + Redshift) # 1 / zscale + v
-        oolspv = oospv / ( self.center ) # 1 / lam * (zscale + v) 
-        sC = self.zscale * C
+        oocpv = 1/(C + Redshift) # 1 / (c + v)
+        oolcpv = oocpv / ( self.center ) # 1 / lam * (c + v) 
         ood = 1 / Dispersion
-        exponand = ( C * ood ) * ( self.zscale * x * oolspv - 1) 
+        exponand = ( C * ood ) * ( C * x * oolcpv - 1) 
         E2 = exponand * exponand
 
-        d_Flux = sC * np.exp(-0.5 * E2) * ood * oolspv * OOSQRT_2_PI
+        d_Flux = C2 * np.exp(-0.5 * E2) * ood * oolcpv * OOSQRT_2_PI
         G = Flux * d_Flux
-        d_Redshift = G * ( sC * exponand * x * ood * oolspv - 1 ) * oospv
+        d_Redshift = G * ( C2 * exponand * x * ood * oolcpv - 1 ) * oocpv
         d_Dispersion = G * ( E2 - 1 ) * ood
 
         return np.array([d_Redshift, d_Flux, d_Dispersion])
@@ -183,30 +180,29 @@ class SpectralFeature():
         Redshift,Flux,Dispersion = p # Unpack
 
         # Calculate a few things in advance
-        spv = (self.zscale + Redshift) # zscale + v
-        oolspv = 1 / (self.center * spv) # lam * (zscale + v) 
+        cpv = (C + Redshift) # C + v
+        oolcpv = 1 / (self.center * cpv) # lam * (c + v) 
 
-        sC = self.zscale * C
         ood = 1 / Dispersion
-        exponand = ( C * ood ) * ( self.zscale * x * oolspv - 1) 
+        exponand = ( C * ood ) * ( C * x * oolcpv - 1) 
         E2 = exponand * exponand
         E2m1 = E2 - 1
-        sCxodlspv = sC*x*ood*oolspv
+        c2xodlcpv = C2*x*ood*oolcpv
 
         # First Derivatives
-        d_Flux = sC * np.exp(-0.5 * E2) * ood * oolspv * OOSQRT_2_PI
+        d_Flux = C2 * np.exp(-0.5 * E2) * ood * oolcpv * OOSQRT_2_PI
         G = Flux * d_Flux
-        d_Redshift = G * ( sC * exponand * x * ood * oolspv - 1 ) / spv
+        d_Redshift = G * ( C2 * exponand * x * ood * oolcpv - 1 ) / cpv
         d_Dispersion = G * E2m1 * ood
 
         # Diagonal terms
-        d_Redshift2 = ( G / (spv * spv)) * ( 2 + sCxodlspv * sCxodlspv * E2m1 - 4 * sCxodlspv * exponand )
+        d_Redshift2 = ( G / (cpv * cpv)) * ( 2 + c2xodlcpv * c2xodlcpv * E2m1 - 4 * c2xodlcpv * exponand )
         d_Flux2 = np.zeros(x.shape)
         d_Dispersion2 = G * ood * ood * ( 2 + E2 * ( E2 - 5 ) )
 
         # Cross terms
         d_Redshift_Flux = d_Redshift / Flux 
-        d_Redshift_Dipersion = (G * exponand * ood / spv)*(sCxodlspv*(E2 - 3) - exponand)
+        d_Redshift_Dipersion = (G * exponand * ood / cpv)*(c2xodlcpv*(E2 - 3) - exponand)
         d_Flux_Dispersion = d_Dispersion / Flux
 
         return np.array([[d_Redshift2,d_Redshift_Flux,d_Redshift_Dipersion],\
@@ -319,7 +315,6 @@ class SSPContinuumFixed():
 
         # Keep track
         self.spec = spec
-        self.redshift = redshift
         
         # List SSPs
         ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
@@ -344,7 +339,7 @@ class SSPContinuumFixed():
             self.ssp_wav = (np.arange(h['NAXIS1']) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
 
         # Interpolate SSP
-        self.ssps = np.array([np.interp(self.spec.wav,self.ssp_wav*(1+redshift),f) for f in ssps])
+        self.ssps = np.array([np.interp(self.spec.wav,self.ssp_wav*(1+redshift/C),f) for f in ssps])
 
         # Set bounds
         self.bounds = tuple((0,np.inf) for i in range(self.nparams))
@@ -391,11 +386,10 @@ class SSPContinuumFree():
     Continuum from SSPs
     """
 
-    def __init__(self, spec, zscale=100):
+    def __init__(self, spec):
 
         # Keep track
         self.spec = spec
-        self.zscale = zscale
         
         # List SSPs
         ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
@@ -420,7 +414,7 @@ class SSPContinuumFree():
             self.ssp_wav = (np.arange(h['NAXIS1']) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
 
         # Set bounds
-        self.bounds = ((zscale*(spec.z-0.001),zscale*(spec.z+0.001)),) + tuple((0,np.inf) for i in range(self.nparams-1))
+        self.bounds = ((C*(spec.z-0.001),C*(spec.z+0.001)),) + tuple((0,np.inf) for i in range(self.nparams-1))
 
     def starting(self):
 
@@ -429,14 +423,14 @@ class SSPContinuumFree():
         region = np.logical_and(x > self.spec.wav.min(),x < self.spec.wav.max())
         meds = np.array([np.median(s[np.logical_and(region,s>0)]) for s in self.ssps])
 
-        return np.append([self.spec.z*self.zscale],np.nanmedian(self.spec.flux)/(len(self.ssp_names)*meds))
+        return np.append([self.spec.z*C],np.nanmedian(self.spec.flux)/(len(self.ssp_names)*meds))
 
     def evaluate(self,p,x,y,isig):
 
         # Combine SSPs
 
         # Get redshift and coefficients
-        z = p[0]/self.zscale
+        z = p[0]/C
         coeffs = np.array(p[1:])
         ssps = self.ssps
 

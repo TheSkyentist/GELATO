@@ -83,11 +83,6 @@ def gelato(params,path,z):
             if params["Verbose"]:
                 print("gelato presented:",name)
 
-        # Remove redshift scaling from parameters
-        ind = cont.nparams()
-        for i,j in zip(range(ind,parameters.shape[1]-1,3),range(len(cont.models),len(model.models))):
-            parameters[:,i] /= model.models[j].zscale
-
         ## Equivalent Widths ##
         if params["CalcEW"]:
             if params["Verbose"]:

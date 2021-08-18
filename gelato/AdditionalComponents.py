@@ -4,6 +4,7 @@ import numpy as np
 import gelato.CustomModels as CM
 
 SQRT_2_PI = np.sqrt(2*np.pi)
+C = 299792.458 # km/s (sets the units of the returned values, needs to be changed in both CustomModels and AdditionalComponents)
 
 def ComponentName(index):
 
@@ -22,7 +23,7 @@ def ComponentName(index):
     if index == 2:
         return 'Absorption'
 
-def AddComponent(flag, line, spectrum, prefix, zscale=100):
+def AddComponent(flag, line, spectrum, prefix):
 
     '''
     For each bit position, what is the model that we implement,
@@ -38,7 +39,7 @@ def AddComponent(flag, line, spectrum, prefix, zscale=100):
     if index == 0: 
     
         # Broad line model
-        model = CM.SpectralFeature(center = line,spec = spectrum, prefix=prefix, zscale=zscale)
+        model = CM.SpectralFeature(center = line,spec = spectrum, prefix=prefix)
         x0 = model.starting()
         
         # Use wider default dispersion
@@ -55,7 +56,7 @@ def AddComponent(flag, line, spectrum, prefix, zscale=100):
     if index == 1: 
     
         # Outflow model
-        model = CM.SpectralFeature(center = line,spec = spectrum, prefix=prefix, zscale=zscale)
+        model = CM.SpectralFeature(center = line,spec = spectrum, prefix=prefix)
         x0 = model.starting()
 
         # Use wider default dispersion
@@ -65,8 +66,8 @@ def AddComponent(flag, line, spectrum, prefix, zscale=100):
         model.Dispersion_bounds = (500,1000)
 
         # Reassign Redshift bounds and starting guess
-        model.Redshift_bounds = (model.zscale*(spectrum.z-0.001),model.zscale*spectrum.z)
-        x0[0] = model.zscale*(spectrum.z-0.0005)
+        model.Redshift_bounds = (C*(spectrum.z-0.001),C*spectrum.z)
+        x0[0] = C*(spectrum.z-0.0005)
         
 
     return model,x0

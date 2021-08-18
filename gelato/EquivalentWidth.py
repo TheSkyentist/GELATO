@@ -98,7 +98,7 @@ def EWfromresults(params,path,z):
 
         ## Create model ##
         # Add continuum
-        models = [CM.SSPContinuumFree(spectrum,zscale=1)]
+        models = [CM.SSPContinuumFree(spectrum)]
         if 'PowerLaw_Coefficient' in names:
             models.append(CM.PowerLawContinuum(spectrum))
             models[-1].starting()
@@ -107,7 +107,7 @@ def EWfromresults(params,path,z):
         ind = sum([m.nparams for m in models]) # index where emission lines begin
         for i in range(ind,len(names)-1,3):
             center = float(names[i].split('_')[-2])
-            models.append(CM.SpectralFeature(center,spectrum,zscale=1))
+            models.append(CM.SpectralFeature(center,spectrum))
 
         # Final model
         model = CM.CompoundModel(models)

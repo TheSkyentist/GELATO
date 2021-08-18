@@ -226,7 +226,7 @@ def plotfromresults(params,path,z):
     
     ## Create model ##
     # Add continuum
-    models = [CM.SSPContinuumFree(spectrum,zscale=1)]
+    models = [CM.SSPContinuumFree(spectrum)]
     if 'PowerLaw_Coefficient' in parameters.columns.names:
         models.append(CM.PowerLawContinuum(spectrum))
         models[-1].starting()
@@ -237,7 +237,7 @@ def plotfromresults(params,path,z):
         ind = sum([m.nparams for m in models]) # index where emission lines begin
         for i in range(ind,median.size,3):
             center = float(parameters.columns.names[i].split('_')[-2])
-            models.append(CM.SpectralFeature(center,spectrum,zscale=1))
+            models.append(CM.SpectralFeature(center,spectrum))
 
         # Final model
         model = CM.CompoundModel(models)
