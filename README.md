@@ -15,7 +15,7 @@ The spectra are fit using a [Levenberg–Marquardt](https://en.wikipedia.org/wik
 Requirements
 -------------
 
-GELATO was developed using Astropy 3.2.3 and Python 3.6.10.
+GELATO is built primarily using Python. It primarily uses NumPy for math, SciPy for optimization, Astropy for FITS handling, matplotlib for plotting, and Jupyter for the example notebook.
 
 To install the dependancies, I recommend installing conda (through [Miniconda](https://docs.conda.io/en/latest/miniconda.html)).
 
@@ -29,7 +29,7 @@ conda env create -f environment.yml
 The environment will then be installed under the name GELATO and can then be activated.
 
 ```bash
-conda activate GELATO
+conda activate gelato
 ```
 
 Whenever running GELATO scripts, they must be run from this environment.
@@ -41,7 +41,7 @@ First, clone the GELATO git repository. Then the GELATO scripts can be installed
 
 ```bash
 cd /path/to/GELATO/directory
-conda activate GELATO
+conda activate gelato
 python setup.py install
 ```
 
@@ -142,7 +142,7 @@ Running the Example
 We provided an example for running GELATO on a few SDSS spectra.This tutorial assumes you start in the Example directory. First we need to activate our GELATO environment.
 
 ```bash
-conda activate GELATO
+conda activate gelato
 ```
 
 We can then run the code over the whole data set.
