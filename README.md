@@ -81,7 +81,10 @@ In order to run GELATO you need:
 * The parameters file, a JSON file, the format of which is described below. An example JSON file is also provided.
 * The spectrum or spectra. The log10 of the wavelength in Angstroms of the spectrum must be provided along with the flux in Flam units. The inverse variance of the fluxes, in corresponding units, must also be provided.
 * The redshift of each spectrum. The redshift of the object must be passed to construct the spectrum object. While the redshift is a fitted parameter, the provided value must be correct to at least 1 part in 200, preferable 1 part in 1000. A basic estimate from the apparent position of any identified emission line should suffice.
-* If running on a list of spectra, GELATO takes in a comma delimited file, where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
+* If running on a list of spectra, GELATO takes either...
+  * a comma delimited file (ending in .csv) where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
+  * a FITS table (ending in .fits) where each object occupies a different entry in the table. The table must have the column "Path" for the path to the object, and "z"
+  containing the redshift of the object.
 * (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified.
 
 Currently, the best way to run GELATO is using the wrapper scripts in the in the Convenience subdirectory. The scripts are executable and can be called directly. Ensure that you are in the GELATO conda environment before running any of the scripts. These scripts can be copied to your working directory.
@@ -98,7 +101,7 @@ There are two wrappers for GELATO, one for running on a single spectrum, and one
 
 * "run_GELATO_multi.py"
 
-   This script is designed to run GELATO over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. You can copy this file into your working directory once GELATO has been installed into the conda environment.
+   This script is designed to run GELATO over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. You can copy this file into your working directory once GELATO has been installed into the conda environment. While it is called multi, it can be run on a file containing a single object.
 
   ```bash
   python run_GELATO_multi.py /path/to/PARAMS.json spectra_with_redshifts.csv
@@ -155,6 +158,11 @@ The output from running the example will be put into 'Results/' and can be compa
 
 While GELATO is designed to be run in this fashion, an IPython notebook is provided in the Example directory. This can also help with how to access GELATO output.
 
+Results File
+-------------
+
+Redshift and dispersion measurements are given in km/s. Flux measurements are dependent on the input units of the spectrum. If calculated, rest equivalent widths are given in Angstroms. If results are concatenated, errors are the standard devations on the recovered parameters from the bootstraps. Coefficients on the SSP continuum models are in the units of the SSP models.
+
 Parameter File
 -------------
 
@@ -202,21 +210,21 @@ Here we describe the format of the emission line dictionary.
 The "ExampleParameters.json" file in the Example directory gives a good example of how to take advantage of these features. This is not mean to represent a physically accurate sample, but to give an idea of all of the features of the code. It consists of four groups:
 
 1. Name: AGN. Here we might put our AGN lines which in this case we want to share redshifts but we don't want to share dispersions. It has a list of species:
-   1. Name: SII. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
+   1. Name: [SII]. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
       * A line with a rest wavelength of 6716.44 and its flux is left free.
       * A line with a rest wavelength of 6730.82 and its flux is left free. This means the line fluxes are completely independent.
-   2. Name: NII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of two lines.
+   2. Name: [NII]. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of two lines.
       * A line with a rest wavelength of 6583.45 and a relative flux of 1.
       * A line with a rest wavelength of 6548.05 and a relative flux of 0.34. This means this line will always have 0.34/1 times the flux of the first line.
-   3. OIII. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of three lines.
+   3. Name: [OIII]. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of three lines.
       * A line with a rest wavelength of 5006.84 and a relative flux of 1.
       * A line with a rest wavelength of 4958.91 and a relative flux of 0.35. This means this line will always have 0.35/1 times the flux of the first line.
       * A line with a rest wavelength of 4363.21 and its flux is left free.
 2. Name: SF. Here these features are set to share redshifts and dispersions. It has a list of species:
-   1. Name: OI.  There are no flags on this component, so the list is empty. It is made out of two lines.
+   1. Name: [OI].  There are no flags on this component, so the list is empty. It is made out of two lines.
       * A line with a rest wavelength of 6300.3 and a relative flux of 3.
       * A line with a rest wavelength of 6463.78 and a relative flux of 1. This means this line will always have 1/3 times the flux of the first line.
-   2. Name: OII. A singlet line with no flags, so the list is empty.
+   2. Name: [OII]. A singlet line with no flags, so the list is empty.
       * A line with a rest wavelength of 3727.43 and its flux is left free.
 3. Name: Balmer. Here these features will not share redshifts and dispersions. It has a list of species:
    1. HI. These features will share the same velocity dispersion and redshift. These have been flagged with a 1, which corresponds to a "Broad" component. This additional component will be placed the group named "Balmer". It is made out of one line.
@@ -224,7 +232,7 @@ The "ExampleParameters.json" file in the Example directory gives a good example 
       * A line with a rest wavelength of 4861.28 and its flux is left free.
       * A line with a rest wavelength of 4340.47 and its flux is left free.
 4. Name: Outflow
-  If more than one component lands in this group, they will share redshifts and dispersions. E.g. if "Outflow" lines are accepted (from NII and OIII), they will share the same redshift and dispersion by design.
+  If more than one component lands in this group, they will share redshifts and dispersions. E.g. if "Outflow" lines are accepted (from [NII] and [OIII]), they will share the same redshift and dispersion by design.
 
 Here is table showing the hierarchy of the Emission Groups Parameter for the "PARAMS.json" file. A script, params_to_TeX.py, is provided in the Convenience directory can turn a Emission Groups dictionary in a Parameter file into a LaTeX table.
 
