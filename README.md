@@ -10,7 +10,7 @@ GELATO
 
 GELATO is a Python code designed to fit emission lines in the spectra of star forming galaxies and active galactic nuclei. In particular, it was built in order to fit spectra where many of the parameters of the emission lines are tied with respect to one another. GELATO attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines). In addition, GELATO is designed to fit additional components to lines with comples kinematics. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? GELATO builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an [F-test](https://en.wikipedia.org/wiki/F-test) and then comparisons of [Akaike Information Criteria](https://en.wikipedia.org/wiki/Akaike_information_criterion).
 
-The spectra are fit using a [Levenberg–Marquardt](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm) non-linear least squares algorithm with Gaussian line profiles.
+The spectra are fit using a [Trust Region Reflective](https://epubs.siam.org/doi/10.1137/S1064827595289108) bounded non-linear least-squares optimization algorithm with Gaussian line profiles.
 
 Requirements
 -------------
@@ -19,7 +19,7 @@ GELATO is built primarily using Python. It primarily uses NumPy for math, SciPy 
 
 To install the dependancies, I recommend installing conda (through [Miniconda](https://docs.conda.io/en/latest/miniconda.html)).
 
-A conda environment with early all the dependencies can be installed via the provided "environment.yml" file. If you do not wish to use conda, you can find the required version of python packages enumerated in the "environment.yml" file.
+A conda environment with early all the dependencies can be installed via the provided "environment.yml" file. If you do not wish to use conda, you can install the dependencies enumerated in the "environment.yml" file.
 
 ```bash
 cd /path/to/GELATO/directory
