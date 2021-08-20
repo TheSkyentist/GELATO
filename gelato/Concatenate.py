@@ -18,7 +18,7 @@ def concatfromresults(p,objects):
     while i*N < len(objects):
         
         tables = [] # Initilize tables list
-        paths = objects['File'][i*N:(i+1)*N] # Get subsample
+        paths = objects['Path'][i*N:(i+1)*N] # Get subsample
 
         # Iterate over results
         for path in paths:

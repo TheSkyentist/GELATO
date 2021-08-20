@@ -7,6 +7,7 @@ import sys
 import copy
 import argparse
 import numpy as np
+from astropy.table import Table
 
 # GELATO
 import gelato.ConstructParams as CP
@@ -32,14 +33,22 @@ if single == multi:
 elif single: # One EW
     EW.EWfromresults(p, args.Spectrum, args.Redshift)
 elif multi: # Many EW
-    # Load Obkects
-    objects = np.genfromtxt(args.ObjectList,delimiter=',',dtype='U100,f8',names=['File','z'])
+    ## Assemble Objects
+    if args.ObjectList.endswith('.csv'):
+        objects = np.atleast_1d(np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['Path','z']))
+    elif args.ObjectList.endswith('.fits'):
+        objects = Table.read(args.ObjectList)
+        objects.convert_bytestring_to_unicode()
+        objects = np.atleast_1d(objects)
+    else:
+        print('Object list not .csv or .fits.')
+    ## Assemble Objects
     if p['NProcess'] > 1: # Mutlithread
         import multiprocessing as mp
         pool = mp.Pool(processes=p['NProcess'])
-        inputs = [(copy.deepcopy(p),o['File'],o['z']) for o in objects]
+        inputs = [(copy.deepcopy(p),o['Path'],o['z']) for o in objects]
         pool.starmap(EW.Wfromresults, inputs)
         pool.close()
         pool.join()
     else: # Single Thread
-        for o in objects: EW.EWfromresults(copy.deepcopy(p),o['File'],o['z'])
+        for o in objects: EW.EWfromresults(copy.deepcopy(p),o['Path'],o['z'])

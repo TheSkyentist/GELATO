@@ -7,6 +7,7 @@ import os
 import copy
 import argparse
 import numpy as np
+from astropy.table import Table
 
 # gelato supporting files
 import gelato
@@ -33,8 +34,10 @@ if __name__ == "__main__":
     ## Assemble Objects
     if args.ObjectList.endswith('.csv'):
         objects = np.atleast_1d(np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['Path','z']))
-    elif args.ObjectList.endswith('.fits'):  
-        objects = np.atleast_1d(Table.read(args.ObjectList))
+    elif args.ObjectList.endswith('.fits'):
+        objects = Table.read(args.ObjectList)
+        objects.convert_bytestring_to_unicode()
+        objects = np.atleast_1d(objects)
     else:
         print('Object list not .csv or .fits.')
     ## Assemble Objects
@@ -48,7 +51,8 @@ if __name__ == "__main__":
         pool.close()
         pool.join()
     else: # Single Thread
-        for o in objects: gelato.gelato(copy.deepcopy(args.Parameters),o['File'],o['z'])
+        for o in objects:
+            gelato.gelato(copy.deepcopy(args.Parameters),o['Path'],o['z'])
     ## Run gelato ##
 
     ## Concatenate Results ##
