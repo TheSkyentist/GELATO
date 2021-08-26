@@ -5,6 +5,7 @@ __pycache__
 EGFig.pdf
 build/
 dist/
+conda/
 GELATO.egg-info/
 Results/
 files.txt
