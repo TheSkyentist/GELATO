@@ -40,6 +40,7 @@ if __name__ == "__main__":
         objects = np.atleast_1d(objects)
     else:
         print('Object list not .csv or .fits.')
+        exit()
     ## Assemble Objects
 
     ## Run gelato ##

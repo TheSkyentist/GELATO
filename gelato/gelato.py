@@ -42,7 +42,11 @@ def gelato(params,path,z):
     ## Fit Continuum ##
     if params["Verbose"]:
         print("Making the base:",name)
-    cont,cont_x = FM.FitContinuum(spectrum)
+    try: cont,cont_x = FM.FitContinuum(spectrum)
+    except np.linalg.LinAlgError:
+        if params["Verbose"]: print("\nGELATO failed for:",name)
+        return
+
     if params["Verbose"]:
         print("Base created:",name)
 
@@ -55,7 +59,10 @@ def gelato(params,path,z):
         
         # Build emission line model
         emis,emis_x = BM.BuildEmission(spectrum)
-        model,model_fit = FM.FitComponents(spectrum,cont,cont_x,emis,emis_x)
+        try: model,model_fit = FM.FitComponents(spectrum,cont,cont_x,emis,emis_x)
+        except np.linalg.LinAlgError:
+            if params["Verbose"]: print("\nGELATO failed for:",name)
+            return
         if params["Verbose"]:
             print("Flavor added:",name)
 
@@ -63,7 +70,12 @@ def gelato(params,path,z):
         if params["Verbose"]:
             print("Scooping portions (this may take a while):",name)
         N = 40 # Max length of progress bar
-        parameters = np.array([FM.FitBoot(model,model_fit,spectrum,i,N=N) for i in range(params["NBoot"])])
+        parameters = np.ones((params["NBoot"],len(model_fit)+1))
+        for i in range(params["NBoot"]):
+            try: parameters[i] = FM.FitBoot(model,model_fit,spectrum,i,N=N)
+            except np.linalg.LinAlgError:
+                if params["Verbose"]: print("\nGELATO failed for:",name)
+                return
         if ((params['NProcess'] == 1) and params['Verbose']):
             print('Progress: |'+N*'#'+'| 100%')
         if params["Verbose"]:

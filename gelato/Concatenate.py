@@ -1,6 +1,7 @@
 """ Concatenate Results """
 
 # Import packages
+import os
 import numpy as np
 from astropy.io import fits
 from astropy.table import Table,vstack
@@ -25,6 +26,8 @@ def concatfromresults(p,objects):
             
             # Load name and parameters
             name = path.split('/')[-1].replace('.fits','')
+            if not os.path.exists(p['OutFolder']+name+'-results.fits'):     
+                continue # If doesn't exist, continue
             parameters = fits.getdata(p['OutFolder']+name+'-results.fits')
             
             # Initalize Lists
