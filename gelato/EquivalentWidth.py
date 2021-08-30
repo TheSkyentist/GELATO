@@ -2,6 +2,7 @@
 
 # Import packages
 import numpy as np
+from os import path
 from astropy.io import fits
 from astropy.table import Table,hstack
 
@@ -67,18 +68,18 @@ def EquivalentWidth(spectrum,model,parameters,param_names=None):
     return np.hstack((parameters,REWs)),param_names
 
 # Plot from results
-def EWfromresults(params,path,z):
+def EWfromresults(params,fpath,z):
 
     if params["Verbose"]:
-        print("Measuring texture:",path.split('/')[-1])
+        print("Measuring texture:",path.split(fpath)[-1])
 
     ## Load in Spectrum ##
-    spectrum = SC.Spectrum(path,z,params)
+    spectrum = SC.Spectrum(fpath,z,params)
 
     if spectrum.regions != []:
 
         # Load name and parameters
-        fname = params['OutFolder']+path.split('/')[-1].replace('.fits','')+'-results.fits'
+        fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
         parameters = Table.read(fname)
         names = parameters.colnames
 
@@ -86,7 +87,7 @@ def EWfromresults(params,path,z):
         for n in names:
             if 'EW' in n:
                 if not params['Overwrite']:
-                    print('Texture already measured:',path.split('/')[-1])
+                    print('Texture already measured:',path.split(fpath)[-1])
                     return
                 else: 
                     parameters = parameters[[n for n in names if 'EW' not in n]]

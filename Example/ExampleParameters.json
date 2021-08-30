@@ -4,7 +4,7 @@
     "RandomSeed": 1,
     "LineRegion": 300,
     "ContinuumRegion": 15000,
-    "NBoot": 1,
+    "NBoot": 500,
     "FThresh": 0.95,
     "NProcess": 1,
     "Plotting": true,
