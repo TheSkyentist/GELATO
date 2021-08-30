@@ -66,7 +66,7 @@ def TieParams(spectrum,param_names,EmissionGroups=None):
             for line in species['Lines']:
                 
                 # Find parameter names
-                name =  group['Name'] + '_' + species['Name'] + '_' + str(line['Wavelength']) + '_'
+                name =  '_'.join([group['Name'],species['Name'],str(line['Wavelength']),''])
                 name_Redshift = name + 'Redshift'
                 name_Dispersion = name + 'Dispersion'
                 name_Flux = name + 'Flux'

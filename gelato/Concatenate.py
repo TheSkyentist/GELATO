@@ -1,8 +1,8 @@
 """ Concatenate Results """
 
 # Import packages
-import os
 import numpy as np
+from os import path
 from astropy.io import fits
 from astropy.table import Table,vstack
 
@@ -19,17 +19,18 @@ def concatfromresults(p,objects):
     while i*N < len(objects):
         
         tables = [] # Initilize tables list
-        paths = objects['Path'][i*N:(i+1)*N] # Get subsample
+        spaths = objects['Path'][i*N:(i+1)*N] # Get subsample
 
         # Iterate over results
-        for path in paths:
+        for spath in spaths:
             
             # Load name and parameters
-            name = path.split('/')[-1].replace('.fits','')
-            if not os.path.exists(p['OutFolder']+name+'-results.fits'):     
+            name = path.split(spath)[-1].replace('.fits','')
+            spath = path.join(p['OutFolder'],name+'-results.fits')
+            if not path.exists(spath):     
                 continue # If doesn't exist, continue
-            parameters = fits.getdata(p['OutFolder']+name+'-results.fits')
-            
+            parameters = fits.getdata(spath)
+
             # Initalize Lists
             data = [name]
             names = ['Name']
@@ -56,14 +57,15 @@ def concatfromresults(p,objects):
             for c in table.colnames: table[c][table.mask[c]] = np.nan
 
         # If first entry, save to disk directly
+        out = path.join(p['OutFolder'],'GELATO-results.fits')
         if first:
-            table.write(p['OutFolder']+'GELATO-results.fits',overwrite=True)
+            table.write(out,overwrite=True)
             first = False
 
         # Otherise load table and append to it
         else:
-            results = Table.read(p['OutFolder']+'GELATO-results.fits')
-            vstack([results,table],join_type = 'outer').write(p['OutFolder']+'GELATO-results.fits',overwrite=True)
+            results = Table.read(out)
+            vstack([results,table],join_type = 'outer').write(out,overwrite=True)
 
         i += 1
 

@@ -1,8 +1,8 @@
 """ Main Function """
 
 # Packages
-import os
 import numpy as np
+from os import path
 from datetime import datetime
 from astropy.table import Table
 
@@ -16,16 +16,16 @@ import gelato.EquivalentWidth as EW
 import gelato.ConstructParams as CP
 
 # Get fit parameters for spectrum
-def gelato(params,path,z):
+def gelato(params,spath,z):
 
     # Load Params
     if type(params) == str: params = CP.construct(params)
 
     # Get name of file
-    name = path.split("/")[-1]
+    name = path.split(spath)[-1]
 
     # If it exits, skip
-    if os.path.exists(params["OutFolder"]+name.replace(".fits","-results.fits")) and not params["Overwrite"]:
+    if path.exists(params["OutFolder"]+name.replace(".fits","-results.fits")) and not params["Overwrite"]:
         if params["Verbose"]:
             print('gelato already exists:',name)
         return
@@ -35,7 +35,7 @@ def gelato(params,path,z):
     ## Load in Spectrum ##
     if params["Verbose"]:
         print("Gathering ingredients:",name)
-    spectrum = SC.Spectrum(path,z,params)
+    spectrum = SC.Spectrum(spath,z,params)
     if params["Verbose"]:
         print("Ingredients gathered:",name)
 
@@ -91,7 +91,7 @@ def gelato(params,path,z):
                 print("Presenting gelato:",name)
             # Set model parameters to median values
             medians = np.median(parameters,0)[:-1]
-            PL.Plot(spectrum,model,medians,path)
+            PL.Plot(spectrum,model,medians,spath)
             if params["Verbose"]:
                 print("gelato presented:",name)
 
@@ -124,7 +124,7 @@ def gelato(params,path,z):
             if params["Verbose"]:
                 print("Presenting gelato:",name)
                 medians = np.median(parameters,0)[:-1]
-            PL.PlotFig(spectrum,model,medians,path)
+            PL.PlotFig(spectrum,model,medians,spath)
             if params["Verbose"]:
                 print("Gelato presented:",name)
 
@@ -141,7 +141,7 @@ def gelato(params,path,z):
     # Save results
     if params["Verbose"]:
         print("Freezing results:",name)
-    parameters.write(params["OutFolder"]+name.replace(".fits","-results.fits"),overwrite=True)
+    parameters.write(path.join(params["OutFolder"],name.replace(".fits","-results.fits")),overwrite=True)
     if params["Verbose"]:
         print("Results freezed:",name)
 
@@ -150,6 +150,18 @@ def gelato(params,path,z):
 
     # Return model (If not multiprocessing)
     if params["NProcess"] == 1: return model
+
+def loadObjects(tpath):
+    if tpath.endswith('.csv'):
+        objects = np.atleast_1d(np.genfromtxt(tpath,delimiter=',',dtype=['U100',np.float_],names=['Path','z']))
+    elif tpath.endswith('.fits'):
+        objects = Table.read(tpath)
+        objects.convert_bytestring_to_unicode()
+        objects = np.atleast_1d(objects)
+    else:
+        print('Object list not .csv or .fits.')
+        exit()
+    return objects
 
 def header():
     print("Welcome to GELATO")

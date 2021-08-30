@@ -11,4 +11,4 @@ import gelato.EquivalentWidth
 import gelato.BuildModel
 import gelato.FittingModel
 
-from gelato.gelato import header,footer,gelato
+from gelato.gelato import header,footer,loadObjects,gelato

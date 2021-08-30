@@ -32,15 +32,7 @@ if __name__ == "__main__":
         gelato.header()
 
     ## Assemble Objects
-    if args.ObjectList.endswith('.csv'):
-        objects = np.atleast_1d(np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['Path','z']))
-    elif args.ObjectList.endswith('.fits'):
-        objects = Table.read(args.ObjectList)
-        objects.convert_bytestring_to_unicode()
-        objects = np.atleast_1d(objects)
-    else:
-        print('Object list not .csv or .fits.')
-        exit()
+    objects = gelato.loadObjects(args.ObjectList)
     ## Assemble Objects
 
     ## Run gelato ##

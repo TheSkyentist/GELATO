@@ -8,6 +8,7 @@ import numpy as np
 from astropy.table import Table
 
 # GELATO
+import gelato
 import gelato.Concatenate as C
 import gelato.ConstructParams as CP
 
@@ -20,14 +21,7 @@ p = CP.construct(args.Parameters)
 ## Parse Arguements
 
 ## Assemble Objects
-if args.ObjectList.endswith('.csv'):
-    objects = np.atleast_1d(np.genfromtxt(args.ObjectList,delimiter=',',dtype=['U100',np.float_],names=['Path','z']))
-elif args.ObjectList.endswith('.fits'):
-    objects = Table.read(args.ObjectList)
-    objects.convert_bytestring_to_unicode()
-    objects = np.atleast_1d(objects)
-else:
-    print('Object list not .csv or .fits.')
+objects = gelato.loadObjects(args.ObjectList)
 ## Assemble Objects
 
 ## Concatenate Results

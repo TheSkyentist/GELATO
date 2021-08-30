@@ -7,8 +7,8 @@ import warnings
 warnings.simplefilter('ignore')
 
 # Packages
-import os
 import numpy as np
+from os import path
 from astropy.io import fits
 from matplotlib import pyplot
 from scipy.optimize import minimize
@@ -21,15 +21,15 @@ import gelato.SpectrumClass as SC
 colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,0),(36,255,36),(219,109,0)])/255
 
 # Plot all Figures
-def Plot(spectrum,model,model_fit,path):
+def Plot(spectrum,model,model_fit,fpath):
 
-    for i in range(3): PlotFig(spectrum,model,model_fit,path,plottype=i)
+    for i in range(3): PlotFig(spectrum,model,model_fit,fpath,plottype=i)
 
 # Plot figure
-def PlotFig(spectrum,model,model_fit,path,plottype=0):
+def PlotFig(spectrum,model,model_fit,fpath,plottype=0):
 
     # Make figure name
-    figname = path.split('/')[-1].replace('.fits','')+'-'
+    figname = path.split(fpath)[-1].replace('.fits','')+'-'
     if plottype == 0:
         figname += 'spec'
     elif plottype == 1:
@@ -38,7 +38,7 @@ def PlotFig(spectrum,model,model_fit,path,plottype=0):
         figname += 'comp'
 
     # Dont overwrite
-    if os.path.exists(spectrum.p['OutFolder'] + figname + '.pdf') and not spectrum.p['Overwrite']:
+    if path.exists(path.join(spectrum.p['OutFolder'],figname+'.pdf')) and not spectrum.p['Overwrite']:
         if spectrum.p['Verbose']:
             print('Gelato already presented:',figname)
         return
@@ -207,20 +207,20 @@ def PlotFig(spectrum,model,model_fit,path,plottype=0):
     # Add title and save figure
     fig.suptitle(figname.replace('_','\_')+', $z='+str(np.round(spectrum.z,3))+'$',y=0.95)
     fig.tight_layout()
-    fig.savefig(spectrum.p['OutFolder'] + figname + '.pdf')
+    fig.savefig(path.join(spectrum.p['OutFolder'],figname+'.pdf'))
     pyplot.close(fig)
 
 # Plot from results
-def plotfromresults(params,path,z):
+def plotfromresults(params,fpath,z):
 
     if params["Verbose"]:
-        print("Presenting gelato:",path.split('/')[-1])
+        print("Presenting gelato:",path.split(fpath)[-1])
 
     ## Load in Spectrum ##
-    spectrum = SC.Spectrum(path,z,params)
+    spectrum = SC.Spectrum(fpath,z,params)
 
     ## Load Results ##
-    fname = params['OutFolder']+path.split('/')[-1].replace('.fits','')+'-results.fits'
+    fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
     parameters = fits.getdata(fname)
     median = np.array([np.median(parameters[n]) for n in parameters.columns.names if 'EW' not in n])[:-1]
     
@@ -243,7 +243,7 @@ def plotfromresults(params,path,z):
         model = CM.CompoundModel(models)
 
         # Plot
-        Plot(spectrum,model,median,path)
+        Plot(spectrum,model,median,fpath)
 
     else:
 
@@ -251,7 +251,7 @@ def plotfromresults(params,path,z):
         model = CM.CompoundModel(models)
 
         # Plot
-        PlotFig(spectrum,model,median,path)
+        PlotFig(spectrum,model,median,fpath)
 
     if params["Verbose"]:
-        print("Gelato presented:",path.split('/')[-1])
+        print("Gelato presented:",fpath.split('/')[-1])
