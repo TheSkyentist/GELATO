@@ -47,7 +47,7 @@ elif multi: # Many EW
         import multiprocessing as mp
         pool = mp.Pool(processes=p['NProcess'])
         inputs = [(copy.deepcopy(p),o['Path'],o['z']) for o in objects]
-        pool.starmap(EW.Wfromresults, inputs)
+        pool.starmap(EW.EWfromresults, inputs)
         pool.close()
         pool.join()
     else: # Single Thread
