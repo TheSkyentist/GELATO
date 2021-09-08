@@ -318,7 +318,7 @@ class SSPContinuumFixed():
         self.redshift = redshift
         
         # List SSPs
-        ssp_dir = path.join(path.dirname(path.abspath(__file__)),'SSPs')
+        ssp_dir = path.join(path.dirname(path.abspath(__file__)),'SSPs','')
         with open(ssp_dir+'continuum_models.txt','r') as f: 
             self.ssp_names = np.sort([l.strip() for l in f.readlines()])
 
@@ -394,7 +394,7 @@ class SSPContinuumFree():
         self.spec = spec
         
         # List SSPs
-        ssp_dir = path.join(path.dirname(path.abspath(__file__)),'SSPs')
+        ssp_dir = path.join(path.dirname(path.abspath(__file__)),'SSPs','')
         with open(ssp_dir+'continuum_models.txt','r') as f: 
             self.ssp_names = np.sort([l.strip() for l in f.readlines()])
 
