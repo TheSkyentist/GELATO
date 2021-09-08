@@ -1,6 +1,6 @@
 """ Custom Models """
 
-import os
+from os import path
 import numpy as np 
 from astropy.io import fits
 
@@ -318,8 +318,9 @@ class SSPContinuumFixed():
         self.redshift = redshift
         
         # List SSPs
-        ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
-        self.ssp_names = np.sort([x for x in os.listdir(ssp_dir) if '_iPp0.00_baseFe_LIS5.0.fits' in x])
+        ssp_dir = path.join(path.dirname(path.abspath(__file__)),'SSPs')
+        with open(ssp_dir+'continuum_models.txt','r') as f: 
+            self.ssp_names = np.sort([l.strip() for l in f.readlines()])
 
         # Number of parameters 
         self.nparams = len(self.ssp_names)
@@ -393,8 +394,9 @@ class SSPContinuumFree():
         self.spec = spec
         
         # List SSPs
-        ssp_dir = os.path.dirname(os.path.abspath(__file__))+'/SSPs/'
-        self.ssp_names = np.sort([x for x in os.listdir(ssp_dir) if '_iPp0.00_baseFe_LIS5.0.fits' in x])
+        ssp_dir = path.join(path.dirname(path.abspath(__file__)),'SSPs')
+        with open(ssp_dir+'continuum_models.txt','r') as f: 
+            self.ssp_names = np.sort([l.strip() for l in f.readlines()])
 
         # Number of parameters 
         self.nparams = len(self.ssp_names)+1

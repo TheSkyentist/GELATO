@@ -41,9 +41,13 @@ def verify(params):
             if not ((type(params[p]) == float) or (type(params[p]) == int)):
                 print('Parameter',p,'must be an int or a float.')
                 return False
-        elif p in ['NBoot','NProcess']:
+        elif p in ['NProcess']:
             if not ((type(params[p]) == int) and (params[p] > 0)):
                 print('Parameter',p,'must be a positive int.')
+                return False
+        elif p in ['NBoot']:
+            if not ((type(params[p]) == int) and (params[p] >= 0)):
+                print('Parameter',p,'must be a non-negative int.')
                 return False
         elif p in ['FThresh']:
             if not (((type(params[p]) == float) or (type(params[p]) == int)) and ((params[p] >= 0) and (params[p] <= 1))):

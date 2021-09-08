@@ -67,19 +67,23 @@ def gelato(params,spath,z):
             print("Flavor added:",name)
 
         # Bootstrap
-        if params["Verbose"]:
-            print("Scooping portions (this may take a while):",name)
-        N = 40 # Max length of progress bar
-        parameters = np.ones((params["NBoot"],len(model_fit)+1))
-        for i in range(params["NBoot"]):
-            try: parameters[i] = FM.FitBoot(model,model_fit,spectrum,i,N=N)
-            except np.linalg.LinAlgError:
-                if params["Verbose"]: print("\nGELATO failed for:",name)
-                return
-        if ((params['NProcess'] == 1) and params['Verbose']):
-            print('Progress: |'+N*'#'+'| 100%')
-        if params["Verbose"]:
-            print("Portions scooped:",name)
+        if params["NBoot"] > 1:
+            if params["Verbose"]:
+                print("Scooping portions (this may take a while):",name)
+            N = 40 # Max length of progress bar
+            parameters = np.ones((params["NBoot"],len(model_fit)+1))
+            for i in range(params["NBoot"]):
+                try: parameters[i] = FM.FitBoot(model,model_fit,spectrum,i,N=N)
+                except np.linalg.LinAlgError:
+                    if params["Verbose"]: print("\nGELATO failed for:",name)
+                    return
+            if ((params['NProcess'] == 1) and params['Verbose']):
+                print('Progress: |'+N*'#'+'| 100%')
+            if params["Verbose"]:
+                print("Portions scooped:",name)
+        else: 
+            parameters = np.ones((1,len(model_fit)+1))
+            parameters[0] = np.concatenate([model_fit,[np.square(model.residual(model_fit,spectrum.wav,spectrum.flux,spectrum.isig)).sum()]])
 
         # Expand parameters and names
         parameters = model.expand_multiple(parameters)

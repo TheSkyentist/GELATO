@@ -1,0 +1,15 @@
+Ech1.30Zm1.30T00.0631_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zm1.30T00.2512_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zm1.30T01.0000_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zm1.30T04.4668_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zm1.30T12.5893_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zm0.40T00.0631_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zm0.40T00.2512_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zm0.40T01.0000_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zm0.40T04.4668_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zm0.40T12.5893_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zp0.00T00.0631_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zp0.00T00.2512_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zp0.00T01.0000_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zp0.00T04.4668_iPp0.00_baseFe_LIS5.0.fits.gz
+Ech1.30Zp0.00T12.5893_iPp0.00_baseFe_LIS5.0.fits.gz

@@ -61,6 +61,11 @@ def PlotFig(spectrum,model,model_fit,fpath,plottype=0):
         # Add axis
         fax = fig.add_subplot(gs[0,0])
 
+        # Plot Power Law
+        if 'PowerLaw_Coefficient' in model.get_names():
+            continuum = CM.CompoundModel(model.models[1:2]).evaluate(model_fit[model.models[0].nparams:],*args)
+            fax.step(wav,continuum,'k',ls='--',where='mid')
+
          # Plot data
         fax.step(wav,flux,'gray',where='mid')
 
