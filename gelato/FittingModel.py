@@ -50,7 +50,6 @@ def FitContinuum(spectrum):
         # Get fixed redshift compound model
         sspfixed = CM.SSPContinuumFixed(z,spectrum)
         cont = CM.CompoundModel([sspfixed,pl])
-        cont.starting() # Initialized SSPs
 
         # Get starting values
         x0 = sspplfit[1:]
@@ -113,17 +112,6 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
         if not MC.FTest(base_model,base_fit,model,fit.x,spectrum,args):
             continue
 
-        # Iterate over new parameters
-        model_names = model.constrain(model.get_names())
-        newp = np.setdiff1d(model_names,base_model.constrain(base_model.get_names()),assume_unique=True)
-        for p in newp:
-            if 'Flux' in p: continue # Ignore bounds on flux
-            # If hitting bounds, continue
-            if fit.active_mask[np.argwhere(model_names==p)[0][0]] != 0:
-                stop = True
-                break
-        if stop: continue
-
         # Accept
         accepted.append(i)
 
@@ -180,7 +168,9 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
 # Fit Model
 def FitModel(model,x0,args,jac='3-point'):
     
-    fit = least_squares(fun = model.residual, jac = jac, x0 = x0, args = args, bounds = model.get_bounds(), method = 'trf', x_scale = model.constrain(model.starting()), tr_solver = 'lsmr', tr_options ={'regularize':True})
+    # fit = least_squares(fun = model.residual, jac = jac, x0 = x0, args = args, bounds = model.get_bounds(), method = 'trf', x_scale='jac')
+
+    fit = least_squares(fun = model.residual, jac = jac, x0 = x0, args = args, bounds = model.get_bounds(), method = 'trf', x_scale='jac',max_nfev=100,tr_solver='lsmr',tr_options={'regularize':True})
 
     return fit
 

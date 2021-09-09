@@ -316,7 +316,7 @@ class SSPContinuumFixed():
         # Keep track
         self.spec = spec
         self.redshift = redshift
-        
+
         # List SSPs
         ssp_dir = path.join(path.dirname(path.abspath(__file__)),'SSPs','')
         with open(ssp_dir+'continuum_models.txt','r') as f: 
