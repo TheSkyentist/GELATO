@@ -44,7 +44,7 @@ def EquivalentWidth(spectrum,model,parameters,param_names=None):
         param_names += (param_names[i].replace('_Redshift','_REW'),)
 
         center = float(param_names[i].split('_')[-2]) 
-        opz = 1 + parameters[:,i] # 1 + z
+        opz = 1 + parameters[:,i]/C # 1 + z
         flux = parameters[:,i+1] # Line flux
 
         # Get line

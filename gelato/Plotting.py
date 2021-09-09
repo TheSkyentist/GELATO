@@ -21,12 +21,15 @@ import gelato.SpectrumClass as SC
 colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,0),(36,255,36),(219,109,0)])/255
 
 # Plot all Figures
-def Plot(spectrum,model,model_fit,fpath):
+def Plot(spectrum,model,parameters,fpath):
 
-    for i in range(3): PlotFig(spectrum,model,model_fit,fpath,plottype=i)
+    for i in range(3): PlotFig(spectrum,model,parameters,fpath,plottype=i)
 
 # Plot figure
-def PlotFig(spectrum,model,model_fit,fpath,plottype=0):
+def PlotFig(spectrum,model,parameters,fpath,plottype=0):
+
+    # Calculate Medians
+    medians = np.median(parameters,0)
 
     # Make figure name
     figname = path.split(fpath)[-1].replace('.fits','')+'-'
@@ -56,20 +59,22 @@ def PlotFig(spectrum,model,model_fit,fpath,plottype=0):
 
         # Model prediction
         args = wav,flux,isig
-        f = model.evaluate(model_fit,*args)
+        f = model.evaluate(medians,*args)
 
         # Add axis
         fax = fig.add_subplot(gs[0,0])
 
         # Plot Power Law
         if 'PowerLaw_Coefficient' in model.get_names():
-            continuum = CM.CompoundModel(model.models[1:2]).evaluate(model_fit[model.models[0].nparams:],*args)
+            continuum = CM.CompoundModel(model.models[1:2]).evaluate(medians[model.models[0].nparams:],*args)
             fax.step(wav,continuum,'k',ls='--',where='mid')
 
          # Plot data
         fax.step(wav,flux,'gray',where='mid')
 
-        # Plot model
+        # Plot model(s)
+        # for p in parameters:
+        #     fax.step(wav,model.evaluate(p,*args),'r',where='mid',alpha=0.5)
         fax.step(wav,f,'r',where='mid')
 
         # Base Y axis on flux
@@ -127,10 +132,10 @@ def PlotFig(spectrum,model,model_fit,fpath,plottype=0):
         # Continuum and Model
         args = spectrum.wav,spectrum.flux,spectrum.isig
         if 'PowerLaw_Coefficient' in model.get_names():
-            continuum = CM.CompoundModel(model.models[0:2]).evaluate(model_fit,*args)
+            continuum = CM.CompoundModel(model.models[0:2]).evaluate(medians,*args)
         else: 
-            continuum = CM.CompoundModel(model.models[0:1]).evaluate(model_fit,*args)
-        f = model.evaluate(model_fit,*args)
+            continuum = CM.CompoundModel(model.models[0:1]).evaluate(medians,*args)
+        f = model.evaluate(medians,*args)
         
         # Iterate over regions
         for i,region in enumerate(spectrum.regions):
@@ -147,7 +152,10 @@ def PlotFig(spectrum,model,model_fit,fpath,plottype=0):
             # Plot data
             fax.step(wav,flux,'gray',where='mid')
 
-            # Plot model
+            # Plot model(s)
+            # for p in parameters:
+            #     fax.step(wav,model.evaluate(p,*args)[good],'r',where='mid',alpha=0.1)
+            fax.step(wav,f[good],'r',where='mid')
             fax.step(wav,f[good],'r',where='mid')
 
             # Base Y axis on flux
@@ -167,9 +175,12 @@ def PlotFig(spectrum,model,model_fit,fpath,plottype=0):
                 for j in range(init,len(model.models)):
                     m = model.models[j]
                     idx = model.indices[j]
-                    m = CM.CompoundModel([m]).evaluate(model_fit[idx:idx+m.nparams],*(wav,flux,isig))
-                    fax.step(wav,ymin+m,'--',c='gray')
-                
+                    cm = CM.CompoundModel([m]).evaluate(medians[idx:idx+m.nparams],*(wav,flux,isig))
+                    fax.step(wav,ymin+cm,'--',c='gray')
+                    # for p in parameters:
+                    #     cm = CM.CompoundModel([m]).evaluate(p[idx:idx+m.nparams],*(wav,flux,isig))
+                    #     fax.step(wav,ymin+cm,'--',c='gray',alpha=0.5)
+
             # Get Line Names/Positions
             linelocs = []
             linelabels = []
@@ -227,8 +238,8 @@ def plotfromresults(params,fpath,z):
     ## Load Results ##
     fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
     parameters = fits.getdata(fname)
-    median = np.array([np.median(parameters[n]) for n in parameters.columns.names if 'EW' not in n])[:-1]
-    
+    ps = np.array([parameters[n] for n in parameters.columns.names if 'EW' not in n])[:-1].T
+
     ## Create model ##
     # Add continuum
     models = [CM.SSPContinuumFree(spectrum)]
@@ -240,7 +251,7 @@ def plotfromresults(params,fpath,z):
 
         # Add spectral lines
         ind = sum([m.nparams for m in models]) # index where emission lines begin
-        for i in range(ind,median.size,3):
+        for i in range(ind,ps.shape[1],3):
             center = float(parameters.columns.names[i].split('_')[-2])
             models.append(CM.SpectralFeature(center,spectrum))
 
@@ -248,7 +259,7 @@ def plotfromresults(params,fpath,z):
         model = CM.CompoundModel(models)
 
         # Plot
-        Plot(spectrum,model,median,fpath)
+        Plot(spectrum,model,ps,fpath)
 
     else:
 
@@ -256,7 +267,7 @@ def plotfromresults(params,fpath,z):
         model = CM.CompoundModel(models)
 
         # Plot
-        PlotFig(spectrum,model,median,fpath)
+        PlotFig(spectrum,model,ps,fpath)
 
     if params["Verbose"]:
         print("Gelato presented:",fpath.split('/')[-1])

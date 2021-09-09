@@ -27,7 +27,8 @@ def FitContinuum(spectrum):
     ssp = CM.CompoundModel([CM.SSPContinuumFree(spectrum)])
 
     # Fit initial continuuum with free redshift
-    sspfit = FitModel(ssp,ssp.starting(),args).x
+    x0 = ssp.starting()
+    sspfit = FitModel(ssp,x0,args).x
 
     # SSP+PL Continuum
     pl = CM.PowerLawContinuum(spectrum,nssps=ssp.nparams()-1)
@@ -165,7 +166,7 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
 # Fit Model
 def FitModel(model,x0,args,jac='3-point'):
     
-    fit = least_squares(fun = model.residual, jac=jac, x0 = x0, args = args,  bounds = model.get_bounds(), method='trf')
+    fit = least_squares(fun = model.residual, jac = jac, x0 = x0, args = args, bounds = model.get_bounds(), method = 'trf', x_scale = model.constrain(model.starting()), tr_solver = 'lsmr', tr_options ={'regularize':True})
 
     return fit
 

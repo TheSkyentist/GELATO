@@ -94,8 +94,7 @@ def gelato(params,spath,z):
             if params["Verbose"]:
                 print("Presenting gelato:",name)
             # Set model parameters to median values
-            medians = np.median(parameters,0)[:-1]
-            PL.Plot(spectrum,model,medians,spath)
+            PL.Plot(spectrum,model,parameters,spath)
             if params["Verbose"]:
                 print("gelato presented:",name)
 
@@ -127,8 +126,7 @@ def gelato(params,spath,z):
         if params["Plotting"]:
             if params["Verbose"]:
                 print("Presenting gelato:",name)
-                medians = np.median(parameters,0)[:-1]
-            PL.PlotFig(spectrum,model,medians,spath)
+            PL.PlotFig(spectrum,model,parameters,spath)
             if params["Verbose"]:
                 print("Gelato presented:",name)
 
