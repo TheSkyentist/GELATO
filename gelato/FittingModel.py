@@ -107,11 +107,25 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
         x0 = model.constrain(x0) # Limit to true parameters
 
         # Fit Model
-        model_fit = FitModel(model,x0,args,jac=model.jacobian).x
+        fit = FitModel(model,x0,args,jac=model.jacobian)
 
         # Perform F-test
-        if MC.FTest(base_model,base_fit,model,model_fit,spectrum,args):
-            accepted.append(i)
+        if not MC.FTest(base_model,base_fit,model,fit.x,spectrum,args):
+            continue
+
+        # Iterate over new parameters
+        model_names = model.constrain(model.get_names())
+        newp = np.setdiff1d(model_names,base_model.constrain(base_model.get_names()),assume_unique=True)
+        for p in newp:
+            if 'Flux' in p: continue # Ignore bounds on flux
+            # If hitting bounds, continue
+            if fit.active_mask[np.argwhere(model_names==p)[0][0]] != 0:
+                stop = True
+                break
+        if stop: continue
+
+        # Accept
+        accepted.append(i)
 
     ## Check all combinations of accepted components with AICs
     # All combinations
