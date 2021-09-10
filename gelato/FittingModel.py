@@ -44,7 +44,7 @@ def FitContinuum(spectrum):
     # Perform F-test
     if MC.FTest(ssp,sspfit,ssppl,sspplfit,spectrum,args):
 
-        # Final Redshift (Round for Stability)
+        # Final Redshift
         z = sspplfit[0]
 
         # Get fixed redshift compound model
@@ -57,7 +57,7 @@ def FitContinuum(spectrum):
         # Return w/ PL component
         return cont,x0
 
-    # Final Redshift (Round for Stability)
+    # Final Redshift
     z = sspfit[0]
 
     # Fixed Redshift compound model
@@ -168,8 +168,6 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
 # Fit Model
 def FitModel(model,x0,args,jac='3-point'):
     
-    # fit = least_squares(fun = model.residual, jac = jac, x0 = x0, args = args, bounds = model.get_bounds(), method = 'trf', x_scale='jac')
-
     fit = least_squares(fun = model.residual, jac = jac, x0 = x0, args = args, bounds = model.get_bounds(), method = 'trf', x_scale='jac',max_nfev=100,tr_solver='lsmr',tr_options={'regularize':True})
 
     return fit
