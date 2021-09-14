@@ -17,7 +17,19 @@ def concatfromresults(p,objects):
     N = 10000 # Number of objects we will concatenate at once
     i = 0 # Index
     while i*N < len(objects):
-        
+
+        # Loading bar
+        Nbar = 40
+        if p['Verbose']:
+                pc = int(100*i*N/len(objects)) # Percentage
+                l = int(Nbar*i*N/len(objects)) # Length of bar
+                if pc == 0:
+                    print('Progress: |'+Nbar*'-'+'|   0%',end='\r')
+                elif pc < 10:
+                    print('Progress: |'+l*'#'+(Nbar-l)*'-'+'|   '+str(pc)+'%',end='\r')
+                else:
+                    print('Progress: |'+l*'#'+(Nbar-l)*'-'+'|  '+str(pc)+'%',end='\r')
+
         tables = [] # Initilize tables list
         spaths = objects['Path'][i*N:(i+1)*N] # Get subsample
 
@@ -68,6 +80,8 @@ def concatfromresults(p,objects):
             vstack([results,table],join_type = 'outer').write(out,overwrite=True)
 
         i += 1
+
+    if p['Verbose']: print('Progress: |'+Nbar*'#'+'| 100%')
 
     if p["Verbose"]:
         print("Gelato combined.")
