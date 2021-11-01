@@ -133,8 +133,9 @@ class SpectralFeature():
 
         # Set bounds
         self.Redshift_bounds = (C*(spec.z-0.001),C*(spec.z+0.001))
-        self.Flux_bounds = (0,1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion)
-
+        # self.Flux_bounds = (0,1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion)
+        self.Flux_bounds = (-1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion,1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion)
+        
         # Return starting value
         return np.array([spec.z*C,Flux,self.Dispersion])
 
