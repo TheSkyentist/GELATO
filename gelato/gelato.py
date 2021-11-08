@@ -7,6 +7,7 @@ from datetime import datetime
 from astropy.table import Table
 
 # gelato supporting files
+from gelato.Constants import C
 import gelato.Plotting as PL
 import gelato.BuildModel as BM
 import gelato.FittingModel as FM
@@ -27,10 +28,10 @@ def gelato(params,spath,z):
     # If it exits, skip
     if path.exists(params["OutFolder"]+name.replace(".fits","-results.fits")) and not params["Overwrite"]:
         if params["Verbose"]:
-            print('gelato already exists:',name)
+            print('GELATO already exists:',name)
         return
     if params["Verbose"]:
-        print("Making gelato for",name)
+        print("Making GELATO for",name)
 
     ## Load in Spectrum ##
     if params["Verbose"]:
@@ -92,19 +93,11 @@ def gelato(params,spath,z):
         ## Plotting ##
         if params["Plotting"]:
             if params["Verbose"]:
-                print("Presenting gelato:",name)
+                print("Presenting GELATO:",name)
             # Set model parameters to median values
             PL.Plot(spectrum,model,parameters,spath)
             if params["Verbose"]:
-                print("gelato presented:",name)
-
-        ## Equivalent Widths ##
-        if params["CalcEW"]:
-            if params["Verbose"]:
-                print("Measuring texture:",name)
-            parameters,param_names = EW.EquivalentWidth(spectrum,model,parameters,param_names)
-            if params["Verbose"]:
-                print("Measured texture:",name)
+                print("GELATO presented:",name)
 
     # Otherwise:
     else:
@@ -125,10 +118,10 @@ def gelato(params,spath,z):
         ## Plotting ##
         if params["Plotting"]:
             if params["Verbose"]:
-                print("Presenting gelato:",name)
+                print("Presenting GELATO:",name)
             PL.PlotFig(spectrum,model,parameters,spath)
             if params["Verbose"]:
-                print("Gelato presented:",name)
+                print("GELATO presented:",name)
 
     # Add in continuum redshifts
     parameters = np.hstack([np.ones((len(parameters),1))*model.models[0].redshift,parameters])
@@ -139,6 +132,20 @@ def gelato(params,spath,z):
 
     # Turn into FITS table
     parameters = Table(data=parameters,names=param_names)
+
+    # Add rest line heights
+    for l in ['_'.join(p.split('_')[:-1]) for p in param_names if 'Flux' in p]:
+        center = float(l.split('_')[-1])
+        rheight = parameters[l+'_Flux']*C/(parameters[l+'_Dispersion']*center*np.sqrt(2*np.pi))
+        parameters.add_column(rheight,index=parameters.colnames.index(l+'_Dispersion')+1,name=l+'_RHeight')
+
+    ## Equivalent Widths ##
+    if params["CalcEW"]:
+        if params["Verbose"]:
+            print("Measuring texture:",name)
+        parameters = EW.EquivalentWidth(spectrum,model,parameters,param_names)
+        if params["Verbose"]:
+            print("Measured texture:",name)
 
     # Save results
     if params["Verbose"]:
@@ -172,4 +179,4 @@ def header():
     print("Started making gelato at",datetime.now())
 
 def footer():
-    print("Finished making gelato at",datetime.now())
+    print("Finished making GELATO at",datetime.now())

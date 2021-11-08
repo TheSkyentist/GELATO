@@ -43,7 +43,7 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
     # Dont overwrite
     if path.exists(path.join(spectrum.p['OutFolder'],figname+'.pdf')) and not spectrum.p['Overwrite']:
         if spectrum.p['Verbose']:
-            print('Gelato already presented:',figname)
+            print('GELATO already presented:',figname)
         return
 
     if plottype == 0:
@@ -230,7 +230,7 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
 def plotfromresults(params,fpath,z):
 
     if params["Verbose"]:
-        print("Presenting gelato:",path.split(fpath)[-1])
+        print("Presenting GELATO:",path.split(fpath)[-1])
 
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(fpath,z,params)
@@ -270,4 +270,4 @@ def plotfromresults(params,fpath,z):
         PlotFig(spectrum,model,ps,fpath)
 
     if params["Verbose"]:
-        print("Gelato presented:",fpath.split('/')[-1])
+        print("GELATO presented:",fpath.split('/')[-1])

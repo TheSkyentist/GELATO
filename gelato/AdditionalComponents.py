@@ -2,9 +2,7 @@
 
 import numpy as np
 import gelato.CustomModels as CM
-
-SQRT_2_PI = np.sqrt(2*np.pi)
-C = 299792.458 # km/s (sets the units of the returned values, needs to be changed in both CustomModels and AdditionalComponents)
+from gelato.Constants import C
 
 def ComponentName(index):
 
@@ -50,7 +48,8 @@ def AddComponent(flag, line, spectrum, prefix):
         model.Dispersion_bounds = (1000,10000)
 
         # Reassign Flux Bounds
-        model.Flux_bounds = (0,1.5*x0[1]*model.Dispersion_bounds[1]/oldMaxDispersion)
+        Fbound = 1.5*x0[1]*model.Dispersion_bounds[1]/oldMaxDispersion
+        model.Flux_bounds = (-Fbound,Fbound)
         
     ''' Outflow '''
     if index == 1: 

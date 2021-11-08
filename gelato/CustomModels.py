@@ -3,10 +3,10 @@
 from os import path
 import numpy as np 
 from astropy.io import fits
+from gelato.Constants import C
 
-OOSQRT_2_PI = 1/np.sqrt(2*np.pi)
-C = 299792.458 # km/s (sets the units of the returned values, needs to be changed in both CustomModels and AdditionalComponents)
 C2 = C*C
+OOSQRT_2_PI = 1/np.sqrt(2*np.pi)
 
 class CompoundModel():
 
@@ -133,9 +133,9 @@ class SpectralFeature():
 
         # Set bounds
         self.Redshift_bounds = (C*(spec.z-0.001),C*(spec.z+0.001))
-        # self.Flux_bounds = (0,1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion)
-        self.Flux_bounds = (-1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion,1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion)
-        
+        Fbound = 1.5*Flux*self.Dispersion_bounds[1]/self.Dispersion
+        self.Flux_bounds = (-Fbound,Fbound)
+
         # Return starting value
         return np.array([spec.z*C,Flux,self.Dispersion])
 
@@ -380,7 +380,7 @@ class SSPContinuumFixed():
 
     def get_names(self):
 
-        return tuple('SSP_'+x.replace('.fits','') for x in self.ssp_names)
+        return tuple('SSP_'+x.replace('.fits','').replace('.gz','') for x in self.ssp_names)
 
 # SSP Continuum
 class SSPContinuumFree():
@@ -448,4 +448,4 @@ class SSPContinuumFree():
 
     def get_names(self):
 
-        return ('SSP_Redshift',) + tuple('SSP_'+x.replace('.fits','') for x in self.ssp_names)
+        return ('SSP_Redshift',) + tuple('SSP_'+x.replace('.fits','').replace('.gz','') for x in self.ssp_names)

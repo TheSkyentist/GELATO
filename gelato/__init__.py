@@ -1,5 +1,6 @@
 # No dependencies
 import gelato.Plotting
+import gelato.Constants
 import gelato.CustomModels
 import gelato.SpectrumClass
 import gelato.ConstructParams

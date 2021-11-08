@@ -26,46 +26,38 @@ def EquivalentWidth(spectrum,model,parameters,param_names=None):
     else: 
         continuum = CM.CompoundModel(model.models[0:1])
 
-    # Where continuum parameters start
-    ind = continuum.nparams()
-
     # Get all continuum heights
-    continua = np.ones((parameters.shape[0],len(spectrum.wav)))
-    for i,params in enumerate(parameters):
+    continua = np.ones((len(parameters),len(spectrum.wav)))
+    for i,params in enumerate(np.array([list(p) for p in parameters])):
         continua[i] = continuum.evaluate(params,*args)
 
-    # Empty EW array
-    REWs = np.zeros((parameters.shape[0],int((parameters.shape[1]-1-ind)/3)))
+    # Iterate over lines
+    for l in ['_'.join(p.split('_')[:-1]) for p in param_names if 'Flux' in p]:
 
-    # Iterate over Emission lines
-    for i in range(ind,parameters.shape[1]-1,3):
-
-        # Get line parameters
-        param_names += (param_names[i].replace('_Redshift','_REW'),)
-
-        center = float(param_names[i].split('_')[-2]) 
-        opz = 1 + parameters[:,i]/C # 1 + z
-        flux = parameters[:,i+1] # Line flux
+        # Line Parameters
+        center = float(l.split('_')[-1])
+        opz = 1 + parameters[l+'_Redshift']/C
+        flux = parameters[l+'_Flux']
 
         # Get line
         linewav = center*opz
         linewidth = linewav*spectrum.p['LineRegion']/(2*C)
 
         # Continuum height
-        heights = np.ones(parameters.shape[0])
-        for j,lwv,lwd,ctm in zip(range(parameters.shape[0]),linewav,linewidth,continua):
+        heights = np.ones(len(parameters))
+        for j,lwv,lwd,ctm in zip(range(len(parameters)),linewav,linewidth,continua):
             # Continuum height region
             region = np.logical_and(spectrum.wav > lwv - lwd,spectrum.wav < lwv + lwd)
             if region.sum() == 0:
                 heights[j] = np.nan
             else:
                 heights[j] = np.median(ctm[region])
-    
+
         # Get REW
-        REWs[:,int((i-ind)/3)] = np.abs(flux/(heights*opz))
+        parameters.add_column(flux/(heights*opz),index=parameters.colnames.index(l+'_RHeight')+1,name=l+'_REW')
 
     # Return combined Results
-    return np.hstack((parameters,REWs)),param_names
+    return parameters
 
 # Plot from results
 def EWfromresults(params,fpath,z):
@@ -93,9 +85,6 @@ def EWfromresults(params,fpath,z):
                     parameters = parameters[[n for n in names if 'EW' not in n]]
                     names = parameters.colnames
                 break
-        
-        # Put parameters into the form we need
-        parameters = np.array([parameters[n] for n in names]).T
 
         ## Create model ##
         # Add continuum
@@ -114,10 +103,7 @@ def EWfromresults(params,fpath,z):
         model = CM.CompoundModel(models)
         
         # Calculate REWs
-        parameters,param_names = EquivalentWidth(spectrum,model,parameters,names)
-
-        # Turn into FITS table
-        parameters = Table(data=parameters,names=param_names)
+        EquivalentWidth(spectrum,model,parameters,names).write(fname,overwrite=True)
         
     if params["Verbose"]:
         print("Texture measured:",path.split('/')[-1])
