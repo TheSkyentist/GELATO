@@ -106,4 +106,4 @@ def EWfromresults(params,fpath,z):
         EquivalentWidth(spectrum,model,parameters,names).write(fname,overwrite=True)
         
     if params["Verbose"]:
-        print("Texture measured:",path.split('/')[-1])
+        print("Texture measured:",path.split(fpath)[-1])
