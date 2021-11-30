@@ -239,7 +239,10 @@ class PowerLawContinuum():
 
     def starting(self):
 
-        Coefficient = np.nanmedian(self.spec.flux)/self.nssps
+        # Average (positive) flux
+        avg = np.nanmedian(self.spec.flux[self.spec.flux>0])
+
+        Coefficient = avg/self.nssps
         Index = 1.5
         self.Center = np.nanpercentile(self.spec.wav,20)
 
@@ -354,7 +357,10 @@ class SSPContinuumFixed():
         region = np.logical_and(x > self.spec.wav.min(),x < self.spec.wav.max())
         meds = np.array([np.median(s[np.logical_and(region,s>0)]) for s in self.ssps])
 
-        return np.nanmedian(self.spec.flux)/(len(self.ssp_names)*meds)
+        # Average (positive) flux
+        avg = np.nanmedian(self.spec.flux[self.spec.flux>0])
+
+        return avg/(len(self.ssp_names)*meds)
 
     def evaluate(self,p,x,y,isig):
 
@@ -427,7 +433,10 @@ class SSPContinuumFree():
         region = np.logical_and(x > self.spec.wav.min(),x < self.spec.wav.max())
         meds = np.array([np.median(s[np.logical_and(region,s>0)]) for s in self.ssps])
 
-        return np.append([self.spec.z*C],np.nanmedian(self.spec.flux)/(len(self.ssp_names)*meds))
+        # Average (positive) flux
+        avg = np.nanmedian(self.spec.flux[self.spec.flux>0])
+
+        return np.append([self.spec.z*C],avg/(len(self.ssp_names)*meds))
 
     def evaluate(self,p,x,y,isig):
 
