@@ -238,12 +238,14 @@ def plotfromresults(params,fpath,z):
     ## Load Results ##
     fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
     parameters = fits.getdata(fname)
-    ps = np.array([parameters[n] for n in parameters.columns.names if 'EW' not in n])[:-1].T
+    ps = np.array([parameters[n] for n in parameters.columns.names if (('EW' not in n) and ('RHeight' not in n))])[:-1].T
+    pnames =  [n for n in parameters.columns.names if (('EW' not in n) and ('RHeight' not in n))][:-1]
+
 
     ## Create model ##
     # Add continuum
     models = [CM.SSPContinuumFree(spectrum)]
-    if 'PowerLaw_Coefficient' in parameters.columns.names:
+    if 'PowerLaw_Coefficient' in pnames:
         models.append(CM.PowerLawContinuum(spectrum))
         models[-1].starting()
 
@@ -252,7 +254,7 @@ def plotfromresults(params,fpath,z):
         # Add spectral lines
         ind = sum([m.nparams for m in models]) # index where emission lines begin
         for i in range(ind,ps.shape[1],3):
-            center = float(parameters.columns.names[i].split('_')[-2])
+            center = float(pnames[i].split('_')[-2])
             models.append(CM.SpectralFeature(center,spectrum))
 
         # Final model
