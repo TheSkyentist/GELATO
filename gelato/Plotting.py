@@ -241,7 +241,6 @@ def plotfromresults(params,fpath,z):
     ps = np.array([parameters[n] for n in parameters.columns.names if (('EW' not in n) and ('RHeight' not in n))])[:-1].T
     pnames =  [n for n in parameters.columns.names if (('EW' not in n) and ('RHeight' not in n))][:-1]
 
-
     ## Create model ##
     # Add continuum
     models = [CM.SSPContinuumFree(spectrum)]
