@@ -87,7 +87,7 @@ def gelato(params,spath,z):
             parameters[0] = np.concatenate([model_fit,[np.square(model.residual(model_fit,spectrum.wav,spectrum.flux,spectrum.isig)).sum()]])
 
         # Expand parameters and names
-        parameters = model.expand_multiple(parameters)
+        if model.constrained: parameters = model.expand_multiple(parameters)
         param_names = model.get_names()+('rChi2',)
 
         ## Plotting ##
