@@ -133,11 +133,11 @@ def gelato(params,spath,z):
     # Turn into FITS table
     parameters = Table(data=parameters,names=param_names)
 
-    # Add rest line heights
+    # Add rest line amplitudes
     for l in ['_'.join(p.split('_')[:-1]) for p in param_names if 'Flux' in p]:
         center = float(l.split('_')[-1])
-        rheight = parameters[l+'_Flux']*C/(parameters[l+'_Dispersion']*center*np.sqrt(2*np.pi))
-        parameters.add_column(rheight,index=parameters.colnames.index(l+'_Dispersion')+1,name=l+'_RHeight')
+        ramp = parameters[l+'_Flux']*C/(parameters[l+'_Dispersion']*center*np.sqrt(2*np.pi))
+        parameters.add_column(ramp,index=parameters.colnames.index(l+'_Dispersion')+1,name=l+'_RAmp')
 
     ## Equivalent Widths ##
     if params["CalcEW"]:

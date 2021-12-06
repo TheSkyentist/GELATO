@@ -12,8 +12,16 @@ GELATO is a Python code designed to fit emission lines in the spectra of star fo
 
 The spectra are fit using a [Trust Region Reflective](https://epubs.siam.org/doi/10.1137/S1064827595289108) bounded non-linear least-squares optimization algorithm with Gaussian line profiles.
 
-Requirements
+
+Installation
 -------------
+
+First, clone the GELATO git repository. If you have not used git before, this is easily done by using the commands before and cloning the directory over HTTPS.
+
+```bash
+cd /path/to/insallation/directory
+git clone https://github.com/TheSkyentist/GELATO.git
+```
 
 GELATO is built primarily using Python. It primarily uses NumPy for math, SciPy for optimization, Astropy for FITS handling, matplotlib for plotting, and Jupyter for the example notebook.
 
@@ -34,10 +42,7 @@ conda activate gelato
 
 Whenever running GELATO scripts, they must be run from this environment.
 
-Installation
--------------
-
-First, clone the GELATO git repository. Then the GELATO scripts can be installed. Make sure you are in the GELATO conda environment.
+Then the GELATO scripts can be installed. Make sure you are in the GELATO conda environment.
 
 ```bash
 cd /path/to/GELATO/directory
@@ -46,6 +51,21 @@ python setup.py install
 ```
 
 In your working directory, **you need to copy the "matplotlibrc" file** to control the plotting settings. This is most important if you are running GELATO with multiprocessing as this file sets the matplotlib backed to "Agg", a non-interactive backend, required for generating and saving figures on multiple threads.
+
+Updating GELATO
+-------------
+
+In order to update GELATO, you need to update the core packages, pull from the repo, and reinstall GELATO to your path. 
+
+```bash
+conda update -n gelato --all
+cd /path/to/GELATO/directory
+git pull
+conda activate gelato
+python setup.py install
+```
+
+In the case where a new version of GELATO releases where there are more strict dependecies, you may need to fully delete GELATO and its associated conda environment and reinstall from scratch.
 
 How it works
 -------------
@@ -96,7 +116,7 @@ There are two wrappers for GELATO, one for running on a single spectrum, and one
    This script is designed to run GELATO over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object. You can copy this file into your working directory once GELATO has been installed into the conda environment.
 
   ```bash
-  python run_GELATO_multi.py PARAMS.json spectrum.fits 0.5
+  python run_GELATO_single.py PARAMS.json spectrum.fits 0.5
   ```
 
 * "run_GELATO_multi.py"
@@ -104,7 +124,7 @@ There are two wrappers for GELATO, one for running on a single spectrum, and one
    This script is designed to run GELATO over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. You can copy this file into your working directory once GELATO has been installed into the conda environment. While it is called multi, it can be run on a file containing a single object.
 
   ```bash
-  python run_GELATO_multi.py /path/to/PARAMS.json spectra_with_redshifts.csv
+  python run_GELATO_multi.py PARAMS.json spectra_with_redshifts.csv
   ```
 
 During a GELATO run, rest equivalent widths and plots can be generated depending on what is specified in the parameter file. However, if you opt out of creating them during the run, you can always create them after using The following scripts. These scripts can be copied to the working directory after the installation. Similarly, these scripts are executable and can be called directly.
@@ -161,7 +181,7 @@ While GELATO is designed to be run in this fashion, an IPython notebook is provi
 Results File
 -------------
 
-Redshift and dispersion measurements are given in km/s. Flux measurements are dependent on the input units of the spectrum. If calculated, rest equivalent widths are given in Angstroms. If results are concatenated, errors are the standard devations on the recovered parameters from the bootstraps. Coefficients on the SSP continuum models are in the units of the SSP models.
+Redshift and dispersion measurements are given in km/s. Flux measurements are dependent on the input units of the spectrum. In addition, the rest amplitude (RAmp) of the Gaussian is also returned as this can be a more reliable way for computing line detection. If calculated, rest equivalent widths are given in Angstroms. If results are concatenated, errors are the standard devations on the recovered parameters from the bootstraps. Coefficients on the SSP continuum models are in the units of the SSP models.
 
 Parameter File
 -------------
