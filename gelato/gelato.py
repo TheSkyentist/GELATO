@@ -4,12 +4,14 @@
 import numpy as np
 from os import path
 from datetime import datetime
+from astropy.io import fits
 from astropy.table import Table
 
 # gelato supporting files
 from gelato.Constants import C
 import gelato.Plotting as PL
 import gelato.BuildModel as BM
+import gelato.CustomModels as CM
 import gelato.FittingModel as FM
 import gelato.SpectrumClass as SC
 import gelato.ModelComparison as MC
@@ -94,7 +96,6 @@ def gelato(params,spath,z):
         if params["Plotting"]:
             if params["Verbose"]:
                 print("Presenting GELATO:",name)
-            # Set model parameters to median values
             PL.Plot(spectrum,model,parameters,spath)
             if params["Verbose"]:
                 print("GELATO presented:",name)
@@ -122,6 +123,51 @@ def gelato(params,spath,z):
             PL.PlotFig(spectrum,model,parameters,spath)
             if params["Verbose"]:
                 print("GELATO presented:",name)
+
+    ### Save Model(s)
+    # Median
+    ps = parameters[:,:-1]
+    median = np.nanmedian(ps,0)
+    # Total Model
+    total = np.array([model.evaluate(p,spectrum.wav,spectrum.flux,spectrum.isig) for p in ps])
+    total_med = model.evaluate(median,spectrum.wav,spectrum.flux,spectrum.isig)
+    # Start HDUL
+    hdul = [fits.PrimaryHDU(total)]
+    hdul[0].name = 'MODEL'
+    # SSP Continuum
+    continuum = np.array([CM.CompoundModel(model.models[0:1]).evaluate(p,spectrum.wav,spectrum.flux,spectrum.isig) for p in ps])
+    continuum_med = CM.CompoundModel(model.models[0:1]).evaluate(median,spectrum.wav,spectrum.flux,spectrum.isig)
+    hdul.append(fits.ImageHDU(continuum))
+    hdul[1].name = 'SSP'
+    # Start Median Table
+    medtab = [np.log10(spectrum.wav),spectrum.flux,spectrum.weight,total_med,continuum_med]
+    medtabnames = ['loglam','flux','ivar','MODEL','SSP']
+    # PL Continuum
+    if 'PowerLaw_Coefficient' in model.get_names():
+        pl = np.array([CM.CompoundModel(model.models[0:2]).evaluate(p,spectrum.wav,spectrum.flux,spectrum.isig) for p in parameters[:,:-1]]) - continuum
+        pl_med = CM.CompoundModel(model.models[0:2]).evaluate(median,spectrum.wav,spectrum.flux,spectrum.isig) - continuum_med
+        hdul.append(fits.ImageHDU(pl))
+        hdul[2].name = 'PL'
+        medtab.append(pl_med)
+        medtabnames.append('PL')
+        continuum = continuum + pl
+        continuum_med = continuum_med + pl_med
+    if len(spectrum.regions) > 0:
+        lines = total - continuum
+        lines_med = total_med - continuum_med
+        hdul.append(fits.ImageHDU(lines))
+        hdul[-1].name = 'LINE'
+        medtab.append(lines_med)
+        medtabnames.append('LINE')
+    # Finish up table
+    hdul.append(fits.BinTableHDU(Table(medtab,names=medtabnames)))
+    hdul[-1].name = 'SUMMARY'
+    # Save results
+    if params["Verbose"]:
+        print("Freezing models:",name)
+    fits.HDUList(hdul).writeto(path.join(params["OutFolder"],name.replace(".fits","-model.fits")),overwrite=True)
+    if params["Verbose"]:
+        print("Models freezed:",name)
 
     # Add in continuum redshifts
     parameters = np.hstack([np.ones((len(parameters),1))*model.models[0].redshift,parameters])

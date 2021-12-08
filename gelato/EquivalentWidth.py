@@ -54,7 +54,7 @@ def EquivalentWidth(spectrum,model,parameters,param_names=None):
                 heights[j] = np.median(ctm[region])
 
         # Get REW
-        parameters.add_column(flux/(heights*opz),index=parameters.colnames.index(l+'_RHeight')+1,name=l+'_REW')
+        parameters.add_column(flux/(heights*opz),index=parameters.colnames.index(l+'_RAmp')+1,name=l+'_REW')
 
     # Return combined Results
     return parameters
