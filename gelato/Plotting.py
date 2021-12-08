@@ -237,9 +237,9 @@ def plotfromresults(params,fpath,z):
 
     ## Load Results ##
     fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
-    parameters = fits.getdata(fname)
-    ps = np.array([parameters[n] for n in parameters.columns.names if (('EW' not in n) and ('RHeight' not in n))])[:-1].T
-    pnames =  [n for n in parameters.columns.names if (('EW' not in n) and ('RHeight' not in n))][:-1]
+    parameters = fits.getdata(fname,'PARAMS')
+    pnames =  [n for n in parameters.columns.names if not (('EW' in n) or ('RAmp' in n) or ('PowerLaw_Scale' == n))][:-1]
+    ps = np.array([parameters[n] for n in pnames]).T
 
     ## Create model ##
     # Add continuum

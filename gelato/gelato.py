@@ -162,12 +162,6 @@ def gelato(params,spath,z):
     # Finish up table
     hdul.append(fits.BinTableHDU(Table(medtab,names=medtabnames)))
     hdul[-1].name = 'SUMMARY'
-    # Save results
-    if params["Verbose"]:
-        print("Freezing models:",name)
-    fits.HDUList(hdul).writeto(path.join(params["OutFolder"],name.replace(".fits","-model.fits")),overwrite=True)
-    if params["Verbose"]:
-        print("Models freezed:",name)
 
     # Add in continuum redshifts
     parameters = np.hstack([np.ones((len(parameters),1))*model.models[0].redshift,parameters])
@@ -196,7 +190,11 @@ def gelato(params,spath,z):
     # Save results
     if params["Verbose"]:
         print("Freezing results:",name)
-    parameters.write(path.join(params["OutFolder"],name.replace(".fits","-results.fits")),overwrite=True)
+    if 'PowerLaw_Coefficient' in model.get_names():
+        parameters.add_column(model.models[1].Center*np.ones(len(parameters)),index=parameters.colnames.index('PowerLaw_Index')+1,name='PowerLaw_Scale')
+    hdul.append(fits.BinTableHDU(parameters))
+    hdul[-1].name = 'PARAMS'
+    fits.HDUList(hdul).writeto(path.join(params["OutFolder"],name.replace(".fits","-results.fits")),overwrite=True)
     if params["Verbose"]:
         print("Results freezed:",name)
 
