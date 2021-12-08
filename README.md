@@ -186,12 +186,8 @@ The results are presented in a file ending with "-results.fits". It is a multi e
 from astrop.io import fits
 print(fits.open('example-results.fits').info())
 ```
-The possible extensions are:
+The extensions are:
 
-* MODEL: This is an image file containing the fully evaluated model. One dimension represents the wavelength axis while the other represents the bootstraps.
-* SSP: This is an image file containing the fully evaluated SSP continuum model. One dimension represents the wavelength axis while the other represents the bootstraps.
-* PL: This is an image file containing the fully evaluated power-law continuum model. One dimension represents the wavelength axis while the other represents the bootstraps. This extension will not appear if a PL model is not used in the final fit. 
-* LINE: This is an image file containing the fully evaluated emission-line model. One dimension represents the wavelength axis while the other represents the bootstraps. This extension will not appear if no lines are fit.
 * SUMMARY: It is a binary FITS table containing the summary of the models. It contains the original spectrum without the bad data points (ivar = 0) along with the total model, ssp continuum, power-law continuum, emission-line model generated from the median parameters. The latter two columns will not appear if they are not included in the final fit of the spectrum.
 * PARAMS: It is a binary FITS table where each column represents a parameter with a row for each bootstrap. Redshift and dispersion measurements are given in km/s. Flux measurements are dependent on the input units of the spectrum. In addition, the rest amplitude (RAmp) of the Gaussian is also returned as this can be a more reliable way for computing line detection. If calculated, rest equivalent widths are given in Angstroms. If results are concatenated, errors are the standard devations on the recovered parameters from the bootstraps. Coefficients on the SSP continuum models are in the units of the SSP models.
 
