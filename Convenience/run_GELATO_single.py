@@ -6,6 +6,7 @@
 import os
 import sys
 import argparse
+from pathlib import Path
 
 
 # gelato supporting files
@@ -26,7 +27,7 @@ if __name__ == "__main__":
 
     ## Create Directory for Output
     if not os.path.exists(p["OutFolder"]):
-        os.mkdir(p["OutFolder"])
+        Path(p["OutFolder"]).mkdir(parents=True)
 
     if p['Verbose']:
         gelato.header()
