@@ -4,12 +4,14 @@
 import numpy as np
 from os import path
 from datetime import datetime
+from astropy.io import fits
 from astropy.table import Table
 
 # gelato supporting files
 from gelato.Constants import C
 import gelato.Plotting as PL
 import gelato.BuildModel as BM
+import gelato.CustomModels as CM
 import gelato.FittingModel as FM
 import gelato.SpectrumClass as SC
 import gelato.ModelComparison as MC
@@ -94,7 +96,6 @@ def gelato(params,spath,z):
         if params["Plotting"]:
             if params["Verbose"]:
                 print("Presenting GELATO:",name)
-            # Set model parameters to median values
             PL.Plot(spectrum,model,parameters,spath)
             if params["Verbose"]:
                 print("GELATO presented:",name)
@@ -123,6 +124,32 @@ def gelato(params,spath,z):
             if params["Verbose"]:
                 print("GELATO presented:",name)
 
+    ### Save Model(s)
+    # Median
+    median = np.nanmedian(parameters[:,:-1],0)
+    # Total Model
+    total_med = model.evaluate(median,spectrum.wav,spectrum.flux,spectrum.isig)
+    # Start HDUL
+    hdul = [fits.PrimaryHDU()]
+    # SSP Continuum
+    continuum_med = CM.CompoundModel(model.models[0:1]).evaluate(median,spectrum.wav,spectrum.flux,spectrum.isig)
+    # Start Median Table
+    medtab = [np.log10(spectrum.wav),spectrum.flux,spectrum.weight,total_med,continuum_med]
+    medtabnames = ['loglam','flux','ivar','MODEL','SSP']
+    # PL Continuum
+    if 'PowerLaw_Coefficient' in model.get_names():
+        pl_med = CM.CompoundModel(model.models[0:2]).evaluate(median,spectrum.wav,spectrum.flux,spectrum.isig) - continuum_med
+        medtab.append(pl_med)
+        medtabnames.append('PL')
+        continuum_med = continuum_med + pl_med
+    if len(spectrum.regions) > 0:
+        lines_med = total_med - continuum_med
+        medtab.append(lines_med)
+        medtabnames.append('LINE')
+    # Finish up table
+    hdul.append(fits.BinTableHDU(Table(medtab,names=medtabnames)))
+    hdul[-1].name = 'SUMMARY'
+
     # Add in continuum redshifts
     parameters = np.hstack([np.ones((len(parameters),1))*model.models[0].redshift,parameters])
     param_names = ('SSP_Redshift',) + param_names
@@ -133,11 +160,11 @@ def gelato(params,spath,z):
     # Turn into FITS table
     parameters = Table(data=parameters,names=param_names)
 
-    # Add rest line heights
+    # Add rest line amplitudes
     for l in ['_'.join(p.split('_')[:-1]) for p in param_names if 'Flux' in p]:
         center = float(l.split('_')[-1])
-        rheight = parameters[l+'_Flux']*C/(parameters[l+'_Dispersion']*center*np.sqrt(2*np.pi))
-        parameters.add_column(rheight,index=parameters.colnames.index(l+'_Dispersion')+1,name=l+'_RHeight')
+        ramp = parameters[l+'_Flux']*C/(parameters[l+'_Dispersion']*center*np.sqrt(2*np.pi))
+        parameters.add_column(ramp,index=parameters.colnames.index(l+'_Dispersion')+1,name=l+'_RAmp')
 
     ## Equivalent Widths ##
     if params["CalcEW"]:
@@ -150,7 +177,11 @@ def gelato(params,spath,z):
     # Save results
     if params["Verbose"]:
         print("Freezing results:",name)
-    parameters.write(path.join(params["OutFolder"],name.replace(".fits","-results.fits")),overwrite=True)
+    if 'PowerLaw_Coefficient' in model.get_names():
+        parameters.add_column(model.models[1].Center*np.ones(len(parameters)),index=parameters.colnames.index('PowerLaw_Index')+1,name='PowerLaw_Scale')
+    hdul.append(fits.BinTableHDU(parameters))
+    hdul[-1].name = 'PARAMS'
+    fits.HDUList(hdul).writeto(path.join(params["OutFolder"],name.replace(".fits","-results.fits")),overwrite=True)
     if params["Verbose"]:
         print("Results freezed:",name)
 

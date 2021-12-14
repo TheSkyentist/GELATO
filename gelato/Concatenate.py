@@ -41,7 +41,7 @@ def concatfromresults(p,objects):
             spath = path.join(p['OutFolder'],name+'-results.fits')
             if not path.exists(spath):     
                 continue # If doesn't exist, continue
-            parameters = fits.getdata(spath)
+            parameters = fits.getdata(spath,'PARAMS')
 
             # Initalize Lists
             data = [name]

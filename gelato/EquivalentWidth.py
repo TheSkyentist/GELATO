@@ -54,7 +54,7 @@ def EquivalentWidth(spectrum,model,parameters,param_names=None):
                 heights[j] = np.median(ctm[region])
 
         # Get REW
-        parameters.add_column(flux/(heights*opz),index=parameters.colnames.index(l+'_RHeight')+1,name=l+'_REW')
+        parameters.add_column(flux/(heights*opz),index=parameters.colnames.index(l+'_RAmp')+1,name=l+'_REW')
 
     # Return combined Results
     return parameters
@@ -72,7 +72,8 @@ def EWfromresults(params,fpath,z):
 
         # Load name and parameters
         fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
-        parameters = Table.read(fname)
+        results = fits.open(fname)
+        parameters = Table(results['PARAMS'].data)
         names = parameters.colnames
 
         # Dont add if already has EWs and no overwrite
@@ -82,7 +83,7 @@ def EWfromresults(params,fpath,z):
                     print('Texture already measured:',path.split(fpath)[-1])
                     return
                 else: 
-                    parameters = parameters[[n for n in names if 'EW' not in n]]
+                    parameters = parameters[[n for n in names if not (('EW' in n) or ('PowerLaw_Scale' == n))]]
                     names = parameters.colnames
                 break
 
@@ -103,7 +104,10 @@ def EWfromresults(params,fpath,z):
         model = CM.CompoundModel(models)
         
         # Calculate REWs
-        EquivalentWidth(spectrum,model,parameters,names).write(fname,overwrite=True)
+        parameters = fits.BinTableHDU(EquivalentWidth(spectrum,model,parameters,names))
+        parameters.name = 'PARAMS'
+        results['PARAMS'] = parameters
+        results.writeto(fname,overwrite=True)
         
     if params["Verbose"]:
         print("Texture measured:",path.split(fpath)[-1])
