@@ -274,7 +274,7 @@ Here is table showing the hierarchy of the Emission Groups Parameter for the "PA
 Models
 -------------
 
-* Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift, a flux, and a dispersion (in km/s). They are forced to have a positive flux. The default value of the velocity dispersion of the line is set to 150 km/s, while it is bounded between 60 km/s and 1000 km/s. This default can be adjusted in the "CustomModels.py" file.
+* Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift, a flux, and a dispersion (in km/s). The flux is bounded symmetrically based on the range of values in the spectrum near the line centroid. The default value of the velocity dispersion of the line is set to 150 km/s, while it is bounded between 60 km/s and 1000 km/s. This default can be adjusted in the "CustomModels.py" file.
 
 * Continuum SSP Model: The continuum is modeled as the sum of E-MILES SSP models. In total, 15 SSP models are used to build a continuum. The normalization coefficients are named for each SSP model.
 
