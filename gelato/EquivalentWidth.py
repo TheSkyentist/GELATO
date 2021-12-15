@@ -76,6 +76,10 @@ def EWfromresults(params,fpath,z):
         parameters = Table(results['PARAMS'].data)
         names = parameters.colnames
 
+        # Remove PowerLaw Scale
+        parameters = parameters[[n for n in names if not ('PowerLaw_Scale' in n)]]
+        names = parameters.colnames
+
         # Dont add if already has EWs and no overwrite
         for n in names:
             if 'EW' in n:
@@ -83,7 +87,7 @@ def EWfromresults(params,fpath,z):
                     print('Texture already measured:',path.split(fpath)[-1])
                     return
                 else: 
-                    parameters = parameters[[n for n in names if not (('EW' in n) or ('PowerLaw_Scale' == n))]]
+                    parameters = parameters[[n for n in names if not ('EW' in n)]]
                     names = parameters.colnames
                 break
 
