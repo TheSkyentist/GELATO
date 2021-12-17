@@ -107,6 +107,9 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
 
         # Fit Model
         fit = FitModel(model,x0,args,jac=model.jacobian)
+        for m,n in zip(fit.active_mask,model.constrain(model.get_names())):
+            print(n,m)
+        print()
 
         # Perform F-test
         if not MC.FTest(base_model,base_fit,model,fit.x,spectrum,args):

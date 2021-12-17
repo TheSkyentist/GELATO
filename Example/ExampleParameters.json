@@ -36,8 +36,8 @@
                 },
                 {
                     "Name":"[NII]",
-                    "Flag": 2,
-                    "FlagGroups": ["Outflow"],
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 6583.45,

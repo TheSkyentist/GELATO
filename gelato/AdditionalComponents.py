@@ -41,16 +41,19 @@ def AddComponent(flag, line, spectrum, prefix):
         x0 = model.starting()
         
         # Use wider default dispersion
-        x0[2] = 1200 # Dispersion
+        x0[2] = 1600 # Dispersion
 
         # Reassign Dispersion bounds
         oldMaxDispersion = model.Dispersion_bounds[1]
-        model.Dispersion_bounds = (1000,10000)
+        model.Dispersion_bounds = (500,6500)
 
         # Reassign Flux Bounds
         Fbound = 1.5*x0[1]*model.Dispersion_bounds[1]/oldMaxDispersion
         model.Flux_bounds = (-Fbound,Fbound)
         
+        # Reassign Redshift bounds
+        model.Redshift_bounds = (C*(spectrum.z-0.002),C*(spectrum.z+0.002))
+
     ''' Outflow '''
     if index == 1: 
     
@@ -59,14 +62,18 @@ def AddComponent(flag, line, spectrum, prefix):
         x0 = model.starting()
 
         # Use wider default dispersion
-        x0[2] = 500 # Dispersion
+        x0[2] = 300 # Dispersion
 
         # Reassign Dispersion bounds
-        model.Dispersion_bounds = (500,1000)
+        oldMaxDispersion = model.Dispersion_bounds[1]
+        model.Dispersion_bounds = (100,750)
+
+        # Reassign Flux Bounds
+        Fbound = 1.5*x0[1]*model.Dispersion_bounds[1]/oldMaxDispersion
+        model.Flux_bounds = (-Fbound,Fbound)
 
         # Reassign Redshift bounds and starting guess
-        model.Redshift_bounds = (C*(spectrum.z-0.001),C*spectrum.z)
+        model.Redshift_bounds = (C*(spectrum.z-0.0025),C*(spectrum.z+0.001))
         x0[0] = C*(spectrum.z-0.0005)
-        
 
     return model,x0
