@@ -107,9 +107,15 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
 
         # Fit Model
         fit = FitModel(model,x0,args,jac=model.jacobian)
-        for m,n in zip(fit.active_mask,model.constrain(model.get_names())):
-            print(n,m)
-        print()
+
+        # Get pnames of new components
+        model_pnames = model.get_names()
+        diff = np.setdiff1d(model_pnames,base_model.get_names(),assume_unique=True)
+        
+        # Reject component if we hit limits
+        mask = model.expand(fit.active_mask)
+        if np.logical_or.reduce([mask[model_pnames.index(d)] for d in diff]):
+            continue
 
         # Perform F-test
         if not MC.FTest(base_model,base_fit,model,fit.x,spectrum,args):
