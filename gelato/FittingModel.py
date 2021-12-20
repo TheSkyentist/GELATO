@@ -49,26 +49,31 @@ def FitContinuum(spectrum):
     models = [CM.SSPContinuumFixed(z,spectrum,region=region)]
     if acceptPL: models.append(pl)
     cont = CM.CompoundModel(models)
-    cnames = list(cont.get_names())
 
-    # Eliminate unneeded SSPs
+    # Fit Fixed Model
     if acceptPL: x0 = sspplfit[1:]
     else: x0 = sspfit[1:]
     sspfixedfit = FitModel(cont,x0,args)
-    mask,x0 = sspfixedfit.active_mask, list(sspfixedfit.x)
-    todelete = [i for i,m in enumerate(mask) if (m and ('SSP_' in cnames[i]))]
-    for i in todelete[::-1]: 
-        cnames.pop(i)
-        x0.pop(i)
+
+    # Remove SSPs
+    model_names = cont.constrain(cont.get_names())
+    fitmask = np.invert(sspfixedfit.active_mask.astype(bool))
+    sspmask = np.array(['SSP_' in n for n in model_names])
+    if not np.logical_and(fitmask,sspmask).sum(): # If all SSPs are rejected, keep them all
+        models = [CM.SSPContinuumFixed(z,spectrum)]
+        if acceptPL: models.append(pl)
+        cont = CM.CompoundModel(models)
+        return cont,x0
+    ssp_names = [n.replace('SSP_','') for n in model_names[np.logical_and(fitmask,sspmask)]]
+    x0 = np.concatenate([sspfixedfit.x[np.logical_and(fitmask,sspmask)],sspfixedfit.x[np.invert(sspmask)]])
 
     # Build Model with Fixed Redshift and Reduced SSPs
-    ssp_names = [c.replace('SSP_','') for c in cnames if 'SSP_' in c]
     models = [CM.SSPContinuumFixed(z,spectrum,ssp_names=ssp_names)]
     if acceptPL: models.append(pl)
     cont = CM.CompoundModel(models)
 
     # Return continuum
-    return cont,np.array(x0)
+    return cont,x0
 
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,cont,cont_x,emis,emis_x):
@@ -175,15 +180,17 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
 
     # Fit Model
     model_fit = FitModel(model,x0,args,jac=model.jacobian)
-    mask, x0 = model_fit.active_mask, list(model_fit.x)
-    cnames = list(cont.get_names())
-    todelete = [i for i,n in enumerate(cnames) if (mask[i] and ('SSP_' in n))]
-    for i in todelete[::-1]: 
-        cnames.pop(i)
-        x0.pop(i)
 
+    # Remove SSPs
+    model_names = model.constrain(model.get_names())
+    fitmask = np.invert(model_fit.active_mask.astype(bool))
+    sspmask = np.array(['SSP_' in n for n in model_names])
+    if not np.logical_and(fitmask,sspmask).sum(): # If all SSPs are rejected, keep them all
+        return model,model_fit.x
+    ssp_names = [n.replace('SSP_','') for n in model_names[np.logical_and(fitmask,sspmask)]]
+    x0 = np.concatenate([model_fit.x[np.logical_and(fitmask,sspmask)],model_fit.x[np.invert(sspmask)]])
+    
     # Build Continuum with Reduced SSPs
-    ssp_names = [c.replace('SSP_','') for c in cnames if 'SSP_' in c]
     cmodels = [CM.SSPContinuumFixed(model.models[0].redshift,spectrum,ssp_names=ssp_names)]
     if 'PowerLaw_Index' in model.get_names(): cmodels.append(cont.models[1])
     cont = CM.CompoundModel(cmodels)
