@@ -30,10 +30,10 @@ if __name__ == "__main__":
         Path(p["OutFolder"]).mkdir(parents=True)
 
     if p['Verbose']:
-        gelato.header()
+        now = gelato.header()
 
     ## Run gelato ##
     gelato.gelato(args.Parameters, args.Spectrum, args.Redshift)
 
     if p['Verbose']:
-        gelato.footer()
+        gelato.footer(now)

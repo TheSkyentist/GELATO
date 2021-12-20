@@ -207,7 +207,11 @@ def header():
     print("Welcome to GELATO")
     print("Galaxy/AGN Emission Line Analysis TOol")
     print("Developed by R. E. Hviding")
-    print("Started making gelato at",datetime.now())
+    now = datetime.now()
+    print("Started making gelato at",now)
+    return now
 
-def footer():
+def footer(then):
+    now = datetime.now()
     print("Finished making GELATO at",datetime.now())
+    print("Elapsed time: ",now - then)

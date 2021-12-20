@@ -30,7 +30,7 @@ if __name__ == "__main__":
         Path(p["OutFolder"]).mkdir(parents=True)
 
     if p['Verbose']:
-        gelato.header()
+        now = gelato.header()
 
     ## Assemble Objects
     objects = gelato.loadObjects(args.ObjectList)
@@ -56,4 +56,4 @@ if __name__ == "__main__":
     ## Concatenate Results ##
 
     if p['Verbose']:
-        gelato.footer()
+        gelato.footer(now)
