@@ -42,29 +42,33 @@ def FitContinuum(spectrum):
     sspplfit = FitModel(ssppl,x0,args).x
 
     # Perform F-test
-    if MC.FTest(ssp,sspfit,ssppl,sspplfit,spectrum,args):
+    acceptPL = MC.FTest(ssp,sspfit,ssppl,sspplfit,spectrum,args)
 
-        # Final Redshift
-        z = sspplfit[0]
+    # Build model with Fixed Redshift
+    z = sspplfit[0]
+    models = [CM.SSPContinuumFixed(z,spectrum,region=region)]
+    if acceptPL: models.append(pl)
+    cont = CM.CompoundModel(models)
+    cnames = list(cont.get_names())
 
-        # Get fixed redshift compound model
-        sspfixed = CM.SSPContinuumFixed(z,spectrum)
-        cont = CM.CompoundModel([sspfixed,pl])
+    # Eliminate unneeded SSPs
+    if acceptPL: x0 = sspplfit[1:]
+    else: x0 = sspfit[1:]
+    sspfixedfit = FitModel(cont,x0,args)
+    mask,x0 = sspfixedfit.active_mask, list(sspfixedfit.x)
+    todelete = [i for i,m in enumerate(mask) if (m and ('SSP_' in cnames[i]))]
+    for i in todelete[::-1]: 
+        cnames.pop(i)
+        x0.pop(i)
 
-        # Get starting values
-        x0 = sspplfit[1:]
+    # Build Model with Fixed Redshift and Reduced SSPs
+    ssp_names = [c.replace('SSP_','') for c in cnames if 'SSP_' in c]
+    models = [CM.SSPContinuumFixed(z,spectrum,ssp_names=ssp_names)]
+    if acceptPL: models.append(pl)
+    cont = CM.CompoundModel(models)
 
-        # Return w/ PL component
-        return cont,x0
-
-    # Final Redshift
-    z = sspfit[0]
-
-    # Fixed Redshift compound model
-    sspfixed = CM.CompoundModel([CM.SSPContinuumFixed(z,spectrum)])
-    sspfixed.starting()
-    
-    return sspfixed,sspfit[1:]
+    # Return continuum
+    return cont,np.array(x0)
 
 # Construct Full Model with F-tests for additional parameters
 def FitComponents(spectrum,cont,cont_x,emis,emis_x):
@@ -158,7 +162,7 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
     else: 
         accepted = []
 
-    # Construct Final Model
+    # Construct Model with Complexity
     EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],accepted)
     emis,emis_x = BM.BuildEmission(spectrum,EmissionGroups)
 
@@ -170,7 +174,26 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
     x0 = model.constrain(x0) # Limit to true parameters
 
     # Fit Model
-    model_fit = FitModel(model,x0,args,jac=model.jacobian).x
+    model_fit = FitModel(model,x0,args,jac=model.jacobian)
+    mask, x0 = model_fit.active_mask, list(model_fit.x)
+    cnames = list(cont.get_names())
+    todelete = [i for i,n in enumerate(cnames) if (mask[i] and ('SSP_' in n))]
+    for i in todelete[::-1]: 
+        cnames.pop(i)
+        x0.pop(i)
+
+    # Build Continuum with Reduced SSPs
+    ssp_names = [c.replace('SSP_','') for c in cnames if 'SSP_' in c]
+    cmodels = [CM.SSPContinuumFixed(model.models[0].redshift,spectrum,ssp_names=ssp_names)]
+    if 'PowerLaw_Index' in model.get_names(): cmodels.append(cont.models[1])
+    cont = CM.CompoundModel(cmodels)
+
+    # Construct Final Model
+    constraints = BM.TieParams(spectrum,cont.get_names()+emis.get_names(),EmissionGroups)
+    model,_ = BM.BuildModel(spectrum,cont,np.array(cont_x),emis,emis_x,constraints)
+
+    # Fit Model
+    model_fit = FitModel(model,np.array(x0),args,jac=model.jacobian).x
 
     return model,model_fit
 

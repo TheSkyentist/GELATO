@@ -21,7 +21,7 @@ def EquivalentWidth(spectrum,model,parameters,param_names=None):
 
     # Continuum and Model
     args = spectrum.wav,spectrum.flux,spectrum.isig
-    if 'PowerLaw_Coefficient' in param_names:
+    if 'PowerLaw_Index' in param_names:
         continuum = CM.CompoundModel(model.models[0:2])
     else: 
         continuum = CM.CompoundModel(model.models[0:1])
@@ -74,41 +74,42 @@ def EWfromresults(params,fpath,z):
         fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
         results = fits.open(fname)
         parameters = Table(results['PARAMS'].data)
-        names = parameters.colnames
+        pnames = parameters.colnames
 
         # Remove PowerLaw Scale
-        parameters = parameters[[n for n in names if not ('PowerLaw_Scale' in n)]]
-        names = parameters.colnames
+        parameters = parameters[[n for n in pnames if not ('PowerLaw_Scale' in n)]]
+        pnames = parameters.colnames
 
         # Dont add if already has EWs and no overwrite
-        for n in names:
+        for n in pnames:
             if 'EW' in n:
                 if not params['Overwrite']:
                     print('Texture already measured:',path.split(fpath)[-1])
                     return
                 else: 
-                    parameters = parameters[[n for n in names if not ('EW' in n)]]
-                    names = parameters.colnames
+                    parameters = parameters[[n for n in pnames if not ('EW' in n)]]
+                    pnames = parameters.colnames
                 break
 
         ## Create model ##
         # Add continuum
-        models = [CM.SSPContinuumFree(spectrum)]
-        if 'PowerLaw_Coefficient' in names:
+        ssp_names = [n[4:] for n in pnames if (('SSP_' in n) and (n != 'SSP_Redshift'))]
+        models = [CM.SSPContinuumFree(spectrum,ssp_names = ssp_names)]
+        if 'PowerLaw_Index' in pnames:
             models.append(CM.PowerLawContinuum(spectrum))
             models[-1].starting()
 
         # Add spectral lines
         ind = sum([m.nparams for m in models]) # index where emission lines begin
-        for i in range(ind,len(names)-1,3):
-            center = float(names[i].split('_')[-2])
+        for i in range(ind,len(pnames)-1,3):
+            center = float(pnames[i].split('_')[-2])
             models.append(CM.SpectralFeature(center,spectrum))
 
         # Final model
         model = CM.CompoundModel(models)
         
         # Calculate REWs
-        parameters = fits.BinTableHDU(EquivalentWidth(spectrum,model,parameters,names))
+        parameters = fits.BinTableHDU(EquivalentWidth(spectrum,model,parameters,pnames))
         parameters.name = 'PARAMS'
         results['PARAMS'] = parameters
         results.writeto(fname,overwrite=True)

@@ -96,7 +96,7 @@ class SpectralFeature():
 
     # Default Dispersion Values #km/s
     Dispersion = 130
-    Dispersion_bounds = (60,500)
+    Dispersion_bounds = (30,500)
 
     # Number of parameters of this model
     nparams = 3
@@ -315,16 +315,19 @@ class SSPContinuumFixed():
     Continuum from SSPs
     """
 
-    def __init__(self, redshift, spec):
+    def __init__(self, redshift, spec, ssp_names = None, region = None):
 
         # Keep track
         self.spec = spec
         self.redshift = redshift
 
-        # List SSPs
+        # Get SSP Names
         ssp_dir = path.join(path.dirname(path.abspath(__file__)),'SSPs','')
         with open(ssp_dir+'continuum_models.txt','r') as f: 
-            self.ssp_names = np.sort([l.strip() for l in f.readlines()])
+            continuum_models = np.sort([l.strip() for l in f.readlines()])
+        if ssp_names is None: self.ssp_names = continuum_models
+        else:
+            self.ssp_names = [c for c in continuum_models if np.logical_or.reduce([s in c for s in ssp_names])]
 
         # Number of parameters 
         self.nparams = len(self.ssp_names)
@@ -345,7 +348,10 @@ class SSPContinuumFixed():
             self.ssp_wav = (np.arange(h['NAXIS1']) - h['CRPIX1'] + 1)*h['CDELT1'] + h['CRVAL1']
 
         # Interpolate SSP
-        self.ssps = np.array([np.interp(self.spec.wav,self.ssp_wav*(1+redshift/C),f) for f in ssps])
+        if region is None:
+            self.ssps = np.array([np.interp(self.spec.wav,self.ssp_wav*(1+redshift/C),f) for f in ssps])
+        else: 
+            self.ssps = np.array([np.interp(self.spec.wav[region],self.ssp_wav*(1+redshift/C),f) for f in ssps])
 
         # Set bounds
         self.bounds = tuple((0,np.inf) for i in range(self.nparams))
@@ -395,7 +401,7 @@ class SSPContinuumFree():
     Continuum from SSPs
     """
 
-    def __init__(self, spec):
+    def __init__(self, spec, ssp_names = None):
 
         # Keep track
         self.spec = spec
@@ -403,7 +409,10 @@ class SSPContinuumFree():
         # List SSPs
         ssp_dir = path.join(path.dirname(path.abspath(__file__)),'SSPs','')
         with open(ssp_dir+'continuum_models.txt','r') as f: 
-            self.ssp_names = np.sort([l.strip() for l in f.readlines()])
+            continuum_models = np.sort([l.strip() for l in f.readlines()])
+        if ssp_names is None: self.ssp_names = continuum_models
+        else:
+            self.ssp_names = [c for c in continuum_models if np.logical_or.reduce([s in c for s in ssp_names])]
 
         # Number of parameters 
         self.nparams = len(self.ssp_names)+1

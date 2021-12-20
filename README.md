@@ -360,3 +360,7 @@ FAQ
 **What does it mean if GELATO failed on an object?**
 
 *If you receive the notice that GELATO failed on an object, this means the SVD algorithm at the heart of the SciPy fitting routine failed. In my experience, this issue is operating system, CPU, and linear algebra library dependent. I recommend running the object through GELATO again with a different random seed or on a different machine.*
+
+**Can I use a different set of SSP Models?**
+
+*Yes but don't use "SSP_" in the name of the file.*

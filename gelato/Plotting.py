@@ -65,7 +65,7 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
         fax = fig.add_subplot(gs[0,0])
 
         # Plot Power Law
-        if 'PowerLaw_Coefficient' in model.get_names():
+        if 'PowerLaw_Index' in model.get_names():
             continuum = CM.CompoundModel(model.models[1:2]).evaluate(medians[model.models[0].nparams:],*args)
             fax.step(wav,continuum,'k',ls='--',where='mid')
 
@@ -131,7 +131,7 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
 
         # Continuum and Model
         args = spectrum.wav,spectrum.flux,spectrum.isig
-        if 'PowerLaw_Coefficient' in model.get_names():
+        if 'PowerLaw_Index' in model.get_names():
             continuum = CM.CompoundModel(model.models[0:2]).evaluate(medians,*args)
         else: 
             continuum = CM.CompoundModel(model.models[0:1]).evaluate(medians,*args)
@@ -170,7 +170,7 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
             # Plot components
             elif plottype == 2:
                 init = 1
-                if 'PowerLaw_Coefficient' in model.get_names():
+                if 'PowerLaw_Index' in model.get_names():
                     init = 2
                 for j in range(init,len(model.models)):
                     m = model.models[j]
@@ -243,8 +243,9 @@ def plotfromresults(params,fpath,z):
 
     ## Create model ##
     # Add continuum
-    models = [CM.SSPContinuumFree(spectrum)]
-    if 'PowerLaw_Coefficient' in pnames:
+    ssp_names = [n[4:] for n in pnames if (('SSP_' in n) and (n != 'SSP_Redshift'))]
+    models = [CM.SSPContinuumFree(spectrum,ssp_names = ssp_names)]
+    if 'PowerLaw_Index' in pnames:
         models.append(CM.PowerLawContinuum(spectrum))
         models[-1].starting()
 

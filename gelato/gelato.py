@@ -137,7 +137,7 @@ def gelato(params,spath,z):
     medtab = [np.log10(spectrum.wav),spectrum.flux,spectrum.weight,total_med,continuum_med]
     medtabnames = ['loglam','flux','ivar','MODEL','SSP']
     # PL Continuum
-    if 'PowerLaw_Coefficient' in model.get_names():
+    if 'PowerLaw_Index' in model.get_names():
         pl_med = CM.CompoundModel(model.models[0:2]).evaluate(median,spectrum.wav,spectrum.flux,spectrum.isig) - continuum_med
         medtab.append(pl_med)
         medtabnames.append('PL')
@@ -177,7 +177,7 @@ def gelato(params,spath,z):
     # Save results
     if params["Verbose"]:
         print("Freezing results:",name)
-    if 'PowerLaw_Coefficient' in model.get_names():
+    if 'PowerLaw_Index' in model.get_names():
         parameters.add_column(model.models[1].Center*np.ones(len(parameters)),index=parameters.colnames.index('PowerLaw_Index')+1,name='PowerLaw_Scale')
     hdul.append(fits.BinTableHDU(parameters))
     hdul[-1].name = 'PARAMS'
