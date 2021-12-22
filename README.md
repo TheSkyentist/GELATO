@@ -8,15 +8,29 @@ GELATO
 *Galaxy/AGN Emission Line Analysis TOol by Raphael Hviding*
 -------------
 
-GELATO is a Python code designed to fit emission lines in the spectra of star forming galaxies and active galactic nuclei. In particular, it was built in order to fit spectra where many of the parameters of the emission lines are tied with respect to one another. GELATO attempts to automate this process. For example, tying the redshifts of AGN lines (e.g. OIII, NII) together, and the flux ratios of the lines therein, but keeping that separate from the redshifts of galaxy lines (e.g. Balmer series lines). In addition, GELATO is designed to fit additional components to lines with comples kinematics. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? GELATO builds a base model based on the spectrum, and iteratively tests whether different additional components are justified to add to the model, based on an [F-test](https://en.wikipedia.org/wiki/F-test) and then comparisons of [Akaike Information Criteria](https://en.wikipedia.org/wiki/Akaike_information_criterion).
+GELATO is a Python code designed to retrieve the kinematics and line fluxes of emission lines from optical spectroscopy of star-forming galaxies and active galactic nuclei. It was designed to allow the user to tie the emission line parameters of associated emission lines to represent the physical conditions present in these galaxies. For example, tying the redshifts of the Balmer lines to each other, or setting the flux ratio of the [OIII] doublet to a specific value. This is done in a flexible way so that any physical scenario can be represented using GELATO. In addition, GELATO is designed to fit additional components to lines with complex kinematics. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? Based on user specifications, GELATO will attempt to fit these components and, using a quality check, can determine if they are required to fit the spectrum. 
 
-The spectra are fit using a [Trust Region Reflective](https://epubs.siam.org/doi/10.1137/S1064827595289108) (TRF) bounded non-linear least-squares optimization algorithm with Gaussian line profiles.
+GELATO relies on a [Trust Region Reflective](https://epubs.siam.org/doi/10.1137/S1064827595289108) (TRF) bounded non-linear for fitting.
 
+Dependecies
+-------------
+GELATO is built with Python 3.9 and requires the following packages:
+* NumPy
+* SciPy
+* Astropy
+
+and any dependecies therein. This is the minimum set of packages that must be installed to run GELATO.
+
+However, to retrieve plots from GELATO, matplotlib must be installed, and a version of LaTeX must be available as well.
+
+In addition, an example Jupyter notebook is provided to demonstrate the capabilities of GELATO. In order to use this notebook, the jupyter package must be installed as well.
+
+Installing the Python dependencies is detailed in the Installation portion of this guide. LaTeX can be installed folling the instructions [here](https://www.latex-project.org/get/).
 
 Installation
 -------------
 
-First, clone the GELATO git repository. If you have not used git before, this is easily done by using the commands before and cloning the directory over HTTPS.
+To install GELATO, begin by cloning the GELATO git repository. If you have not used git before, this is done by using the following commands to clone the directory over HTTPS.
 
 ```bash
 cd /path/to/insallation/directory
