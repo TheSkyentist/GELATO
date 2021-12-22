@@ -214,4 +214,4 @@ def header():
 def footer(then):
     now = datetime.now()
     print("Finished making GELATO at",datetime.now())
-    print("Elapsed time: ",now - then)
+    print("Elapsed time:",now - then)
