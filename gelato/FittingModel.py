@@ -122,7 +122,8 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
         diff = np.setdiff1d(model_pnames,base_model.get_names(),assume_unique=True)
         
         # Reject component if we hit limits
-        mask = model.expand(fit.active_mask)
+        mask = fit.active_mask
+        if model.constrained: mask = model.expand(mask)
         if np.logical_or.reduce([mask[model_pnames.index(d)] for d in diff]):
             continue
 
