@@ -217,7 +217,7 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
             rax = fig.add_subplot(gs[1,i])
             rax.step(wav,(flux - f[good])*isig,'gray',where='mid')
             ymax = np.max(np.abs(rax.get_ylim()))
-            rax.set(xlim=region,xlabel=r'Wavelength [\AA]',ylim=[-ymax,ymax])
+            rax.set(xlim=[wav.min(),wav.max()],xlabel=r'Wavelength [\AA]',ylim=[-ymax,ymax])
             rax.set_ylabel('Deviation',fontsize=15)
 
     # Add title and save figure
