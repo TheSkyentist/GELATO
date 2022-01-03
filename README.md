@@ -15,8 +15,8 @@ Table of Contents
 
 * [Dependecies](#Dependencies)
 * [Installation](#Installation)
-
-
+* [Updating GELATO](#Updating-GELATO)
+* [GELATO at a Glance](#GELATO-at-a-glance)
 
 ## Dependencies
 GELATO is built with Python 3.9 and requires the following packages:
@@ -67,8 +67,7 @@ python setup.py install
 
 In your working directory, **you need to copy the "matplotlibrc" file** to control the plotting settings. This is most important if you are running GELATO with multiprocessing as this file sets the matplotlib backed to "Agg", a non-interactive backend, required for generating and saving figures on multiple threads.
 
-Updating GELATO
--------------
+## Updating GELATO
 
 In order to update GELATO, you need to update the core packages, pull from the repo, and reinstall GELATO to your path. 
 
@@ -82,8 +81,7 @@ python setup.py install
 
 In the case where a new version of GELATO releases where there are more strict dependecies, you may need to fully delete GELATO and its associated conda environment and reinstall from scratch.
 
-GELATO at a Glance
--------------
+## GELATO at a Glance
 
 In this section we describe the operation of GELATO at a high level.
 
