@@ -10,9 +10,15 @@ GELATO
 
 GELATO is a Python code designed to retrieve the kinematics and line fluxes of emission lines from optical spectroscopy of star-forming galaxies and active galactic nuclei. It was designed to allow the user to tie the emission line parameters of associated emission lines to represent the physical conditions present in these galaxies. For example, tying the redshifts of the Balmer lines to each other, or setting the flux ratio of the [OIII] doublet to a specific value. This is done in a flexible way so that any physical scenario can be represented using GELATO. In addition, GELATO is designed to fit additional components to lines with complex kinematics. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? Based on user specifications, GELATO will attempt to fit these components and, using a quality check, can determine if they are required to fit the spectrum. 
 
-GELATO relies on a [Trust Region Reflective](https://epubs.siam.org/doi/10.1137/S1064827595289108) (TRF) bounded non-linear for fitting.
+Table of Contents
+-------------
 
-Dependecies
+* [Dependecies](#Dependencies)
+* [Installation](#Installation)
+
+
+
+## Dependencies
 -------------
 GELATO is built with Python 3.9 and requires the following packages:
 * NumPy
@@ -25,7 +31,7 @@ However, to retrieve plots from GELATO, matplotlib must be installed, and a vers
 
 In addition, an example Jupyter notebook is provided to demonstrate the capabilities of GELATO. In order to use this notebook, the jupyter package must be installed as well.
 
-Installing the Python dependencies is detailed in the Installation portion of this guide. LaTeX can be installed folling the instructions [here](https://www.latex-project.org/get/).
+Installing the Python dependencies is detailed in the Installation portion of this guide. LaTeX can be installed following the instructions [here](https://www.latex-project.org/get/).
 
 Installation
 -------------
@@ -37,11 +43,9 @@ cd /path/to/insallation/directory
 git clone https://github.com/TheSkyentist/GELATO.git
 ```
 
-GELATO is built primarily using Python. It primarily uses NumPy for math, SciPy for optimization, Astropy for FITS handling, matplotlib for plotting, and Jupyter for the example notebook.
-
 To install the dependancies, I recommend installing conda (through [Miniconda](https://docs.conda.io/en/latest/miniconda.html)).
 
-A conda environment with early all the dependencies can be installed via the provided "environment.yml" file. If you do not wish to use conda, you can install the dependencies enumerated in the "environment.yml" file.
+A conda environment with nearly all the dependencies can be installed via the provided "environment.yml" file. If you do not wish to use conda, you can install the dependencies enumerated in the "environment.yml" file.
 
 ```bash
 cd /path/to/GELATO/directory
@@ -81,7 +85,28 @@ python setup.py install
 
 In the case where a new version of GELATO releases where there are more strict dependecies, you may need to fully delete GELATO and its associated conda environment and reinstall from scratch.
 
-How it works
+GELATO at a Glance
+-------------
+
+In this section we describe the operation of GELATO at a high level.
+
+1. Gathering Ingredients: The spectrum is loaded and, based on the input parameters file, GELATO determines which emission lines are in the wavelength range of the spectrum. The emission lines are then masked. If there are additional regions that should be masked in the spectrum, either due to telluric or spectral features, this should be done before passing the spectrum to GELATO.
+
+2. Creating Base: GELATO models the continuum of the masked spectrum as a non-negative linear combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/) (E-MILES). In addition, GELATO tests for the inclusion of a power-law component. During this step, the redshift of the continuum models is allowed to vary and is fixed following the final fit of the continuum. The spectrum is unmasked and a single Gaussian is added for each emission line in the input parameter file.
+
+3. Adding Flavor: Additional line components for each emission line as specified in the input parameter file are tested. The final model is constructed from the continuum model, the base emission lines, and the accepted set of additional components. 
+
+4. Scooping Portions: In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run as many times as specified by the input parameters file.
+
+5. Presenting gelato: (Optional) Three figures depicting the final fit to the data are generated and saved to disk.
+
+6. Measuring Texture: (Optional) The rest equivalent width of the emission line components are measured.
+
+7. Freezing results: The results of the fit are saved to disk. Along with any additional parameters measured.
+
+8. Combining GELATO: (Optional) If GELATO is running on multiple objects, the results from each object are averaged and combined into one convinient file. 
+
+GELATO in Depth
 -------------
 
 1. Gathering Ingredients: First, the spectrum is loaded. The code assumes the spectrum file is a FITS table with the following columns and column names:
@@ -97,9 +122,8 @@ How it works
 
 4. Adding Flavor: The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component and the additional component does not hit any , it is accepted. This is decided by performing an F-test. The combinations of all accepted additional components are then then tested by measuring their Akaike Information Criteria (AICs). The model set with the lowest AIC is the final model.
 
-5. Scooping Portions: In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run again.
+5. Scooping Portions: 
 
-6. Presenting gelato: Figures depicting the fit, for the entire spectrum and zoomed into specific lines, are then saved to disk.
 
 7. Measuring texture: From the results, the rest equivalent width for each emission line is calculated. The height of the continuum is found by taking the median continuum in a region around the emission line.
 
@@ -192,7 +216,7 @@ The output from running the example will be put into 'Results/' and can be compa
 
 While GELATO is designed to be run in this fashion, an IPython notebook is provided in the Example directory. This can also help with how to access GELATO output.
 
-Result File
+Results File
 -------------
 
 The results are presented in a file ending with "-results.fits". It is a multi extension FITS file. Each extension is named based on its contents and can be retrieved in the following manner:
@@ -204,7 +228,6 @@ The extensions are:
 
 * SUMMARY: It is a binary FITS table containing the summary of the models. It contains the original spectrum without the bad data points (ivar = 0) along with the total model, ssp continuum, power-law continuum, emission-line model generated from the median parameters. The latter two columns will not appear if they are not included in the final fit of the spectrum.
 * PARAMS: It is a binary FITS table where each column represents a parameter with a row for each bootstrap. Redshift and dispersion measurements are given in km/s. Flux measurements are dependent on the input units of the spectrum. In addition, the rest amplitude (RAmp) of the Gaussian is also returned as this can be a more reliable way for computing line detection. If calculated, rest equivalent widths are given in Angstroms. If results are concatenated, errors are the standard devations on the recovered parameters from the bootstraps. Coefficients on the SSP continuum models are in the units of the SSP models.
-
 
 Parameter File
 -------------
