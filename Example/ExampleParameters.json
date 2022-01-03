@@ -4,7 +4,7 @@
     "RandomSeed": 1,
     "LineRegion": 300,
     "ContinuumRegion": 15000,
-    "NBoot": 500,
+    "NBoot": 10,
     "FThresh": 0.9973,
     "NProcess": 1,
     "Plotting": true,
@@ -36,8 +36,8 @@
                 },
                 {
                     "Name":"[NII]",
-                    "Flag": 0,
-                    "FlagGroups": [],
+                    "Flag": 2,
+                    "FlagGroups": ["Outflow"],
                     "Lines": [
                         {
                             "Wavelength": 6583.45,

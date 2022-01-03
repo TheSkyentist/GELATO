@@ -157,16 +157,28 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
         x0 = model.constrain(x0) # Limit to true parameters
 
         # Fit Model
-        model_fit = FitModel(model,x0,args,jac=model.jacobian).x
+        fit = FitModel(model,x0,args,jac=model.jacobian)
+
+        # Get pnames of new components
+        model_pnames = model.get_names()
+        diff = np.setdiff1d(model_pnames,base_model.get_names(),assume_unique=True)
+
+        # Reject component if we hit limits
+        mask = fit.active_mask
+        if model.constrained: mask = model.expand(mask)
+        for d in diff:
+            print(d,mask[model_pnames.index(d)])
+        if np.logical_or.reduce([mask[model_pnames.index(d)] for d in diff]):
+            AICs[i] = np.inf
+            continue
 
         # Calcualte AIC
-        AICs[i] = MC.AIC(model,model_fit,args)
+        AICs[i] = MC.AIC(model,fit.x,args)
 
     # Use min AIC
-    if combs != []:
+    accepted = []
+    if (combs != []) and (min(combs) != np.inf):
         accepted = combs[np.argmin(AICs)]
-    else: 
-        accepted = []
 
     # Construct Model with Complexity
     EmissionGroups = AddComplexity(spectrum.p['EmissionGroups'],accepted)
