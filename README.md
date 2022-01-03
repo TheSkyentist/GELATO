@@ -19,7 +19,6 @@ Table of Contents
 
 
 ## Dependencies
--------------
 GELATO is built with Python 3.9 and requires the following packages:
 * NumPy
 * SciPy
@@ -33,9 +32,7 @@ In addition, an example Jupyter notebook is provided to demonstrate the capabili
 
 Installing the Python dependencies is detailed in the Installation portion of this guide. LaTeX can be installed following the instructions [here](https://www.latex-project.org/get/).
 
-Installation
--------------
-
+## Installation
 To install GELATO, begin by cloning the GELATO git repository. If you have not used git before, this is done by using the following commands to clone the directory over HTTPS.
 
 ```bash
