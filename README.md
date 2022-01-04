@@ -23,7 +23,7 @@ Table of Contents
 * [Parameter File](#Parameter-File)
 * [Emission Line Dictionary](#Emission-Line-Dictionary)
 * [GELATO in Depth](#GELATO-in-Depth)
-* [Models & Limits](#Models-&-Limits)
+* [Model Descriptions & Limits](#Model-Descriptions-&-Limits)
 * [Additional Components](#Additional-Components)
 * [License](#License)
 * [FAQ](#FAQ)
@@ -200,12 +200,12 @@ While GELATO is designed to be run in this fashion, an IPython notebook is provi
 
 The results are presented in a file with the name of the spectrum and ending with "-results.fits". It is a multi extension FITS file. Each extension is named based on its contents and can be retrieved in the following manner:
 ```python
-from astrop.io import fits
+from astropy.io import fits
 print(fits.open('example-results.fits').info())
 ```
 The extensions are:
 
-* SUMMARY: It is a binary FITS table containing the summary of the models. It contains the original spectrum without the bad data points (ivar = 0) along with the total model, ssp continuum, power-law continuum, emission-line model generated from the median parameters. The latter two columns will not appear if they are not included in the final fit of the spectrum.
+* SUMMARY: It is a binary FITS table containing the summary of the models. It contains the original spectrum without the bad data points (ivar == 0) along with the total model, ssp continuum, power-law continuum, emission-line model generated from the median parameters. The latter two columns will not appear if they are not included in the final fit of the spectrum.
 * PARAMS: It is a binary FITS table where each column represents a parameter with a row for each bootstrap. Redshift and dispersion measurements are given in km/s. Flux measurements are dependent on the input units of the spectrum. In addition, the rest amplitude (RAmp) of the Gaussian is also returned as this can be a more reliable way for computing line detection. If calculated, rest equivalent widths are given in Angstroms. Coefficients on the SSP continuum models are in the units of the SSP models.
 
 In addition, if running on multiple spectra, GELATO can optioanlly create a file named "GELATO-results.fits". For each object, the median of the resulting parameters and standard devation across the bootstraps are taken and concatenated into a single file for convinence.
@@ -262,7 +262,7 @@ The "ExampleParameters.json" file in the Example directory gives a good example 
    1. Name: [SII]. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
       * A line with a rest wavelength of 6716.44 and its flux is left free.
       * A line with a rest wavelength of 6730.82 and its flux is left free. This means the line fluxes are completely independent.
-   2. Name: [NII]. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of two lines.
+   2. Name: [NII]. These features will share the same velocity dispersion and redshift. There are no flags on this component, so the list is empty. It is made out of two lines.
       * A line with a rest wavelength of 6583.45 and a relative flux of 1.
       * A line with a rest wavelength of 6548.05 and a relative flux of 0.34. This means this line will always have 0.34/1 times the flux of the first line.
    3. Name: [OIII]. These features will share the same velocity dispersion and redshift. These have been flagged with a 2, or in binary 10. This corresponds to an "Outflow" component. This additional component will be placed the group named "Outflow". It is made out of three lines.
@@ -285,7 +285,7 @@ The "ExampleParameters.json" file in the Example directory gives a good example 
       * A line with a rest wavelength of 4861.28 and its flux is left free.
       * A line with a rest wavelength of 4340.47 and its flux is left free.
 4. Name: Outflow
-  If more than one component lands in this group, they will share redshifts and dispersions. E.g. if "Outflow" lines are accepted (from [NII] and [OIII]), they will share the same redshift and dispersion by design.
+  If more than one component lands in this group, they will share redshifts and dispersions. E.g. if "Outflow" lines are accepted (i.e. from [OIII]), they will share the same redshift and dispersion by design.
 
 Here is table showing the hierarchy of the Emission Groups Parameter for the "PARAMS.json" file. A script, params_to_TeX.py, is provided in the Convenience directory can turn a Emission Groups dictionary in a Parameter file into a LaTeX table.
 
@@ -297,35 +297,38 @@ Here is table showing the hierarchy of the Emission Groups Parameter for the "PA
 
 ## GELATO in Depth
 
+0. All fitting in GELATO is done using a [Trust Region Reflective](https://epubs.siam.org/doi/10.1137/S1064827595289108) bounded non-linear least-squares optimization algorithm.
+
 1. Gathering Ingredients: First, the spectrum is loaded. The code assumes the spectrum file is a FITS table with the following columns and column names:
     1. The log10 of the wavelengths in Angstroms, column name: "loglam"
     2. The spectral flux density in flam units, column name: "flux"
     3. The inverse variances of the data points, column name: "ivar"
 
-    Based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
+   Based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
 
-2. Creating Base (Continuum): GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). We take SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 12.5893] (Gyr)) with nominal resolutions of 5 Angstroms. Note, since the continuum models have a minimum wavelength of 1680 Angstroms, there is a maximum wavelength that can be fit with GELATO based on the spectral coverage of the input spectra. It is possible to change the GELATO SSP models as described later in this guide. The redshift is allowed to vary around the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficients for the SSP models are constrained to be positive. Following the initial fit, an additional power law component is added, required to have a negative power law index and a positive coefficient. If the continuum model with a power law passes an F-test for its inclusion, it is added to the model. The redshift of the continuum model is frozen and not fit moving forward. Finally, the continuum is fit to the spectrum in the region without emission lines, if any of the SSP coefficients hit their lower limits (as determined by the TRF algorithm), the corresponding SSP is removed from the continuum model.
+2. Creating Base: GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). Note, since the continuum models have a minimum wavelength of 1680 Angstroms, there is a maximum wavelength that can be fit with GELATO based on the spectral coverage of the input spectra. The redshift is allowed to vary around the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficients for the SSP models are constrained to be positive. 
+Following the initial fit, an additional power law component is added. If the continuum model with a power law passes an F-test for its inclusion, it is added to the model. The redshift of the continuum model is frozen and not fit moving forward. Finally, the continuum is fit to the spectrum in the region without emission lines, if any of the SSP coefficients hit their lower limits (as determined by the TRF algorithm), the corresponding SSP is removed from the continuum model.
+A single Gaussian is then added for each emission line. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model is then fit to the spectrum.
 
-3. Creating Base (Emission Lines): The emission line models are then constructed based on the emission line dictionary. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model flux is reasonable bounded based on these values, and the redshift of the line is bounded to be within 0.005 of it's starting value. The model is then fit to the spectrum.
+3. Adding Flavor: The additional components are then added to the base model and tested separately. If the fit is statistically better (judged with an F-test) with the additional component and the additional component does not hit any of its parameter limits (as determined by the TRF algorithm), it is accepted. Every possible combination of all accepted additional components is then then tested and theirAkaike Information Criteria (AICs) are measured. If any combination has any of its constituent model components hit a limit, then its AIC is set to infinity. The model set with the lowest AIC is the final model. The model is then fit to the spectrum.
 
-4. Adding Flavor: The additional components are then added to the base model and tested separately. If the fit is statistically better with the additional component and the additional component does not hit any , it is accepted. This is decided by performing an F-test. The combinations of all accepted additional components are then then tested by measuring their Akaike Information Criteria (AICs). The model set with the lowest AIC is the final model.
+4. Scooping Portions: In order to constraint fit uncertainties, the flux is bootstrapped by randomly sampling each data point based on the associated inverse variance. The model is then fit to the bootstrapped spectrum with the fitted parameters from step 3 as input.
 
-5. Scooping Portions: 
+5. Presenting gelato: (Optional) A figure depicting the total fit to the entire spectrum and the total fit zoomed in on the emission lines are presented. In addition, a figure is presented zoomed in on the emission lines that presents all components fit to the lines.
 
+6. Measuring Texture: (Optional) The rest equivalent width of the emission line components are measured for each of the boostraps. This is not a full integration of the continuum and approximates the height of the continuum as the median continuum flux within a small region around the line center.
 
-7. Measuring texture: From the results, the rest equivalent width for each emission line is calculated. The height of the continuum is found by taking the median continuum in a region around the emission line.
+7. Freezing results: The results of the fit are saved to disk. Along with any additional parameters measured.
 
-8. Freezing results: The full set of bootstrapped parameters are saved to disk.
+8. Combining GELATO: (Optional) If GELATO is running on multiple objects, the results from each object are averaged and combined into one convinient file. 
 
-9. Combining gelato: If running on multiple objects, the median parameters and standard deviations for all of the fits are concatenated into one file and saved to disk.
-
-## Models & Limits
+## Model Descriptions & Limits
 
 * Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift (km/s), a flux, and a dispersion (km/s). The dispersion represents the standard devation of the Gaussian. The flux is bounded symmetrically based on the range of values in the spectrum near the line centroid. The default value of the dispersion is set to the median narrow line dispersion of the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample of 130 km/s. It has a lower bound of 60 km/s corresponding to the maximum SDSS resolution of 2500. It has an upper bound of 500 km/s corresponding to the delineation between narrow lines and broad lines at a FWHM of 1200 km/s used in [Hao et al. 2005](https://ui.adsabs.harvard.edu/abs/2005AJ....129.1783H/abstract). The redshift of the narrow line Guassians is allowed to vary by +/-300 km/s based on the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample where 98% of the narrow line redshift offsets fall within this range.
 
 These defaults can be adjusted in the "CustomModels.py" file. 
 
-* Continuum SSP Model: The continuum is modeled as the sum of E-MILES SSP models. In total, 15 SSP models are used to build a continuum. The normalization coefficients are named for each SSP model. We use SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 12.5893] (Gyr)) with nominal resolutions of 5 Angstroms. The models that are loaded in are specified in the continuum_models.txt file in the SSPs directory.
+* Continuum SSP Model: The continuum is modeled as the sum of E-MILES SSP models. In total, 15 SSP models are used to build a continuum. The normalization coefficients are named for each SSP model. We use SSP models assuming a Chabrier IMF (slope=1.3), the isochrones of Girardi et al. (2000) (Padova+00) with solar alpha abundance, and spanning a range of representatives metallicities and ages ([M/H] = [-1.31, -0.40, 0.00] and Age = [00.0631, 00.2512, 01.0000, 04.4668, 12.5893] (Gyr)) with nominal resolutions of 5 Angstroms. The models that are loaded in are specified in the continuum_models.txt file in the SSPs directory. When first fitting the continuum, the continuum models are allowed to vary by +/- 300 km/s before being fixed. 
 
 * Continuum Power Law Model: An additional power law continuum is attempted to be fit in addition to the SSP models. It is parametrized with a power law index, a normalization coefficient, and a scale (y = coeff*(x/scale)**(-index)). The power law index has a default value of 1.5. The scale is set as the 20th percentile of the wavelength values for which there is a good flux value. i.e. np.nanpercentile(10**loglam[ivar > 0],20). The coefficient has a lower bound of zero with no upper bound and the power law index has no bounds.
 

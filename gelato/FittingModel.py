@@ -166,8 +166,6 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
         # Reject component if we hit limits
         mask = fit.active_mask
         if model.constrained: mask = model.expand(mask)
-        for d in diff:
-            print(d,mask[model_pnames.index(d)])
         if np.logical_or.reduce([mask[model_pnames.index(d)] for d in diff]):
             AICs[i] = np.inf
             continue

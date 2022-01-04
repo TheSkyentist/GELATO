@@ -4,13 +4,13 @@
     "RandomSeed": 1,
     "LineRegion": 300,
     "ContinuumRegion": 15000,
-    "NBoot": 10,
-    "FThresh": 0.9973,
-    "NProcess": 1,
+    "NBoot": 100,
+    "FThresh": 0.95,
+    "NProcess": 3,
     "Plotting": true,
     "FlamUnits": "$10^{-17}$ erg cm$^{-2}$ s$^{-1}$ \\AA$^{-1}$",
     "CalcEW": true,
-    "Concatenate": false,
+    "Concatenate": true,
     "Overwrite": true,
     "Verbose": true,
     "EmissionGroups": [
@@ -36,8 +36,8 @@
                 },
                 {
                     "Name":"[NII]",
-                    "Flag": 2,
-                    "FlagGroups": ["Outflow"],
+                    "Flag": 0,
+                    "FlagGroups": [],
                     "Lines": [
                         {
                             "Wavelength": 6583.45,
