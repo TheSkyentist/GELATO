@@ -10,6 +10,10 @@ GELATO
 
 GELATO is a Python code designed to retrieve the kinematics and line fluxes of emission lines from optical spectroscopy of star-forming galaxies and active galactic nuclei. It was designed to allow the user to tie the emission line parameters of associated emission lines to represent the physical conditions present in these galaxies. For example, tying the redshifts of the Balmer lines to each other, or setting the flux ratio of the [OIII] doublet to a specific value. This is done in a flexible way so that any physical scenario can be represented using GELATO. In addition, GELATO is designed to fit additional components to lines with complex kinematics. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? Based on user specifications, GELATO will attempt to fit these components and, using a quality check, can determine if they are required to fit the spectrum. 
 
+![Release](https://img.shields.io/github/release/TheSkyentist/GELATO.svg)
+[![DOI](https://zenodo.org/badge/188781577.svg)](https://zenodo.org/badge/latestdoi/188781577)
+![License](https://img.shields.io/github/license/TheSkyentist/GELATO.svg)
+
 Table of Contents
 -------------
 
