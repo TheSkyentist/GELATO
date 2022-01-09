@@ -29,6 +29,7 @@ Table of Contents
 * [GELATO in Depth](#GELATO-in-Depth)
 * [Model Descriptions & Limits](#Model-Descriptions-&-Limits)
 * [Additional Components](#Additional-Components)
+* [Citation](#Citation)
 * [License](#License)
 * [FAQ](#FAQ)
 
@@ -395,6 +396,10 @@ In order to have GELATO attempt to fit an emission line with an additional compo
 * Constants.py
 
   Sets the scale for the dispersions and redshifts by putting in the speed of light. Can be changed but will adjust all output units.
+
+## Citation
+
+If you use GELATO for your work, please provide a link to this GitHub repository and cite the version used on Zenodo: [https://zenodo.org/record/5831730](https://zenodo.org/record/5831730).
 
 ## License
 
