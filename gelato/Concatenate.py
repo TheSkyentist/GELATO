@@ -37,7 +37,7 @@ def concatfromresults(p,objects):
         for spath in spaths:
             
             # Load name and parameters
-            name = path.split(spath)[-1].replace('.fits','')
+            name = path.split(spath)[-1]
             spath = path.join(p['OutFolder'],name+'-results.fits')
             if not path.exists(spath):     
                 continue # If doesn't exist, continue
