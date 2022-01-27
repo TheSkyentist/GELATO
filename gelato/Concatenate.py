@@ -36,9 +36,15 @@ def concatfromresults(p,objects):
         # Iterate over results
         for spath in spaths:
             
-            # Load name and parameters
+            # Load name, output file, and parameters
             name = path.split(spath)[-1]
-            spath = path.join(p['OutFolder'],name+'-results.fits')
+            if (name[-5:] == '.fits'):
+                spath = name[:-5]+'-results.fits'
+            elif (name[-8:] == '.fits.gz'):
+                spath = name[:-8]+'-results.fits'
+            else:
+                spath = name+'-results.fits'
+            spath = path.join(p['OutFolder'],spath)
             if not path.exists(spath):     
                 continue # If doesn't exist, continue
             parameters = fits.getdata(spath,'PARAMS')

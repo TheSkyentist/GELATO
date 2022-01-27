@@ -32,7 +32,13 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
     medians = np.median(parameters,0)
 
     # Make figure name
-    figname = path.split(fpath)[-1].replace('.fits','')+'-'
+    fpath = path.split(fpath)[-1]
+    if (fpath[-5:] == '.fits'):
+        figname = fpath[:-5]+'-'
+    elif (fpath[-8:] == '.fits.gz'):
+        figname = fpath[:-8]+'-'
+    else:
+        figname = fpath+'-'
     if plottype == 0:
         figname += 'spec'
     elif plottype == 1:
@@ -235,8 +241,18 @@ def plotfromresults(params,fpath,z):
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(fpath,z,params)
 
+    # Get just the final bit of the path
+    fpath = path.split(fpath)[-1]
+
     ## Load Results ##
-    fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
+    if (fpath[-5:] == '.fits'):
+        fname = fpath[:-5]+'-results.fits'
+    elif (fpath[-8:] == '.fits.gz'):
+        fname = fpath[:-8]+'-results.fits'
+    else:
+        fname = fpath+'-results.fits'
+    fname = path.join(params['OutFolder'],fname)
+    print(fname)
     parameters = fits.getdata(fname,'PARAMS')
     pnames =  [n for n in parameters.columns.names if not (('EW' in n) or ('RAmp' in n) or ('PowerLaw_Scale' == n))][:-1]
     ps = np.array([parameters[n] for n in pnames]).T
@@ -272,4 +288,4 @@ def plotfromresults(params,fpath,z):
         PlotFig(spectrum,model,ps,fpath)
 
     if params["Verbose"]:
-        print("GELATO presented:",fpath.split('/')[-1])
+        print("GELATO presented:",fpath)

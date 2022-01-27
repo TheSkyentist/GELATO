@@ -181,7 +181,13 @@ def gelato(params,spath,z):
         parameters.add_column(model.models[1].Center*np.ones(len(parameters)),index=parameters.colnames.index('PowerLaw_Index')+1,name='PowerLaw_Scale')
     hdul.append(fits.BinTableHDU(parameters))
     hdul[-1].name = 'PARAMS'
-    fits.HDUList(hdul).writeto(path.join(params["OutFolder"],name.replace(".fits","-results.fits")),overwrite=True)
+    if (name[-5:] == '.fits'):
+        outname = name[:-5]+'-results.fits'
+    elif (name[-8:] == '.fits.gz'):
+        outname = name[:-8]+'-results.fits'
+    else:
+        outname = name+'-results.fits'
+    fits.HDUList(hdul).writeto(path.join(params["OutFolder"],outname),overwrite=True)
     if params["Verbose"]:
         print("Results freezed:",name)
 

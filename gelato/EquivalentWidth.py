@@ -68,10 +68,19 @@ def EWfromresults(params,fpath,z):
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(fpath,z,params)
 
+    # Get just the final bit of the path
+    fpath = path.split(fpath)[-1]
+
     if spectrum.regions != []:
 
         # Load name and parameters
-        fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
+        if (fpath[-5:] == '.fits'):
+            fname = fpath[:-5]+'-results.fits'
+        elif (fpath[-8:] == '.fits.gz'):
+            fname = fpath[:-8]+'-results.fits'
+        else:
+            fname = fpath+'-results.fits'
+        fname = path.join(params['OutFolder'],fname)
         results = fits.open(fname)
         parameters = Table(results['PARAMS'].data)
         pnames = parameters.colnames
@@ -84,7 +93,7 @@ def EWfromresults(params,fpath,z):
         for n in pnames:
             if 'EW' in n:
                 if not params['Overwrite']:
-                    print('Texture already measured:',path.split(fpath)[-1])
+                    print('Texture already measured:',fpath)
                     return
                 else: 
                     parameters = parameters[[n for n in pnames if not ('EW' in n)]]
@@ -115,4 +124,4 @@ def EWfromresults(params,fpath,z):
         results.writeto(fname,overwrite=True)
         
     if params["Verbose"]:
-        print("Texture measured:",path.split(fpath)[-1])
+        print("Texture measured:",fpath)
