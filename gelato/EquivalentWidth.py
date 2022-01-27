@@ -7,6 +7,7 @@ from astropy.io import fits
 from astropy.table import Table,hstack
 
 # GELATO
+import gelato.Utility as U
 import gelato.CustomModels as CM
 import gelato.SpectrumClass as SC
 
@@ -74,13 +75,7 @@ def EWfromresults(params,fpath,z):
     if spectrum.regions != []:
 
         # Load name and parameters
-        if (fpath[-5:] == '.fits'):
-            fname = fpath[:-5]+'-results.fits'
-        elif (fpath[-8:] == '.fits.gz'):
-            fname = fpath[:-8]+'-results.fits'
-        else:
-            fname = fpath+'-results.fits'
-        fname = path.join(params['OutFolder'],fname)
+        fname = path.join(params['OutFolder'],U.fileName(fpath))+'-results.fits'
         results = fits.open(fname)
         parameters = Table(results['PARAMS'].data)
         pnames = parameters.colnames

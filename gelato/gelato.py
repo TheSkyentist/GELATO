@@ -3,12 +3,12 @@
 # Packages
 import numpy as np
 from os import path
-from datetime import datetime
 from astropy.io import fits
 from astropy.table import Table
 
 # gelato supporting files
 from gelato.Constants import C
+import gelato.Utility as U
 import gelato.Plotting as PL
 import gelato.BuildModel as BM
 import gelato.CustomModels as CM
@@ -73,15 +73,13 @@ def gelato(params,spath,z):
         if params["NBoot"] > 1:
             if params["Verbose"]:
                 print("Scooping portions (this may take a while):",name)
-            N = 40 # Max length of progress bar
             parameters = np.ones((params["NBoot"],len(model_fit)+1))
             for i in range(params["NBoot"]):
-                try: parameters[i] = FM.FitBoot(model,model_fit,spectrum,i,N=N)
+                try: parameters[i] = FM.FitBoot(model,model_fit,spectrum,i)
                 except np.linalg.LinAlgError:
                     if params["Verbose"]: print("\nGELATO failed for:",name)
                     return
-            if ((params['NProcess'] == 1) and params['Verbose']):
-                print('Progress: |'+N*'#'+'| 100%')
+            if ((params['NProcess'] == 1) and params['Verbose']): U.loadingBar(params["NBoot"],params["NBoot"])
             if params["Verbose"]:
                 print("Portions scooped:",name)
         else: 
@@ -181,13 +179,7 @@ def gelato(params,spath,z):
         parameters.add_column(model.models[1].Center*np.ones(len(parameters)),index=parameters.colnames.index('PowerLaw_Index')+1,name='PowerLaw_Scale')
     hdul.append(fits.BinTableHDU(parameters))
     hdul[-1].name = 'PARAMS'
-    if (name[-5:] == '.fits'):
-        outname = name[:-5]+'-results.fits'
-    elif (name[-8:] == '.fits.gz'):
-        outname = name[:-8]+'-results.fits'
-    else:
-        outname = name+'-results.fits'
-    fits.HDUList(hdul).writeto(path.join(params["OutFolder"],outname),overwrite=True)
+    fits.HDUList(hdul).writeto(path.join(params["OutFolder"],U.fileName(name)+'-results.fits'),overwrite=True)
     if params["Verbose"]:
         print("Results freezed:",name)
 
@@ -196,28 +188,3 @@ def gelato(params,spath,z):
 
     # Return model (If not multiprocessing)
     if params["NProcess"] == 1: return model
-
-def loadObjects(tpath):
-    if tpath.endswith('.csv'):
-        objects = np.atleast_1d(np.genfromtxt(tpath,delimiter=',',dtype=['U100',np.float_],names=['Path','z']))
-    elif tpath.endswith('.fits'):
-        objects = Table.read(tpath)
-        objects.convert_bytestring_to_unicode()
-        objects = np.atleast_1d(objects)
-    else:
-        print('Object list not .csv or .fits.')
-        exit()
-    return objects
-
-def header():
-    print("Welcome to GELATO")
-    print("Galaxy/AGN Emission Line Analysis TOol")
-    print("Developed by R. E. Hviding")
-    now = datetime.now()
-    print("Started making gelato at",now)
-    return now
-
-def footer(then):
-    now = datetime.now()
-    print("Finished making GELATO at",datetime.now())
-    print("Elapsed time:",now - then)

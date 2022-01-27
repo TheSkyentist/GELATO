@@ -1,15 +1,22 @@
 # No dependencies
-import gelato.Plotting
+import gelato.Utility
 import gelato.Constants
-import gelato.CustomModels
 import gelato.SpectrumClass
 import gelato.ConstructParams
 import gelato.ModelComparison
 
-# Multiple Dependencies
-import gelato.AdditionalComponents
+# First-Level Dependencies
+import gelato.Concatenate
+import gelato.CustomModels
+
+# Second-Level Dependencies
+import gelato.Plotting
 import gelato.EquivalentWidth
+import gelato.AdditionalComponents
+
+# Third-Level Dependencies
 import gelato.BuildModel
 import gelato.FittingModel
 
-from gelato.gelato import header,footer,loadObjects,gelato
+# Fourth-Level Dependencies
+from gelato.gelato import gelato

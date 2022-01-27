@@ -3,7 +3,6 @@
 """ Turn parameter file into LaTeX table """
 
 # Packages
-import copy
 import argparse
 
 # gelato supporting files
@@ -34,7 +33,7 @@ def TeX(params):
             tex += 5*' & '+' & '.join(['\multirow{1}{*}{'+x+'}' for x in [group['Name'],slashbool(group['TieRedshift']),slashbool(group['TieDispersion'])]])
             tex += '\\\\\n'
             if i < len(params['EmissionGroups']):
-                tex += '\cline{0-6}\n'
+                tex += '\cline{0-7}\n'
 
         # Multirow
         for j,species in enumerate(group['Species']):

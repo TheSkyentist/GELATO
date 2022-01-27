@@ -35,7 +35,7 @@ GELATO is built with Python 3.9 and requires the following packages:
 * SciPy
 * Astropy
 
-and any dependecies therein. This is the minimum set of packages that must be installed to run GELATO.
+and any dependencies therein. This is the minimum set of packages that must be installed to run GELATO.
 
 However, to retrieve plots from GELATO, matplotlib must be installed, and a version of LaTeX must be available as well.
 
@@ -48,7 +48,7 @@ Installing the Python dependencies is detailed in the Installation portion of th
 To install GELATO, begin by cloning the GELATO git repository. If you have not used git before, this is done by using the following commands to clone the directory over HTTPS.
 
 ```bash
-cd /path/to/insallation/directory
+cd /path/to/installation/directory
 git clone https://github.com/TheSkyentist/GELATO.git
 ```
 
@@ -111,7 +111,7 @@ In this section we describe the operation of GELATO at a high level.
 
 7. Freezing results: The results of the fit are saved to disk. Along with any additional parameters measured.
 
-8. Combining GELATO: (Optional) If GELATO is running on multiple objects, the results from each object are averaged and combined into one convinient file. 
+8. Combining GELATO: (Optional) If GELATO is running on multiple objects, the results from each object are averaged and combined into one convenient file. 
 
 ## Running GELATO
 
@@ -130,52 +130,59 @@ Currently, the best way to run GELATO is using the wrapper scripts in the in the
 
 There are two wrappers for GELATO, one for running on a single spectrum, and one for running on a list of spectra.
 
-* "run_GELATO_single.py"
-
-   This script is designed to run GELATO over a single object. This takes 3 positional arguments, the path to the parameters file, the path to the spectrum, and the redshift of the object (in this example, 0.5). You can copy this file into your working directory once GELATO has been installed into the conda environment.
-
-  ```bash
-  python run_GELATO_single.py PARAMS.json spectrum.fits 0.5
-  ```
-
-* "run_GELATO_multi.py"
-
-   This script is designed to run GELATO over a list of objects. This takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. You can copy this file into your working directory once GELATO has been installed into the conda environment. While it is called multi, it can be run on a file containing a single object.
+* "runGELATO.py"
+  
+  GELATO is designed to be run over a list of objects. The script takes 2 positional arguments, the path to the parameters file, and the path to the list of objects. You can copy this file into your working directory once GELATO has been installed into the conda environment. It can be run on a file containing a single object. 
 
   ```bash
-  python run_GELATO_multi.py PARAMS.json spectra_with_redshifts.csv
+  python runGELATO.py PARAMS.json ObjectList.fits 
   ```
 
-During a GELATO run, rest equivalent widths and plots can be generated depending on what is specified in the parameter file. However, if you opt out of creating them during the run, you can always create them after using the following scripts located in the Convinience subdirectory. These scripts can be copied to the working directory after the installation. Similarly, these scripts are executable and can be called directly.
-
-* "Plot_from_results.py":
+   This script can also be used to run GELATO over a single object if you specify the "--single" option after the Parameter file argument. This therefore takes 4 positional arguments, the path to the parameters file, the -s or --single option, the path to the spectrum, and the redshift of the object (in this example, z). 
 
   ```bash
-  # For a single plot
-  python Plot_from_results.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
+  python runGELATO.py PARAMS.json --single spectrum.fits z
+
   ```
+
+During a GELATO run, rest equivalent widths and plots can be generated depending on what is specified in the parameter file. However, if you opt out of creating them during the run, you can always create them after using the following scripts located in the Convenience subdirectory. These scripts can be copied to the working directory after the installation. Similarly, these scripts are executable and can be called directly.
+
+* "plotResults.py":
 
   ```bash
   # For multiple plots
-  python Plot_from_results.py PARAMS.json --ObjectList spectra_with_redshifts.csv
-  ```
-
-* "EW_from_results.py"
-
-  ```bash
-  python EW_from_results.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
+  python plotResults.py PARAMS.json ObjectList.fits 
   ```
 
   ```bash
-  python EW_from_results.py PARAMS.json --Spectrum spectrum.fits --Redshift 0.5
+  # For a single plot
+  python plotResults.py PARAMS.json --single spectrum.fits z
+  ```
+
+* "ewResults.py"
+
+  ```bash
+  # For multiple EWs
+  python ewResults.py PARAMS.json ObjectList.fits 
+  ```
+
+  ```bash
+  # For a single EW
+  python ewResults.py PARAMS.json --single spectrum.fits z
   ```
 
 The concatenated results, with median parameters and standard deviations, for GELATO can also be created directly the results files in the following manner:
 
-* "Concat_from_results.py"
+* "concatResults.py"
 
   ```bash
-  python Concat_from_results.py PARAMS.json spectra_with_redshifts.csv
+  # To concatenate from a list of objects
+  python concatResults.py PARAMS.json ObjectList.fits 
+  ```
+
+    ```bash
+  # To generate the results file with a single spectrum
+  python concatResults.py PARAMS.json --single spectrum.fits z
   ```
 
 ## Running the Example
@@ -189,7 +196,7 @@ conda activate gelato
 We can then run the code over the whole data set.
 
 ```bash
-python ../Convenience/run_GELATO_multi.py ExampleParameters.json ExampleObjList.csv
+python ../Convenience/runGELATO.py ExampleParameters.json ExampleObjList.csv
 ```
 
 The output from running the example will be put into 'Results/' and can be compared to the results in the 'Comparison/' directory.
@@ -208,7 +215,7 @@ The extensions are:
 * SUMMARY: It is a binary FITS table containing the summary of the models. It contains the original spectrum without the bad data points (ivar == 0) along with the total model, ssp continuum, power-law continuum, emission-line model generated from the median parameters. The latter two columns will not appear if they are not included in the final fit of the spectrum.
 * PARAMS: It is a binary FITS table where each column represents a parameter with a row for each bootstrap. Redshift and dispersion measurements are given in km/s. Flux measurements are dependent on the input units of the spectrum. In addition, the rest amplitude (RAmp) of the Gaussian is also returned as this can be a more reliable way for computing line detection. If calculated, rest equivalent widths are given in Angstroms. Coefficients on the SSP continuum models are in the units of the SSP models.
 
-In addition, if running on multiple spectra, GELATO can optioanlly create a file named "GELATO-results.fits". For each object, the median of the resulting parameters and standard devation across the bootstraps are taken and concatenated into a single file for convinence.
+In addition, if running on multiple spectra, GELATO can optionally create a file named "GELATO-results.fits". For each object, the median of the resulting parameters and standard deviation across the bootstraps are taken and concatenated into a single file for convenience.
 
 ## Parameter File
 
@@ -219,9 +226,9 @@ The behavior of GELATO is controlled by the JSON parameters file. The JSON param
 * RandomSeed: The seed used as input to NumPy for random number generation.
 * ContinuumRegion: The border around emission lines in velocity units (km/s) that will be excluded when fitting the continuum initially.
 * LineRegion: The border around an emission line in velocity units (km/s) that must be contained within the spectrum in order to be fit. This region is also used to estimate the initial height of the line.
-* NBoot: Number of bootstrap iterations to constrain error on parameters.
+* NBoot: Number of bootstrap iterations to constrain error on parameters. Set equal to zero to not perform bootstraps at all.
 * FThresh: F-test threshold to incorporate additional model parameters.
-* NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single thread.
+* NProcess: Number of processes to open with python multiprocessing. Set equal to 1 to use only a single process.
 * Plotting: Produce plots or not.
 * FlamUnits: String containing the units of the spectrum flux for purposes of plotting, can accept LaTeX syntax.
 * CalcEW: To calculate (rest) equivalent widths or not.
@@ -290,7 +297,7 @@ The "ExampleParameters.json" file in the Example directory gives a good example 
 Here is table showing the hierarchy of the Emission Groups Parameter for the "PARAMS.json" file. A script, params_to_TeX.py, is provided in the Convenience directory can turn a Emission Groups dictionary in a Parameter file into a LaTeX table.
 
   ```bash
-  python params_to_TeX.py PARAMS.json
+  python paramsToTeX.py PARAMS.json
   ```
 
 ![Image of PARAMS](./Images/PARAMS.png)
@@ -310,21 +317,21 @@ Here is table showing the hierarchy of the Emission Groups Parameter for the "PA
 Following the initial fit, an additional power law component is added. If the continuum model with a power law passes an F-test for its inclusion, it is added to the model. The redshift of the continuum model is frozen and not fit moving forward. Finally, the continuum is fit to the spectrum in the region without emission lines, if any of the SSP coefficients hit their lower limits (as determined by the TRF algorithm), the corresponding SSP is removed from the continuum model.
 A single Gaussian is then added for each emission line. The starting values are generated based on the spectrum by looking at the range of values where the emission line would be expected to lie. The model is then fit to the spectrum.
 
-3. Adding Flavor: The additional components are then added to the base model and tested separately. If the fit is statistically better (judged with an F-test) with the additional component and the additional component does not hit any of its parameter limits (as determined by the TRF algorithm), it is accepted. Every possible combination of all accepted additional components is then then tested and theirAkaike Information Criteria (AICs) are measured. If any combination has any of its constituent model components hit a limit, then its AIC is set to infinity. The model set with the lowest AIC is the final model. The model is then fit to the spectrum.
+3. Adding Flavor: The additional components are then added to the base model and tested separately. If the fit is statistically better (judged with an F-test) with the additional component and the additional component does not hit any of its parameter limits (as determined by the TRF algorithm), it is accepted. Every possible combination of all accepted additional components is then then tested and their Akaike Information Criteria (AICs) are measured. If any combination has any of its constituent model components hit a limit, then its AIC is set to infinity. The model set with the lowest AIC is the final model. The model is then fit to the spectrum.
 
 4. Scooping Portions: In order to constraint fit uncertainties, the flux is bootstrapped by randomly sampling each data point based on the associated inverse variance. The model is then fit to the bootstrapped spectrum with the fitted parameters from step 3 as input.
 
 5. Presenting gelato: (Optional) A figure depicting the total fit to the entire spectrum and the total fit zoomed in on the emission lines are presented. In addition, a figure is presented zoomed in on the emission lines that presents all components fit to the lines.
 
-6. Measuring Texture: (Optional) The rest equivalent width of the emission line components are measured for each of the boostraps. This is not a full integration of the continuum and approximates the height of the continuum as the median continuum flux within a small region around the line center.
+6. Measuring Texture: (Optional) The rest equivalent width of the emission line components are measured for each of the bootstraps. This is not a full integration of the continuum and approximates the height of the continuum as the median continuum flux within a small region around the line center.
 
 7. Freezing results: The results of the fit are saved to disk. Along with any additional parameters measured.
 
-8. Combining GELATO: (Optional) If GELATO is running on multiple objects, the results from each object are averaged and combined into one convinient file. 
+8. Combining GELATO: (Optional) If GELATO is running on multiple objects, the results from each object are averaged and combined into one convenient file. 
 
 ## Model Descriptions & Limits
 
-* Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift (km/s), a flux, and a dispersion (km/s). The dispersion represents the standard devation of the Gaussian. The flux is bounded symmetrically based on the range of values in the spectrum near the line centroid. The default value of the dispersion is set to the median narrow line dispersion of the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample of 130 km/s. It has a lower bound of 60 km/s corresponding to the maximum SDSS resolution of 2500. It has an upper bound of 500 km/s corresponding to the delineation between narrow lines and broad lines at a FWHM of 1200 km/s used in [Hao et al. 2005](https://ui.adsabs.harvard.edu/abs/2005AJ....129.1783H/abstract). The redshift of the narrow line Guassians is allowed to vary by +/-300 km/s based on the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample where 98% of the narrow line redshift offsets fall within this range.
+* Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift (km/s), a flux, and a dispersion (km/s). The dispersion represents the standard deviation of the Gaussian. The flux is bounded symmetrically based on the range of values in the spectrum near the line centroid. The default value of the dispersion is set to the median narrow line dispersion of the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample of 130 km/s. It has a lower bound of 60 km/s corresponding to the maximum SDSS resolution of 2500. It has an upper bound of 500 km/s corresponding to the delineation between narrow lines and broad lines at a FWHM of 1200 km/s used in [Hao et al. 2005](https://ui.adsabs.harvard.edu/abs/2005AJ....129.1783H/abstract). The redshift of the narrow line Guassians is allowed to vary by +/-300 km/s based on the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample where 98% of the narrow line redshift offsets fall within this range.
 
 These defaults can be adjusted in the "CustomModels.py" file. 
 
@@ -344,37 +351,39 @@ In order to have GELATO attempt to fit an emission line with an additional compo
 
 ## GELATO submodules
 
-* ConstructParams.py
+### No GELATO submodule dependencies: 
 
-  Routines for turning the PARAMS.json file into a python dictionary, and verifying that it is in the correct format.
+* Utility.py
 
-* GELATO.py
+  Utility functions for running GELATO used by many other submodules
 
-  Main GELATO function that calls and coordinates the whole operation.
+* Constants.py
+
+  Sets the scale for the dispersions and redshifts by putting in the speed of light. Can be changed but will adjust all output units.
 
 * SpectrumClass.py
 
   A class the defines how a spectrum is loaded. GELATO was designed for SDSS spectra. To load in any other kind of spectrum, you can edit the way this class is initialized.
 
-* BuildModel.py
+* ConstructParams.py
 
-  This file handles the construction of models and for tying the various parameters together as outlined by the emission line dictionary.
+  Routines for turning the PARAMS.json file into a python dictionary, and verifying that it is in the correct format.
+
+* ModelComparison.py
+
+  Here are scripts for model comparison and selection, including F-tests and AIC calculation.
+
+### Has first-level GELATO submodule dependencies
 
 * CustomModels.py
 
   Here are where the custom models used in GELATO are defined. Here exists a gaussian emission line model, the SSP continuum, and the power law continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can be set.
 
-* AdditionalComponents.py
+* Concatenate.py
 
-  Here are where the additional components are defined along with their bit flag positions. In order to add extra additional components, this file can be easily extended to include more models. This is where the velocity dispersion limits on additional components can be modified.
+  Scripts for concatenating results from a multi GELATO run. Can also be run independently on results after the fact.
 
-* FittingModel.py
-
-  Here are the scripts for fitting GELATO generated models and for testing the inclusion of additional parameters. To change the fitting algorithm, this file can be edited.
-
-* ModelComparison.py
-
-  Here are scripts for model comparison and selection, including F-tests and AIC calculation.
+### Has second-level submodule dependencies
 
 * Plotting.py
 
@@ -384,13 +393,25 @@ In order to have GELATO attempt to fit an emission line with an additional compo
 
   Here are the scripts for creating and saving emission line EW. Can also be run directly on GELATO results in order to generate EW after the fact. Rest equivalent widths are generated by assuming a flat continuum at the height of the continuum at the emission line center.
 
-* Concatenate.py
+* AdditionalComponents.py
 
-  Scripts for concatenating results from a multi GELATO run. Can also be run independently on results after the fact.
+  Here are where the additional components are defined along with their bit flag positions. In order to add extra additional components, this file can be easily extended to include more models. This is where the velocity dispersion limits on additional components can be modified.
 
-* Constants.py
+### Has third-level submodule dependencies
 
-  Sets the scale for the dispersions and redshifts by putting in the speed of light. Can be changed but will adjust all output units.
+* BuildModel.py
+
+  This file handles the construction of models and for tying the various parameters together as outlined by the emission line dictionary.
+
+* FittingModel.py
+
+  Here are the scripts for fitting GELATO generated models and for testing the inclusion of additional parameters. To change the fitting algorithm, this file can be edited.
+
+### Has fourth-level submodule dependencies
+
+* gelato.py
+
+  Main GELATO function that calls and coordinates the whole operation.
 
 ## License
 

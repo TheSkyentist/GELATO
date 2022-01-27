@@ -6,6 +6,9 @@ from os import path
 from astropy.io import fits
 from astropy.table import Table,vstack
 
+# Gelato dependecies
+import gelato.Utility as U
+
 # Concatenate results
 def concatfromresults(p,objects):
 
@@ -20,7 +23,7 @@ def concatfromresults(p,objects):
 
         # Loading bar
         Nbar = 40
-        if p['Verbose']:
+        if p['Verbose']: 
                 pc = int(100*i*N/len(objects)) # Percentage
                 l = int(Nbar*i*N/len(objects)) # Length of bar
                 if pc == 0:

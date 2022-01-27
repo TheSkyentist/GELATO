@@ -14,6 +14,7 @@ from matplotlib import pyplot
 from scipy.optimize import minimize
 
 # GELATO
+import gelato.Utility as U
 import gelato.CustomModels as CM
 import gelato.SpectrumClass as SC
 
@@ -32,13 +33,7 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
     medians = np.median(parameters,0)
 
     # Make figure name
-    fpath = path.split(fpath)[-1]
-    if (fpath[-5:] == '.fits'):
-        figname = fpath[:-5]+'-'
-    elif (fpath[-8:] == '.fits.gz'):
-        figname = fpath[:-8]+'-'
-    else:
-        figname = fpath+'-'
+    figname = U.fileName(path.split(fpath)[-1])+'-'
     if plottype == 0:
         figname += 'spec'
     elif plottype == 1:
@@ -245,14 +240,7 @@ def plotfromresults(params,fpath,z):
     fpath = path.split(fpath)[-1]
 
     ## Load Results ##
-    if (fpath[-5:] == '.fits'):
-        fname = fpath[:-5]+'-results.fits'
-    elif (fpath[-8:] == '.fits.gz'):
-        fname = fpath[:-8]+'-results.fits'
-    else:
-        fname = fpath+'-results.fits'
-    fname = path.join(params['OutFolder'],fname)
-    print(fname)
+    fname = path.join(params['OutFolder'],U.fileName(fpath))+'-results.fits'
     parameters = fits.getdata(fname,'PARAMS')
     pnames =  [n for n in parameters.columns.names if not (('EW' in n) or ('RAmp' in n) or ('PowerLaw_Scale' == n))][:-1]
     ps = np.array([parameters[n] for n in pnames]).T
