@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="GELATO",
-    version="2.5",
+    version="2.5.1",
     author="Raphael Hviding",
     author_email="raphael.hviding@gmail.com",
     description="Galaxy/AGN Emission Line Analysis TOol ",
