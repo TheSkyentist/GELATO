@@ -49,7 +49,7 @@ def AddComponent(flag, line, spectrum, prefix):
 
         # Reassign Flux Bounds
         Fbound = 1.5*x0[1]*model.Dispersion_bounds[1]/oldMaxDispersion
-        model.Flux_bounds = (-Fbound,Fbound)
+        model.Flux_bounds = (0,Fbound)
         
         # Reassign Redshift bounds
         model.Redshift_bounds = (C*(spectrum.z-0.002),C*(spectrum.z+0.002))
@@ -70,7 +70,7 @@ def AddComponent(flag, line, spectrum, prefix):
 
         # Reassign Flux Bounds
         Fbound = 1.5*x0[1]*model.Dispersion_bounds[1]/oldMaxDispersion
-        model.Flux_bounds = (-Fbound,Fbound)
+        model.Flux_bounds = (0,Fbound)
 
         # Reassign Redshift bounds and starting guess
         model.Redshift_bounds = (C*(spectrum.z-0.0025),C*(spectrum.z+0.001))

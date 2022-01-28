@@ -11,6 +11,7 @@ from itertools import combinations
 from scipy.optimize import least_squares
 
 # gelato supporting files
+import gelato.Utility as U
 import gelato.BuildModel as BM
 import gelato.CustomModels as CM
 import gelato.ModelComparison as MC
@@ -122,10 +123,10 @@ def FitComponents(spectrum,cont,cont_x,emis,emis_x):
         diff = np.setdiff1d(model_pnames,base_model.get_names(),assume_unique=True)
         
         # Reject component if we hit limits
-        mask = fit.active_mask
-        if model.constrained: mask = model.expand(mask)
-        if np.logical_or.reduce([mask[model_pnames.index(d)] for d in diff]):
-            continue
+        # mask = fit.active_mask
+        # if model.constrained: mask = model.expand(mask)
+        # if np.logical_or.reduce([mask[model_pnames.index(d)] for d in diff]):
+        #     continue
 
         # Perform F-test
         if not MC.FTest(base_model,base_fit,model,fit.x,spectrum,args):
@@ -223,18 +224,10 @@ def FitModel(model,x0,args,jac='3-point'):
     return fit
 
 # Fit (Bootstrapped) Model
-def FitBoot(model,x0,spectrum,i,N):
+def FitBoot(model,x0,spectrum,i):
 
-    # Loading bar params
-    if ((spectrum.p['NProcess'] == 1) and spectrum.p['Verbose']):
-        p = int(100*i/spectrum.p['NBoot']) # Percentage
-        l = int(N*i/(spectrum.p['NBoot'])) # Length of bar
-        if p == 0:
-            print('Progress: |'+N*'-'+'|   0%',end='\r')
-        elif p < 10:
-            print('Progress: |'+l*'#'+(N-l)*'-'+'|   '+str(p)+'%',end='\r')
-        else:
-            print('Progress: |'+l*'#'+(N-l)*'-'+'|  '+str(p)+'%',end='\r')
+    # Loading bar
+    if ((spectrum.p['NProcess'] == 1) and spectrum.p['Verbose']): U.loadingBar(i,spectrum.p['NBoot'])
 
     # Fit model
     args = spectrum.wav,spectrum.Bootstrap(i),spectrum.isig

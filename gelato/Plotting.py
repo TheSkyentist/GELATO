@@ -14,6 +14,7 @@ from matplotlib import pyplot
 from scipy.optimize import minimize
 
 # GELATO
+import gelato.Utility as U
 import gelato.CustomModels as CM
 import gelato.SpectrumClass as SC
 
@@ -32,7 +33,7 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
     medians = np.median(parameters,0)
 
     # Make figure name
-    figname = path.split(fpath)[-1].replace('.fits','')+'-'
+    figname = U.fileName(path.split(fpath)[-1])+'-'
     if plottype == 0:
         figname += 'spec'
     elif plottype == 1:
@@ -235,8 +236,11 @@ def plotfromresults(params,fpath,z):
     ## Load in Spectrum ##
     spectrum = SC.Spectrum(fpath,z,params)
 
+    # Get just the final bit of the path
+    fpath = path.split(fpath)[-1]
+
     ## Load Results ##
-    fname = path.join(params['OutFolder'],path.split(fpath)[-1].replace('.fits','')+'-results.fits')
+    fname = path.join(params['OutFolder'],U.fileName(fpath))+'-results.fits'
     parameters = fits.getdata(fname,'PARAMS')
     pnames =  [n for n in parameters.columns.names if not (('EW' in n) or ('RAmp' in n) or ('PowerLaw_Scale' == n))][:-1]
     ps = np.array([parameters[n] for n in pnames]).T
@@ -272,4 +276,4 @@ def plotfromresults(params,fpath,z):
         PlotFig(spectrum,model,ps,fpath)
 
     if params["Verbose"]:
-        print("GELATO presented:",fpath.split('/')[-1])
+        print("GELATO presented:",fpath)

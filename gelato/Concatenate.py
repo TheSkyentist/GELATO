@@ -6,6 +6,9 @@ from os import path
 from astropy.io import fits
 from astropy.table import Table,vstack
 
+# Gelato dependecies
+import gelato.Utility as U
+
 # Concatenate results
 def concatfromresults(p,objects):
 
@@ -20,7 +23,7 @@ def concatfromresults(p,objects):
 
         # Loading bar
         Nbar = 40
-        if p['Verbose']:
+        if p['Verbose']: 
                 pc = int(100*i*N/len(objects)) # Percentage
                 l = int(Nbar*i*N/len(objects)) # Length of bar
                 if pc == 0:
@@ -36,9 +39,15 @@ def concatfromresults(p,objects):
         # Iterate over results
         for spath in spaths:
             
-            # Load name and parameters
-            name = path.split(spath)[-1].replace('.fits','')
-            spath = path.join(p['OutFolder'],name+'-results.fits')
+            # Load name, output file, and parameters
+            name = path.split(spath)[-1]
+            if (name[-5:] == '.fits'):
+                spath = name[:-5]+'-results.fits'
+            elif (name[-8:] == '.fits.gz'):
+                spath = name[:-8]+'-results.fits'
+            else:
+                spath = name+'-results.fits'
+            spath = path.join(p['OutFolder'],spath)
             if not path.exists(spath):     
                 continue # If doesn't exist, continue
             parameters = fits.getdata(spath,'PARAMS')
