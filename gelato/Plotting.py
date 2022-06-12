@@ -62,68 +62,23 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
         args = wav,flux,isig
         f = model.evaluate(medians,*args)
 
-        # Add axis
-        fax = fig.add_subplot(gs[0,0])
+        # Add axes
+        fax,rax = fig.add_subplot(gs[0,0]),fig.add_subplot(gs[1,0])
 
         # Plot Power Law
         if 'PowerLaw_Index' in model.get_names():
             continuum = CM.CompoundModel(model.models[1:2]).evaluate(medians[model.models[0].nparams:],*args)
             fax.step(wav,continuum,'k',ls='--',where='mid')
 
-         # Plot data
-        fax.step(wav,flux,'gray',where='mid')
-
         # Plot model(s)
         # for p in parameters:
         #     fax.step(wav,model.evaluate(p,*args),'r',where='mid',alpha=0.5)
         fax.step(wav,f,'r',where='mid')
 
-        # Base Y axis on flux
-        ymin = np.max([0,flux.min()])
-        dy = flux.max() - ymin
-        ylim = [ymin,ymin+1.3*dy] # Increase Axis size by 20%
-        text_height = ymin+1.2*dy 
-
-        # Get Line Names/Positions
-        linelocs = []
-        linelabels = []
-        for group in spectrum.p['EmissionGroups']:
-            for species in group['Species']:
-                if species['Flag'] >= 0:
-                    for line in species['Lines']:
-                        x = line['Wavelength']*(1+spectrum.z)
-                        if ((x < wav[-1]) and (x > wav[0])):
-                            linelocs.append(x)
-                            linelabels.append(species['Name'])
-
-        # If we have lines to plot
-        if len(linelocs) > 0:
-
-            # Reorder line positions
-            inds = np.argsort(linelocs)
-            linelocs = np.array(linelocs)[inds]
-            linelabels = np.array(linelabels)[inds]
-            linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/65).sum(),np.linspace(linelocs.min(),linelocs.max(),len(inds)),method='Nelder-Mead',options={'adaptive':True,'maxiter':len(inds)*750}).x
-
-            # Plot names
-            for lineloc,linelabel,linelabelloc in zip(linelocs,linelabels,linelabellocs):
-                # Text
-                fax.text(linelabelloc,text_height,linelabel,rotation=90,fontsize=12,ha='center',va='center')
-                # Plot Lines
-                fax.plot([lineloc,lineloc,linelabelloc,linelabelloc],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],ls='-',c='gray',lw=0.25)
-
-        # Axis labels and limits
-        fax.set(ylabel=r'$F_\lambda$ ['+spectrum.p['FlamUnits']+']',ylim=ylim)
-        fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticks=[])
-
-        # Residual Axis
-        rax = fig.add_subplot(gs[1,0])
-        rax.step(wav,(flux - f)*isig,'gray',where='mid')
-        ymax = np.max(np.abs(rax.get_ylim()))
-        rax.set(xlim=[wav.min(),wav.max()],xlabel=r'Observed Wavelength [\AA]',ylim=[-ymax,ymax])
-        rax.set_ylabel('Deviation',fontsize=15)
+        # Subplot plotting
+        subplotplot(plottype,fax,rax,spectrum,args,f)
         
-    elif (plottype == 1) or (plottype == 2):
+    elif plottype > 0:
 
         # Make figure
         ncols   = len(spectrum.regions)
@@ -146,24 +101,13 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
             wav     = spectrum.wav[good]
             flux    = spectrum.flux[good]
             isig    = spectrum.isig[good]
+            args    = wav,flux,isig
 
-            # Axis to plot spectrum
-            fax = fig.add_subplot(gs[0,i])
+            # Add Axes
+            fax,rax = fig.add_subplot(gs[0,i]),fig.add_subplot(gs[1,i])
 
-            # Plot data
-            fax.step(wav,flux,'gray',where='mid')
-
-            # Plot model(s)
-            # for p in parameters:
-            #     fax.step(wav,model.evaluate(p,*args)[good],'r',where='mid',alpha=0.1)
-            fax.step(wav,f[good],'r',where='mid')
-            fax.step(wav,f[good],'r',where='mid')
-
-            # Base Y axis on flux
-            ymin = np.max([0,flux.min() - (flux.max() - flux.min())/20])
-            dy = flux.max() - ymin
-            ylim = [ymin,ymin+1.3*dy] # Increase Axis size by 20%
-            text_height = ymin+1.2*dy 
+            # Subplot plotting
+            ymin = subplotplot(plottype,fax,rax,spectrum,args,f[good])
 
             # Plot Continuum
             if plottype == 1:
@@ -182,50 +126,81 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
                     #     cm = CM.CompoundModel([m]).evaluate(p[idx:idx+m.nparams],*(wav,flux,isig))
                     #     fax.step(wav,ymin+cm,'--',c='gray',alpha=0.5)
 
-            # Get Line Names/Positions
-            linelocs = []
-            linelabels = []
-            for group in spectrum.p['EmissionGroups']:
-                for species in group['Species']:
-                    if species['Flag'] >= 0:
-                        for line in species['Lines']:
-                            x = line['Wavelength']*(1+spectrum.z)
-                            if ((x < wav[-1]) and (x > wav[0])):
-                                linelocs.append(x)
-                                linelabels.append(species['Name'])
-
-            # If we have lines to plot
-            if len(linelocs) > 0:
-
-                # Reorder line positions
-                inds = np.argsort(linelocs)
-                linelocs = np.array(linelocs)[inds]
-                linelabels = np.array(linelabels)[inds]
-                linelabellocs = minimize(lambda x: np.square(x-linelocs).sum()-np.log(x[1:]-x[:-1]+(wav.min()-wav.max())/15).sum(),np.linspace(wav.min(),wav.max(),len(inds)+2)[1:-1],method='Nelder-Mead',options={'adaptive':True,'maxiter':len(inds)*500}).x
-
-                # Plot names
-                for lineloc,linelabel,linelabelloc in zip(linelocs,linelabels,linelabellocs):
-                    # Text
-                    fax.text(linelabelloc,text_height,linelabel,rotation=90,fontsize=12,ha='center',va='center')
-                    # Plot Lines
-                    fax.plot([lineloc,lineloc,linelabelloc,linelabelloc],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],'k-',lw=0.25)
-
-            fax.set(ylabel=r'$F_\lambda$ ['+spectrum.p['FlamUnits']+']',ylim=ylim)
-            fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticks=[])
-
-            # Residual Axis
-            text_height = ymin+1.2*dy # Put labels halfway
-            rax = fig.add_subplot(gs[1,i])
-            rax.step(wav,(flux - f[good])*isig,'gray',where='mid')
-            ymax = np.max(np.abs(rax.get_ylim()))
-            rax.set(xlim=[wav.min(),wav.max()],xlabel=r'Observed Wavelength [\AA]',ylim=[-ymax,ymax])
-            rax.set_ylabel('Deviation',fontsize=15)
-
     # Add title and save figure
     fig.suptitle(figname.replace('_','\_')+', $z='+str(np.round(spectrum.z,3))+'$',y=0.95)
     fig.tight_layout()
     fig.savefig(path.join(spectrum.p['OutFolder'],figname+'.pdf'))
     pyplot.close(fig)
+
+# Add Linelabels
+def subplotplot(pt,fax,rax,spectrum,args,f):
+    
+    # Unpack
+    wav,flux,isig = args
+
+    # Plot data
+    fax.step(wav,flux,'gray',where='mid')
+
+    # Plot model(s)
+    # for p in parameters:
+    #     fax.step(wav,model.evaluate(p,*args),'r',where='mid',alpha=0.5)
+    fax.step(wav,f,'r',where='mid')
+    
+    # Base Y axis on flux
+    ymin = np.max([0,flux.min()])
+    dy = flux.max() - ymin
+    ylim = [ymin,ymin+1.3*dy] # Increase Axis size by 20%
+    text_height = ymin+1.2*dy 
+
+    # Get Line Names/Positions
+    linelocs = []
+    linelabels = []
+    for group in spectrum.p['EmissionGroups']:
+        for species in group['Species']:
+            if species['Flag'] >= 0:
+                for line in species['Lines']:
+                    x = line['Wavelength']*(1+spectrum.z)
+                    if ((x < wav[-1]) and (x > wav[0])):
+                        linelocs.append(x)
+                        linelabels.append(species['Name'])
+
+    # If we have lines to plot
+    if len(linelocs) > 0:
+
+        # Reorder line positions
+        inds = np.argsort(linelocs)
+        linelocs = np.array(linelocs)[inds]
+        linelabels = np.array(linelabels)[inds]
+
+        # Log barrier constraints
+        norm = 65 if pt == 0 else 15
+        x0 = np.linspace(wav.min(),wav.max(),len(inds)+2)[1:-1] # Initial guess
+        linelabellocs = minimize(logbarrier,x0,args=(wav,linelocs,norm),method='Nelder-Mead',options={'adaptive':True,'maxiter':len(inds)*750}).x
+
+        # Plot names
+        for lineloc,linelabel,linelabelloc in zip(linelocs,linelabels,linelabellocs):
+            # Text
+            fax.text(linelabelloc,text_height,linelabel,rotation=90,fontsize=12,ha='center',va='center')
+            # Plot Lines
+            fax.plot([lineloc,lineloc,linelabelloc,linelabelloc],[ymin+dy*1.01,ymin+dy*1.055,ymin+dy*1.075,ymin+dy*1.12],ls='-',c='gray',lw=0.25)
+
+    # Axis labels and limits
+    fax.set(ylabel=r'$F_\lambda$ ['+spectrum.p['FlamUnits']+']',ylim=ylim)
+    fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticks=[])
+
+    # Residual Axis
+    rax.step(wav,(flux - f)*isig,'gray',where='mid')
+    ymax = np.max(np.abs(rax.get_ylim()))
+    rax.set(xlim=[wav.min(),wav.max()],xlabel=r'Observed Wavelength [\AA]',ylim=[-ymax,ymax])
+    rax.set_ylabel('Deviation',fontsize=15)
+
+    return ymin
+
+# Log barrier constraints
+def logbarrier(x,wav,linelocs,norm):
+    
+    y = np.concatenate([[wav.min()],x,[wav.max()]])
+    return np.square(x-linelocs).sum()-np.log(y[1:]-y[:-1]+(wav.min()-wav.max())/norm).sum()
 
 # Plot from results
 def plotfromresults(params,fpath,z):
