@@ -39,6 +39,7 @@ GELATO is built with Python 3.9 and requires the following packages:
 * NumPy
 * SciPy
 * Astropy
+* tqdm (lightweight progress bar)
 
 and any dependencies therein. This is the minimum set of packages that must be installed to run GELATO.
 
@@ -79,7 +80,7 @@ Then the GELATO scripts can be installed. Make sure you are in the GELATO conda 
 ```bash
 cd /path/to/GELATO/directory
 conda activate gelato
-python setup.py install
+pip install .
 ```
 
 In your working directory, **you need to copy the "matplotlibrc" file** to control the plotting settings. This is most important if you are running GELATO with multiprocessing as this file sets the matplotlib backed to "Agg", a non-interactive backend, required for generating and saving figures on multiple threads.

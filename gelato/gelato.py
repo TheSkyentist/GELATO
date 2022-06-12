@@ -3,6 +3,7 @@
 # Packages
 import numpy as np
 from os import path
+from tqdm import tqdm
 from astropy.io import fits
 from astropy.table import Table
 
@@ -74,12 +75,11 @@ def gelato(params,spath,z):
             if params["Verbose"]:
                 print("Scooping portions (this may take a while):",name)
             parameters = np.ones((params["NBoot"],len(model_fit)+1))
-            for i in range(params["NBoot"]):
+            for i in tqdm(range(params["NBoot"])):
                 try: parameters[i] = FM.FitBoot(model,model_fit,spectrum,i)
                 except np.linalg.LinAlgError:
                     if params["Verbose"]: print("\nGELATO failed for:",name)
                     return
-            if ((params['NProcess'] == 1) and params['Verbose']): U.loadingBar(params["NBoot"],params["NBoot"])
             if params["Verbose"]:
                 print("Portions scooped:",name)
         else: 

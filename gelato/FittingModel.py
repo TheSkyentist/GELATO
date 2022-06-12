@@ -226,9 +226,6 @@ def FitModel(model,x0,args,jac='3-point'):
 # Fit (Bootstrapped) Model
 def FitBoot(model,x0,spectrum,i):
 
-    # Loading bar
-    if ((spectrum.p['NProcess'] == 1) and spectrum.p['Verbose']): U.loadingBar(i,spectrum.p['NBoot'])
-
     # Fit model
     args = spectrum.wav,spectrum.Bootstrap(i),spectrum.isig
     fit_model = FitModel(model,x0,args,jac=model.jacobian)
