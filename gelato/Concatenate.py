@@ -3,11 +3,9 @@
 # Import packages
 import numpy as np
 from os import path
+from tqdm import tqdm
 from astropy.io import fits
 from astropy.table import Table,vstack
-
-# Gelato dependecies
-import gelato.Utility as U
 
 # Concatenate results
 def concatfromresults(p,objects):
@@ -19,19 +17,9 @@ def concatfromresults(p,objects):
     first = True
     N = 10000 # Number of objects we will concatenate at once
     i = 0 # Index
+    pbar = tqdm(total=len(objects),disable=not p["Verbose"]) # Progress Bar
+    
     while i*N < len(objects):
-
-        # Loading bar
-        Nbar = 40
-        if p['Verbose']: 
-                pc = int(100*i*N/len(objects)) # Percentage
-                l = int(Nbar*i*N/len(objects)) # Length of bar
-                if pc == 0:
-                    print('Progress: |'+Nbar*'-'+'|   0%',end='\r')
-                elif pc < 10:
-                    print('Progress: |'+l*'#'+(Nbar-l)*'-'+'|   '+str(pc)+'%',end='\r')
-                else:
-                    print('Progress: |'+l*'#'+(Nbar-l)*'-'+'|  '+str(pc)+'%',end='\r')
 
         tables = [] # Initilize tables list
         spaths = objects['Path'][i*N:(i+1)*N] # Get subsample
@@ -70,7 +58,8 @@ def concatfromresults(p,objects):
                 # Add errors
                 data.append(np.nanstd(ps))
                 names.append(n+'_err')
-
+            
+            # Append to list
             tables.append(Table(data = np.array(data), names = names,dtype=dtype))
 
         table = vstack(tables,join_type = 'outer')
@@ -88,9 +77,13 @@ def concatfromresults(p,objects):
             results = Table.read(out)
             vstack([results,table],join_type = 'outer').write(out,overwrite=True)
 
+        # Update Progress Bar
+        pbar.update(len(spaths))
+
         i += 1
 
-    if p['Verbose']: print('Progress: |'+Nbar*'#'+'| 100%')
+    # Close progress bar
+    pbar.close()
 
     if p["Verbose"]:
         print("Gelato combined.")

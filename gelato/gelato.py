@@ -75,7 +75,7 @@ def gelato(params,spath,z):
             if params["Verbose"]:
                 print("Scooping portions (this may take a while):",name)
             parameters = np.ones((params["NBoot"],len(model_fit)+1))
-            for i in tqdm(range(params["NBoot"])):
+            for i in tqdm(range(params["NBoot"]),disable=not(params["Verbose"] and (params["NProcess"] == 1))):
                 try: parameters[i] = FM.FitBoot(model,model_fit,spectrum,i)
                 except np.linalg.LinAlgError:
                     if params["Verbose"]: print("\nGELATO failed for:",name)
