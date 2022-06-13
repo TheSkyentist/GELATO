@@ -60,7 +60,7 @@ def concatfromresults(p,objects):
                 names.append(n+'_err')
             
             # Append to list
-            tables.append(Table(data = np.array(data), names = names,dtype=dtype))
+            tables.append(Table(data=np.array(data),names=names,dtype = dtype))
 
         table = vstack(tables,join_type = 'outer')
         if not type(table.mask) == type(None):
@@ -75,7 +75,7 @@ def concatfromresults(p,objects):
         # Otherise load table and append to it
         else:
             results = Table.read(out)
-            vstack([results,table],join_type = 'outer').write(out,overwrite=True)
+            vstack([results,table],join_type='outer').write(out,overwrite=True)
 
         # Update Progress Bar
         pbar.update(len(spaths))
