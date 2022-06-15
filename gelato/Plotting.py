@@ -173,7 +173,7 @@ def subplotplot(pt,fax,rax,spectrum,args,f):
         linelabels = np.array(linelabels)[inds]
 
         # Log barrier constraints
-        norm = 65 if pt == 0 else 15 # Magic numbers for line label spacings
+        norm = 60 if pt == 0 else 20 # Magic numbers for line spacing
         x0 = np.linspace(wav.min(),wav.max(),len(inds)+2)[1:-1] # Initial guess
         linelabellocs = minimize(logbarrier,x0,args=(wav,linelocs,norm),method='Nelder-Mead',options={'adaptive':True,'maxiter':len(inds)*750}).x
 
