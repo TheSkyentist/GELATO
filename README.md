@@ -94,7 +94,7 @@ conda update -n gelato --all
 cd /path/to/GELATO/directory
 git pull
 conda activate gelato
-python setup.py install
+pip install .
 ```
 
 In the case where a new version of GELATO releases where there are more strict dependecies, you may need to fully delete GELATO and its associated conda environment and reinstall from scratch.
