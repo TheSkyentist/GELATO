@@ -109,7 +109,7 @@ In this section we describe the operation of GELATO at a high level.
 
 3. Adding Flavor: Additional line components for each emission line as specified in the input parameter file are tested. The final model is constructed from the continuum model, the base emission lines, and the accepted set of additional components. 
 
-4. Scooping Portions: In order to constraint fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run as many times as specified by the input parameters file.
+4. Scooping Portions: In order to constrain fit uncertainties, the flux is bootstrapped with respect to provided uncertainties and the fit is run as many times as specified by the input parameters file.
 
 5. Presenting gelato: (Optional) Three figures depicting the final fit to the data are generated and saved to disk.
 
@@ -325,7 +325,7 @@ A single Gaussian is then added for each emission line. The starting values are 
 
 3. Adding Flavor: The additional components are then added to the base model and tested separately. If the fit is statistically better (judged with an F-test) with the additional component, it is accepted. Every possible combination of all accepted additional components is then then tested and their Akaike Information Criteria (AICs) are measured. If any combination has any of its constituent model components hit any of its parameter limits (as determined by the TRF algorithm), then its AIC is set to infinity. The model set with the lowest AIC is the final model. The model is then fit to the spectrum.
 
-4. Scooping Portions: In order to constraint fit uncertainties, the flux is bootstrapped by randomly sampling each data point based on the associated inverse variance. The model is then fit to the bootstrapped spectrum with the fitted parameters from step 3 as input.
+4. Scooping Portions: In order to constrain fit uncertainties, the flux is bootstrapped by randomly sampling each data point based on the associated inverse variance. The model is then fit to the bootstrapped spectrum with the fitted parameters from step 3 as input.
 
 5. Presenting gelato: (Optional) A figure depicting the total fit to the entire spectrum and the total fit zoomed in on the emission lines are presented. In addition, a figure is presented zoomed in on the emission lines that presents all components fit to the lines.
 
