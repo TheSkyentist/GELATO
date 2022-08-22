@@ -6,7 +6,7 @@ import numpy as np
 from astropy.io import fits
 
 # Constants
-C = 299792.458 # km/s
+C = 299_792.458 # km/s
 
 class Spectrum:
     
