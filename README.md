@@ -35,7 +35,7 @@ Table of Contents
 
 ## Dependencies
 
-GELATO is built with Python 3.9 and requires the following packages:
+GELATO is built with Python 3 and requires the following packages:
 * NumPy
 * SciPy
 * Astropy
