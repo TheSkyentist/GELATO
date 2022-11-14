@@ -421,7 +421,7 @@ In order to have GELATO attempt to fit an emission line with an additional compo
 
 ## Citation
 
-If you use GELATO for your work, please provide a link to this GitHub repository and cite the version used on Zenodo: [https://zenodo.org/record/5831730](https://zenodo.org/record/5831730).
+If you use GELATO for your work, please provide a link to this GitHub repository and cite the version used on Zenodo: [https://zenodo.org/record/5831730](https://zenodo.org/record/5831730). Please also cite [Hviding et al. (2022)](https://ui.adsabs.harvard.edu/abs/2022AJ....163..224H/abstract).
 
 ## License
 
