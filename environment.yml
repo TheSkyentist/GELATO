@@ -1,9 +1,12 @@
 name: gelato
+channels:
+  - conda-forge
 dependencies:
   - python
+  - tqdm
   - numpy
   - scipy
+  - lmfit
   - astropy
-  - matplotlib
   - jupyter
-  - tqdm
+  - matplotlib
