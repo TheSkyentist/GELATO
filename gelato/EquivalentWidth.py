@@ -8,11 +8,9 @@ from astropy.table import Table,hstack
 
 # GELATO
 import gelato.Utility as U
+from gelato.Constants import C
 import gelato.CustomModels as CM
 import gelato.SpectrumClass as SC
-
-# Constants
-C = 299792.458 # km/s
 
 # Calculate Equivalent Width
 def EquivalentWidth(spectrum,model,parameters,param_names=None):

@@ -60,7 +60,7 @@ def fileName(fpath):
     # Otherwise just return it
     return fpath
 
-# Loading Bar
+# Loading Bar (Deprecated)
 def loadingBar(i,N,L=40):
 
     # If at 100%, print the final part of the bar

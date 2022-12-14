@@ -1,6 +1,6 @@
 {
     "OutFolder": "./Results",
-    "VacuumWav": false,
+    "VacuumWav": true,
     "RandomSeed": 1,
     "LineRegion": 300,
     "ContinuumRegion": 15000,
@@ -25,11 +25,11 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 6716.44,
+                            "Wavelength": 6718.29,
                             "RelStrength": null
                         },
                         {
-                            "Wavelength":  6730.82,
+                            "Wavelength":  6732.67,
                             "RelStrength": null
                         }
                     ]
@@ -40,11 +40,11 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 6583.45,
+                            "Wavelength": 6585.27,
                             "RelStrength": 1
                         },
                         { 
-                            "Wavelength":  6548.05,
+                            "Wavelength":  6549.86,
                             "RelStrength": 0.34
                         }
                     ]
@@ -55,15 +55,15 @@
                     "FlagGroups": ["Outflow"],
                     "Lines": [
                         {
-                            "Wavelength": 5006.84,
+                            "Wavelength": 5008.240,
                             "RelStrength": 1
                         },
                         { 
-                            "Wavelength": 4958.91,
+                            "Wavelength": 4960.295,
                             "RelStrength": 0.35
                         },
                         {
-                            "Wavelength": 4363.21,
+                            "Wavelength": 4364.436,
                             "RelStrength": null
                         }
                     ]
@@ -74,7 +74,7 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 3868.76,
+                            "Wavelength": 3869.86,
                             "RelStrength": null
                         }
                     ]
@@ -85,8 +85,12 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 3425.88,
-                            "RelStrength": null
+                            "Wavelength": 3346.79,
+                            "RelStrength": 1
+                        },
+                        {
+                            "Wavelength": 3426.85,
+                            "RelStrength": 3.4
                         }
                     ]
                 }
@@ -103,11 +107,11 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 6300.30,
+                            "Wavelength": 6302.046,
                             "RelStrength": 3
                         },
                         { 
-                            "Wavelength": 6363.78,
+                            "Wavelength": 6365.536,
                             "RelStrength": 1
                         }
                     ]
@@ -118,7 +122,7 @@
                     "FlagGroups": [],
                     "Lines": [
                         {
-                            "Wavelength": 3727.43,
+                            "Wavelength": 3728.48,
                             "RelStrength": null
                         }
                     ]
@@ -127,7 +131,7 @@
         },
         {
             "Name":"Balmer",
-            "TieRedshift": false,
+            "TieRedshift": true,
             "TieDispersion": false,
             "Species": [
                 {
@@ -136,15 +140,15 @@
                     "FlagGroups": ["Balmer"],
                     "Lines": [
                         {
-                            "Wavelength": 6562.79,
+                            "Wavelength": 6564.61,
                             "RelStrength": null
                         },
                         {
-                            "Wavelength": 4861.28,
+                            "Wavelength": 4862.68,
                             "RelStrength": null
                         },
                         {
-                            "Wavelength": 4340.47,
+                            "Wavelength": 4341.68,
                             "RelStrength": null
                         }
                     ]

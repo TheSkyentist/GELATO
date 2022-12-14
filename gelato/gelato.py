@@ -148,13 +148,6 @@ def gelato(params,spath,z):
     hdul.append(fits.BinTableHDU(Table(medtab,names=medtabnames)))
     hdul[-1].name = 'SUMMARY'
 
-    # Add in continuum redshifts
-    parameters = np.hstack([np.ones((len(parameters),1))*model.models[0].redshift,parameters])
-    param_names = ('SSP_Redshift',) + param_names
-
-    # Turn Chi2 into rChi2
-    parameters[:,param_names.index('rChi2')] /= len(spectrum.wav) - model.nparams()
-
     # Turn into FITS table
     parameters = Table(data=parameters,names=param_names)
 
@@ -171,6 +164,12 @@ def gelato(params,spath,z):
         parameters = EW.EquivalentWidth(spectrum,model,parameters,param_names)
         if params["Verbose"]:
             print("Measured texture:",name)
+
+    # Add in continuum redshifts
+    parameters.add_column(np.ones(len(parameters))*model.models[0].redshift,index=0,name='SSP_Redshift')
+
+    # Turn Chi2 into rChi2
+    parameters['rChi2'] /= len(spectrum.wav) - model.nparams()
 
     # Save results
     if params["Verbose"]:
