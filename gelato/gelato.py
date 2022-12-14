@@ -122,7 +122,7 @@ def gelato(params,spath,z):
             if params["Verbose"]:
                 print("GELATO presented:",name)
 
-    ### Save Model(s)
+    ### Save Model(s) ###
     # Median
     median = np.nanmedian(parameters[:,:-1],0)
     # Total Model
@@ -148,35 +148,32 @@ def gelato(params,spath,z):
     hdul.append(fits.BinTableHDU(Table(medtab,names=medtabnames)))
     hdul[-1].name = 'SUMMARY'
 
-    # Add in continuum redshifts
-    parameters = np.hstack([np.ones((len(parameters),1))*model.models[0].redshift,parameters])
-    param_names = ('SSP_Redshift',) + param_names
-
-    # Turn Chi2 into rChi2
-    parameters[:,param_names.index('rChi2')] /= len(spectrum.wav) - model.nparams()
-
+    ### Finish Parameter Table ###
     # Turn into FITS table
     parameters = Table(data=parameters,names=param_names)
-
     # Add rest line amplitudes
     for l in ['_'.join(p.split('_')[:-1]) for p in param_names if 'Flux' in p]:
         center = float(l.split('_')[-1])
         ramp = parameters[l+'_Flux']*C/(parameters[l+'_Dispersion']*center*np.sqrt(2*np.pi))
         parameters.add_column(ramp,index=parameters.colnames.index(l+'_Dispersion')+1,name=l+'_RAmp')
-
-    ## Equivalent Widths ##
+    # Equivalent Widths
     if params["CalcEW"]:
         if params["Verbose"]:
             print("Measuring texture:",name)
         parameters = EW.EquivalentWidth(spectrum,model,parameters,param_names)
         if params["Verbose"]:
             print("Measured texture:",name)
+    # Add Power Law Scale
+    if 'PowerLaw_Index' in model.get_names():
+        parameters.add_column(model.models[1].Center*np.ones(len(parameters)),index=parameters.colnames.index('PowerLaw_Index')+1,name='PowerLaw_Scale')
+    # Add in continuum redshifts
+    parameters.add_column(np.ones(len(parameters))*model.models[0].redshift,index=0,name='SSP_Redshift')
+    # Turn Chi2 into rChi2
+    parameters['rChi2'] /= len(spectrum.wav) - model.nparams()
 
     # Save results
     if params["Verbose"]:
         print("Freezing results:",name)
-    if 'PowerLaw_Index' in model.get_names():
-        parameters.add_column(model.models[1].Center*np.ones(len(parameters)),index=parameters.colnames.index('PowerLaw_Index')+1,name='PowerLaw_Scale')
     hdul.append(fits.BinTableHDU(parameters))
     hdul[-1].name = 'PARAMS'
     fits.HDUList(hdul).writeto(path.join(params["OutFolder"],U.fileName(name)+'-results.fits'),overwrite=True)

@@ -8,11 +8,9 @@ from astropy.table import Table,hstack
 
 # GELATO
 import gelato.Utility as U
+from gelato.Constants import C
 import gelato.CustomModels as CM
 import gelato.SpectrumClass as SC
-
-# Constants
-C = 299792.458 # km/s
 
 # Calculate Equivalent Width
 def EquivalentWidth(spectrum,model,parameters,param_names=None):
@@ -81,7 +79,7 @@ def EWfromresults(params,fpath,z):
         pnames = parameters.colnames
 
         # Remove PowerLaw Scale
-        parameters = parameters[[n for n in pnames if not ('PowerLaw_Scale' in n)]]
+        parameters = parameters[[n for n in pnames if not ('PowerLaw_Scale' == n)]]
         pnames = parameters.colnames
 
         # Dont add if already has EWs and no overwrite
