@@ -79,7 +79,7 @@ def EWfromresults(params,fpath,z):
         pnames = parameters.colnames
 
         # Remove PowerLaw Scale
-        parameters = parameters[[n for n in pnames if not ('PowerLaw_Scale' in n)]]
+        parameters = parameters[[n for n in pnames if not ('PowerLaw_Scale' == n)]]
         pnames = parameters.colnames
 
         # Dont add if already has EWs and no overwrite
