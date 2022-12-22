@@ -24,6 +24,28 @@ def FitContinuum(spectrum):
     region = np.invert(spectrum.emission_region)
     args = (spectrum.wav[region],spectrum.flux[region],spectrum.isig[region])
 
+    ssp,params = CM.SSPContinuumFree(spectrum)
+
+    y = ssp.eval(params=params,x=spectrum.wav[region])
+
+    import matplotlib.pyplot as plt
+    plt.plot(spectrum.wav[region],spectrum.flux[region])
+    plt.plot(spectrum.wav[region],y)
+
+    result = ssp.fit(spectrum.flux[region],params=params,x=spectrum.wav[region],weights=spectrum.weight[region],method='least_squares')
+
+    print(result.fit_report())
+    print(result.params)
+    y = result.eval()
+    plt.plot(spectrum.wav[region],y)
+
+    plt.show()
+
+
+    print('Here')
+    exit()
+
+
     # SSP Continuum        
     ssp = CM.CompoundModel([CM.SSPContinuumFree(spectrum)])
 
