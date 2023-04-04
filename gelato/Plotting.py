@@ -186,7 +186,7 @@ def subplotplot(pt,fax,rax,spectrum,args,f):
 
     # Axis labels and limits
     fax.set(ylabel=r'$F_\lambda$ ['+spectrum.p['FlamUnits']+']',ylim=ylim)
-    fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticks=[])
+    fax.set(yticks=[t for t in fax.get_yticks() if (t > ymin+0.05*dy) and (t < ylim[-1])],xlim=[wav.min(),wav.max()],xticklabels=[])
 
     # Residual Axis
     rax.step(wav,(flux - f)*isig,'gray',where='mid')
