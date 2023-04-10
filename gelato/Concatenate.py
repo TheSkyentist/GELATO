@@ -1,11 +1,39 @@
 """ Concatenate Results """
 
 # Import packages
+import copy
 import numpy as np
 from os import path
 from tqdm import tqdm
 from astropy.io import fits
 from astropy.table import Table,vstack
+
+# Order names correctly
+def orderNames(table):
+
+    # Order of prefixes
+    order = ['Name','SSP_Redshift','SSP_','PowerLaw']
+
+    # Get columns
+    colnames = copy.deepcopy(table.colnames)
+
+    # Make empty columns
+    names = []
+
+    # Iterate over prefixes
+    for o in order:
+        newnames = np.sort([n for n in colnames if o in n]).tolist()
+        for n in newnames: colnames.remove(n)
+        names += newnames
+
+    # Get final names
+    lastnames = np.sort([n for n in colnames if 'rChi2' in n]).tolist()
+    for n in lastnames: colnames.remove(n) 
+
+    # Order everything else
+    names += np.sort(colnames).tolist() + lastnames
+
+    return names
 
 # Concatenate results
 def concatfromresults(p,objects):
@@ -60,22 +88,23 @@ def concatfromresults(p,objects):
                 names.append(n+'_err')
             
             # Append to list
-            tables.append(Table(data=np.array(data),names=names,dtype = dtype))
+            tables.append(Table(data=np.array(data),names=names,dtype=dtype))
 
+        # Stack tables, include all columns
         table = vstack(tables,join_type = 'outer')
-        if not type(table.mask) == type(None):
+        if not type(table.mask) == type(None): # NaN for missing values
             for c in table.colnames: table[c][table.mask[c]] = np.nan
 
         # If first entry, save to disk directly
         out = path.join(p['OutFolder'],'GELATO-results.fits')
         if first:
-            table.write(out,overwrite=True)
+            table[orderNames(table)].write(out,overwrite=True)
             first = False
 
         # Otherise load table and append to it
         else:
-            results = Table.read(out)
-            vstack([results,table],join_type='outer').write(out,overwrite=True)
+            results = vstack([Table.read(out),table],join_type='outer')
+            results[orderNames(results)].write(out,overwrite=True)
 
         # Update Progress Bar
         pbar.update(len(spaths))
