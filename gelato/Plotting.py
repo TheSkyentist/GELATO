@@ -10,8 +10,8 @@ warnings.simplefilter('ignore')
 import numpy as np
 from os import path
 from astropy.io import fits
-from matplotlib import pyplot
 from scipy.optimize import minimize
+from matplotlib import rcParams,pyplot
 
 # GELATO
 import gelato.Utility as U
@@ -20,6 +20,11 @@ import gelato.SpectrumClass as SC
 
 # Colorblind friendly colors
 colors = np.array([(0,146,146),(182,109,255),(255,182,219),(109,182,255),(146,0,0),(36,255,36),(219,109,0)])/255
+
+# Matplotlib options
+pyplot.style.use('default')
+rcParams['backend'] = 'Agg'
+pyplot.style.use('gelato.presentation')
 
 # Plot all Figures
 def Plot(spectrum,model,parameters,fpath):
@@ -47,10 +52,13 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
             print('GELATO already presented:',figname)
         return
 
+    # Get transform for secondary axis
+    transform = (lambda obs: obs / (1 + spectrum.z), lambda rest: rest * (1 + spectrum.z))
+
     if plottype == 0:
 
         # Make figure
-        fig = pyplot.figure(figsize=(15,7))
+        fig = pyplot.figure(figsize=(15,8))
         gs = fig.add_gridspec(ncols=1,nrows=2,height_ratios=[4,1],hspace=0)
 
         # Get Spectrum
@@ -77,12 +85,16 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
 
         # Subplot plotting
         subplotplot(plottype,fax,rax,spectrum,args,f)
+
+        # Add secondary axis
+        rax.secondary_xaxis('top', functions=transform).set(xticklabels=[])
+        fax.secondary_xaxis('top', functions=transform).set_xlabel('Rest Wavelength [\AA]',labelpad=10)
         
     elif plottype > 0:
 
         # Make figure
         ncols   = len(spectrum.regions)
-        fig = pyplot.figure(figsize = (5*ncols,7))
+        fig = pyplot.figure(figsize = (5*ncols,8))
         gs = fig.add_gridspec(ncols=ncols,nrows=2,height_ratios=[4,1],hspace=0)
 
         # Continuum and Model
@@ -125,6 +137,10 @@ def PlotFig(spectrum,model,parameters,fpath,plottype=0):
                     # for p in parameters:
                     #     cm = CM.CompoundModel([m]).evaluate(p[idx:idx+m.nparams],*(wav,flux,isig))
                     #     fax.step(wav,ymin+cm,'--',c='gray',alpha=0.5)
+
+            # Add secondary axis
+            rax.secondary_xaxis('top', functions=transform).set(xticklabels=[])
+            fax.secondary_xaxis('top', functions=transform).set_xlabel('Rest Wavelength [\AA]',labelpad=10)
 
     # Add title and save figure
     fig.suptitle(figname.replace('_','\_')+', $z='+str(np.round(spectrum.z,3))+'$',y=0.95)

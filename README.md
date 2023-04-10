@@ -27,7 +27,7 @@ Table of Contents
 * [Parameter File](#Parameter-File)
 * [Emission Line Dictionary](#Emission-Line-Dictionary)
 * [GELATO in Depth](#GELATO-in-Depth)
-* [Model Descriptions & Limits](#Model-Descriptions-&-Limits)
+* [Model Descriptions and Limits](#Model-Descriptions-and-Limits)
 * [Additional Components](#Additional-Components)
 * [Citation](#Citation)
 * [License](#License)
@@ -83,8 +83,6 @@ conda activate gelato
 pip install .
 ```
 
-In your working directory, **you need to copy the "matplotlibrc" file** to control the plotting settings. This is most important if you are running GELATO with multiprocessing as this file sets the matplotlib backed to "Agg", a non-interactive backend, required for generating and saving figures on multiple threads.
-
 ## Updating GELATO
 
 In order to update GELATO, you need to update the core packages, pull from the repo, and reinstall GELATO to your path. 
@@ -130,7 +128,7 @@ In order to run GELATO you need:
   * a comma delimited file (ending in .csv) where each object occupies a different line. The first item in each line is the path to the spectrum. The second is the redshift of the spectrum.
   * a FITS table (ending in .fits) where each object occupies a different entry in the table. The table must have the column "Path" for the path to the object, and "z"
   containing the redshift of the object.
-* (If plotting) the matplotlibrc file in your working directory, especially if you are running on multiple threads, in which case the non-interactive backend must be specified.
+* (If plotting) LaTeX available on the working path.
 
 Currently, the best way to run GELATO is using the wrapper scripts in the in the Convenience subdirectory. The scripts are executable and can be called directly. Ensure that you are in the GELATO conda environment before running any of the scripts. These scripts can be copied to your working directory.
 
@@ -335,7 +333,7 @@ A single Gaussian is then added for each emission line. The starting values are 
 
 8. Combining GELATO: (Optional) If GELATO is running on multiple objects, the results from each object are averaged and combined into one convenient file. 
 
-## Model Descriptions & Limits
+## Model Descriptions and Limits
 
 * Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift (km/s), a flux, and a dispersion (km/s). The dispersion represents the standard deviation of the Gaussian. The flux is bounded symmetrically based on the range of values in the spectrum near the line centroid. The default value of the dispersion is set to the median narrow line dispersion of the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample of 130 km/s. It has a lower bound of 60 km/s corresponding to the maximum SDSS resolution of 2500. It has an upper bound of 500 km/s corresponding to the delineation between narrow lines and broad lines at a FWHM of 1200 km/s used in [Hao et al. 2005](https://ui.adsabs.harvard.edu/abs/2005AJ....129.1783H/abstract). The redshift of the narrow line Guassians is allowed to vary by +/-300 km/s based on the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample where 98% of the narrow line redshift offsets fall within this range.
 

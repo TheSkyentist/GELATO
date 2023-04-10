@@ -1,0 +1,8 @@
+font.family           : serif
+text.usetex           : True
+xtick.bottom          : True
+xtick.direction       : in
+ytick.left            : True
+ytick.right           : True
+ytick.direction       : in
+font.size             : 20.0
