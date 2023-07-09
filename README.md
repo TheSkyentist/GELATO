@@ -241,7 +241,7 @@ The behavior of GELATO is controlled by the JSON parameters file. The JSON param
 * Verbose: To print GELATO output.
 * EmissionGroups: Dictionary of emission lines to be fit by GELATO. The structure of this dictionary is crucial to the operation of GELATO. The following section details the format of this dictionary.
 
-## Emission Line Dictionary
+## Emission-Line Dictionary
 
 GELATO uses a hierarchical approach to represent the physical relationship between emission-line species and components. GELATO first associates individual emission lines, characterized by a central wavelength, with a *Species*. For example, all Balmer emission lines would be characterized by a single *Species*, e.g. H I. Since all emission lines within a *Species* come from the same physical source, their kinematics are tied together, e.g. their redshifts and velocity dispersions are required to be the same value, respectively. In addition, a flux ratio can be specified for emission lines whose relative intensities are fixed. The various *Species* are then distributed into *Groups*. *Groups* embody assumptions made between their various component *Species*. The user can decide whether *Species* in a *Group* are required to have their velocity dispersion or redshifts fixed to the same value, respectively. In summary, *Groups* contain *Species*, which can optionally share kinematic properties, while *Species* contain emission lines that must share kinematic properties. 
 
