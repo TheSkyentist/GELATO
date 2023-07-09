@@ -5,10 +5,10 @@ GELATO
 ![Example of Fit](./Images/Example1.png)
 ![Example of Components](./Images/Example2.png)
 
-*Galaxy/AGN Emission Line Analysis TOol by Raphael Hviding*
+*Galaxy/AGN Emission-Line Analysis TOol by Raphael Hviding*
 -------------
 
-GELATO is a Python code designed to retrieve the kinematics and line fluxes of emission lines from optical spectroscopy of star-forming galaxies and active galactic nuclei. It was designed to allow the user to tie the emission line parameters of associated emission lines to represent the physical conditions present in these galaxies. For example, tying the redshifts of the Balmer lines to each other, or setting the flux ratio of the [OIII] doublet to a specific value. This is done in a flexible way so that any physical scenario can be represented using GELATO. In addition, GELATO is designed to fit additional components to lines with complex kinematics. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? Based on user specifications, GELATO will attempt to fit these components and, using a quality check, can determine if they are required to fit the spectrum. 
+GELATO is a Python code designed to retrieve the kinematics and line fluxes of emission lines from optical spectroscopy of star-forming galaxies and active galactic nuclei. It was designed to allow the user to tie the emission-line parameters of associated emission lines to represent the physical conditions present in these galaxies. For example, tying the redshifts of the Balmer lines to each other, or setting the flux ratio of the [OIII] doublet to a specific value. This is done in a flexible way so that any physical scenario can be represented using GELATO. In addition, GELATO is designed to fit additional components to lines with complex kinematics. For example, is the spectrum better fit with a broad Halpha component? Or an outflowing OIII component? Based on user specifications, GELATO will attempt to fit these components and, using a quality check, can determine if they are required to fit the spectrum. 
 
 ![Release](https://img.shields.io/github/release/TheSkyentist/GELATO.svg)
 [![DOI](https://zenodo.org/badge/188781577.svg)](https://zenodo.org/badge/latestdoi/188781577)
@@ -25,7 +25,7 @@ Table of Contents
 * [Running the Example](#Running-the-Example)
 * [Results File](#Results-File)
 * [Parameter File](#Parameter-File)
-* [Emission Line Dictionary](#Emission-Line-Dictionary)
+* [Emission-Line Dictionary](#Emission-Line-Dictionary)
 * [GELATO in Depth](#GELATO-in-Depth)
 * [Model Descriptions and Limits](#Model-Descriptions-and-Limits)
 * [Additional Components](#Additional-Components)
@@ -111,7 +111,7 @@ In this section we describe the operation of GELATO at a high level.
 
 5. Presenting gelato: (Optional) Three figures depicting the final fit to the data are generated and saved to disk.
 
-6. Measuring Texture: (Optional) The rest equivalent width of the emission line components are measured.
+6. Measuring Texture: (Optional) The rest equivalent width of the emission-line components are measured.
 
 7. Freezing results: The results of the fit are saved to disk. Along with any additional parameters measured.
 
@@ -243,11 +243,11 @@ The behavior of GELATO is controlled by the JSON parameters file. The JSON param
 
 ## Emission Line Dictionary
 
-GELATO uses a hierarchical approach to represent the physical relationship between emission line species and components. GELATO first associates individual emission lines, characterized by a central wavelength, with a *Species*. For example, all Balmer emission lines would be characterized by a single *Species*, e.g. H I. Since all emission lines within a *Species* come from the same physical source, their kinematics are tied together, e.g. their redshifts and velocity dispersions are required to be the same value, respectively. In addition, a flux ratio can be specified for emission lines whose relative intensities are fixed. The various *Species* are then distributed into *Groups*. *Groups* embody assumptions made between their various component *Species*. The user can decide whether *Species* in a *Group* are required to have their velocity dispersion or redshifts fixed to the same value, respectively. In summary, *Groups* contain *Species*, which can optionally share kinematic properties, while *Species* contain emission lines that must share kinematic properties. 
+GELATO uses a hierarchical approach to represent the physical relationship between emission-line species and components. GELATO first associates individual emission lines, characterized by a central wavelength, with a *Species*. For example, all Balmer emission lines would be characterized by a single *Species*, e.g. H I. Since all emission lines within a *Species* come from the same physical source, their kinematics are tied together, e.g. their redshifts and velocity dispersions are required to be the same value, respectively. In addition, a flux ratio can be specified for emission lines whose relative intensities are fixed. The various *Species* are then distributed into *Groups*. *Groups* embody assumptions made between their various component *Species*. The user can decide whether *Species* in a *Group* are required to have their velocity dispersion or redshifts fixed to the same value, respectively. In summary, *Groups* contain *Species*, which can optionally share kinematic properties, while *Species* contain emission lines that must share kinematic properties. 
 
 For each *Species*, the user can also specify which additional components should be tested for their inclusion. Any combination of the supported additional components can be specified for all *Species*. For each additional component specified, a *Group* must be specified that the additional component will be placed into. This allows for the additional component to have a different relationship with other *Species* than the parent *Species*. As a consequence, it allows the user to specify whether or not additonal components will have a velocity shift with respect to their narrow counterparts.
 
-In this setion we detail the format of the emission line dictionary:
+In this section we detail the format of the emission-line dictionary:
 
 1. The emission groups dictionary is made up of Groups. All spectral features in the same group can be set to share a common redshift, a common dispersion, or neither.  This means, during fitting, their redshifts or dispersions can be forcibly tied to be equal.
 
@@ -315,7 +315,7 @@ Here is table showing the hierarchy of the Emission Groups Parameter for the "PA
     2. The spectral flux density in flam units, column name: "flux"
     3. The inverse variances of the data points, column name: "ivar"
 
-   Based on the emission line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
+   Based on the emission-line dictionary and redshift provided, the code determines which emission lines actually lie inside the domain of the spectrum. The region free from emission lines is then determined which will be used to obtain the initial fit to the continuum.
 
 2. Creating Base: GELATO models the continuum as a combination of Simple Stellar Populations (SSPs) from the [Extended MILES stellar library](http://research.iac.es/proyecto/miles/). Note, since the continuum models have a minimum wavelength of 1680 Angstroms, there is a maximum wavelength that can be fit with GELATO based on the spectral coverage of the input spectra. The redshift is allowed to vary around the input redshift and the SSP models are fit to the region of continuum free from emission lines. The coefficients for the SSP models are constrained to be positive. 
 Following the initial fit, an additional power law component is added. If the continuum model with a power law passes an F-test for its inclusion, it is added to the model. The redshift of the continuum model is frozen and not fit moving forward. Finally, the continuum is fit to the spectrum in the region without emission lines, if any of the SSP coefficients hit their lower limits (as determined by the TRF algorithm), the corresponding SSP is removed from the continuum model.
@@ -327,7 +327,7 @@ A single Gaussian is then added for each emission line. The starting values are 
 
 5. Presenting gelato: (Optional) A figure depicting the total fit to the entire spectrum and the total fit zoomed in on the emission lines are presented. In addition, a figure is presented zoomed in on the emission lines that presents all components fit to the lines.
 
-6. Measuring Texture: (Optional) The rest equivalent width of the emission line components are measured for each of the bootstraps. This is not a full integration of the continuum and approximates the height of the continuum as the median continuum flux within a small region around the line center.
+6. Measuring Texture: (Optional) The rest equivalent width of the emission-line components are measured for each of the bootstraps. This is not a full integration of the continuum and approximates the height of the continuum as the median continuum flux within a small region around the line center.
 
 7. Freezing results: The results of the fit are saved to disk. Along with any additional parameters measured.
 
@@ -335,7 +335,7 @@ A single Gaussian is then added for each emission line. The starting values are 
 
 ## Model Descriptions and Limits
 
-* Emission Line Model: Emission lines are modeled as Gaussians parametrized with a redshift (km/s), a flux, and a dispersion (km/s). The dispersion represents the standard deviation of the Gaussian. The flux is bounded symmetrically based on the range of values in the spectrum near the line centroid. The default value of the dispersion is set to the median narrow line dispersion of the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample of 130 km/s. It has a lower bound of 60 km/s corresponding to the maximum SDSS resolution of 2500. It has an upper bound of 500 km/s corresponding to the delineation between narrow lines and broad lines at a FWHM of 1200 km/s used in [Hao et al. 2005](https://ui.adsabs.harvard.edu/abs/2005AJ....129.1783H/abstract). The redshift of the narrow line Guassians is allowed to vary by +/-300 km/s based on the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample where 98% of the narrow line redshift offsets fall within this range.
+* Emission-Line Model: Emission lines are modeled as Gaussians parametrized with a redshift (km/s), a flux, and a dispersion (km/s). The dispersion represents the standard deviation of the Gaussian. The flux is bounded symmetrically based on the range of values in the spectrum near the line centroid. The default value of the dispersion is set to the median narrow line dispersion of the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample of 130 km/s. It has a lower bound of 60 km/s corresponding to the maximum SDSS resolution of 2500. It has an upper bound of 500 km/s corresponding to the delineation between narrow lines and broad lines at a FWHM of 1200 km/s used in [Hao et al. 2005](https://ui.adsabs.harvard.edu/abs/2005AJ....129.1783H/abstract). The redshift of the narrow line Guassians is allowed to vary by +/-300 km/s based on the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample where 98% of the narrow line redshift offsets fall within this range.
 
 These defaults can be adjusted in the "CustomModels.py" file. 
 
@@ -347,11 +347,11 @@ These defaults can be adjusted in the "CustomModels.py" file.
 
 The current supported additional components are:
 
-1. Broad Component: The broad components are modeled as Gaussians. They are identical to the regular emission line models except for a few key differences. The flux is constrained to be positive. The dispersion has a lower bound of 500 km/s corresponding to the delineation between narrow lines and broad lines at a FWHM of 1200 km/s used in [Hao et al. 2005](https://ui.adsabs.harvard.edu/abs/2005AJ....129.1783H/abstract) and an upper bound of 6,500 km/s which encompasses 99% of all Ha and Hb broad line dispersion velocities in the [Shen et al. 2011](http://adsabs.harvard.edu/abs/2011ApJS..194...45S) sample. The starting value is set to 1600 km/s based on the median values in the [Shen et al. 2011](http://adsabs.harvard.edu/abs/2011ApJS..194...45S) sample. The redshift of the broad line Guassians is allowed to vary by +/-600 km/s based on the [Shen et al. 2011](http://adsabs.harvard.edu/abs/2011ApJS..194...45S) sample where 90%+ of the broad line redshift offsets fall within this range.
+1. Broad Component: The broad components are modeled as Gaussians. They are identical to the regular emission-line models except for a few key differences. The flux is constrained to be positive. The dispersion has a lower bound of 500 km/s corresponding to the delineation between narrow lines and broad lines at a FWHM of 1200 km/s used in [Hao et al. 2005](https://ui.adsabs.harvard.edu/abs/2005AJ....129.1783H/abstract) and an upper bound of 6,500 km/s which encompasses 99% of all Ha and Hb broad line dispersion velocities in the [Shen et al. 2011](http://adsabs.harvard.edu/abs/2011ApJS..194...45S) sample. The starting value is set to 1600 km/s based on the median values in the [Shen et al. 2011](http://adsabs.harvard.edu/abs/2011ApJS..194...45S) sample. The redshift of the broad line Guassians is allowed to vary by +/-600 km/s based on the [Shen et al. 2011](http://adsabs.harvard.edu/abs/2011ApJS..194...45S) sample where 90%+ of the broad line redshift offsets fall within this range.
 
-2. Outflow Component: The outflow components are modeled as Gaussians. They are identical to the regular emission line models except for a few key differences. The flux is constrained to be positive. The dispersion has a lower bound of 100 km/s and an upper bound of 750km/s corresponding to 1 and 99 percentile values of the dispersion of the second OIII component invoked in the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample with a starting value of 300 km/s based on the median value. The redshift of the outflow Guassians is allowed to vary within the range of [-750 km/s, 150 km/s] based on the 1 and 99 percentile values of the second OIII component invoked in the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample with a starting value of -150km/s based on the median value.
+2. Outflow Component: The outflow components are modeled as Gaussians. They are identical to the regular emission-line models except for a few key differences. The flux is constrained to be positive. The dispersion has a lower bound of 100 km/s and an upper bound of 750km/s corresponding to 1 and 99 percentile values of the dispersion of the second OIII component invoked in the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample with a starting value of 300 km/s based on the median value. The redshift of the outflow Guassians is allowed to vary within the range of [-750 km/s, 150 km/s] based on the 1 and 99 percentile values of the second OIII component invoked in the [Mullaney et al. 2013](https://ui.adsabs.harvard.edu/abs/2013MNRAS.433..622M/abstract) sample with a starting value of -150km/s based on the median value.
 
-In order to have GELATO attempt to fit an emission line with an additional component, the line must be flagged in the parameters file, described in the [Emission Line Dictionary](#Emission-Line-Dictionary) section. The flag is an integer, whose bitwise digits describe if a specific additional component should be tried. Examples for all possible combinations are given in the figure following the description of the EmissionGroups parameter.
+In order to have GELATO attempt to fit an emission line with an additional component, the line must be flagged in the parameters file, described in the [Emission-Line Dictionary](#Emission-Line-Dictionary) section. The flag is an integer, whose bitwise digits describe if a specific additional component should be tried. Examples for all possible combinations are given in the figure following the description of the EmissionGroups parameter.
 
 ## GELATO submodules
 
@@ -381,7 +381,7 @@ In order to have GELATO attempt to fit an emission line with an additional compo
 
 * CustomModels.py
 
-  Here are where the custom models used in GELATO are defined. Here exists a gaussian emission line model, the SSP continuum, and the power law continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can be set.
+  Here are where the custom models used in GELATO are defined. Here exists a gaussian emission-line model, the SSP continuum, and the power law continuum. The parameters for each model are defined with respect to the rest frame, but the output of the model is in the observed frame. This is where the velocity width limits on emission features can be set.
 
 * Concatenate.py
 
@@ -395,7 +395,7 @@ In order to have GELATO attempt to fit an emission line with an additional compo
 
 * EquivalentWidth.py
 
-  Here are the scripts for creating and saving emission line EW. Can also be run directly on GELATO results in order to generate EW after the fact. Rest equivalent widths are generated by assuming a flat continuum at the height of the continuum at the emission line center.
+  Here are the scripts for creating and saving emission-line EW. Can also be run directly on GELATO results in order to generate EW after the fact. Rest equivalent widths are generated by assuming a flat continuum at the height of the continuum at the emission-line center.
 
 * AdditionalComponents.py
 
@@ -405,7 +405,7 @@ In order to have GELATO attempt to fit an emission line with an additional compo
 
 * BuildModel.py
 
-  This file handles the construction of models and for tying the various parameters together as outlined by the emission line dictionary.
+  This file handles the construction of models and for tying the various parameters together as outlined by the emission-line dictionary.
 
 * FittingModel.py
 

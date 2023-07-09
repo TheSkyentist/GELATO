@@ -9,7 +9,7 @@ setuptools.setup(
     version="2.5.2",
     author="Raphael Hviding",
     author_email="raphael.hviding@gmail.com",
-    description="Galaxy/AGN Emission Line Analysis TOol ",
+    description="Galaxy/AGN Emission-Line Analysis TOol ",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/TheSkyentist/GELATO",
