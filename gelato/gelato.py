@@ -47,7 +47,7 @@ def gelato(params,spath,z):
     if params["Verbose"]:
         print("Making the base:",name)
     try: cont,cont_x = FM.FitContinuum(spectrum)
-    except (ValueError, np.linalg.LinAlgError)::
+    except (ValueError, np.linalg.LinAlgError):
         if params["Verbose"]: print("\nGELATO failed for:",name)
         return
 
@@ -77,7 +77,7 @@ def gelato(params,spath,z):
             parameters = np.ones((params["NBoot"],len(model_fit)+1))
             for i in tqdm(range(params["NBoot"]),disable=not(params["Verbose"] and (params["NProcess"] == 1))):
                 try: parameters[i] = FM.FitBoot(model,model_fit,spectrum,i)
-                except (ValueError, np.linalg.LinAlgError)::
+                except (ValueError, np.linalg.LinAlgError):
                     if params["Verbose"]: print("\nGELATO failed for:",name)
                     return
             if params["Verbose"]:
