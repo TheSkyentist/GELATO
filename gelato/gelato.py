@@ -47,7 +47,7 @@ def gelato(params,spath,z):
     if params["Verbose"]:
         print("Making the base:",name)
     try: cont,cont_x = FM.FitContinuum(spectrum)
-    except np.linalg.LinAlgError:
+    except (ValueError, np.linalg.LinAlgError)::
         if params["Verbose"]: print("\nGELATO failed for:",name)
         return
 
@@ -64,7 +64,7 @@ def gelato(params,spath,z):
         # Build emission line model
         emis,emis_x = BM.BuildEmission(spectrum)
         try: model,model_fit = FM.FitComponents(spectrum,cont,cont_x,emis,emis_x)
-        except np.linalg.LinAlgError:
+        except (ValueError, np.linalg.LinAlgError):
             if params["Verbose"]: print("\nGELATO failed for:",name)
             return
         if params["Verbose"]:
@@ -77,7 +77,7 @@ def gelato(params,spath,z):
             parameters = np.ones((params["NBoot"],len(model_fit)+1))
             for i in tqdm(range(params["NBoot"]),disable=not(params["Verbose"] and (params["NProcess"] == 1))):
                 try: parameters[i] = FM.FitBoot(model,model_fit,spectrum,i)
-                except np.linalg.LinAlgError:
+                except (ValueError, np.linalg.LinAlgError)::
                     if params["Verbose"]: print("\nGELATO failed for:",name)
                     return
             if params["Verbose"]:
